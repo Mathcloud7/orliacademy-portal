@@ -1,0 +1,235 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orli International Academy - Teacher Portal</title>
+  <style>
+    /* Global styles */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f9fc;
+      margin: 20px;
+      padding: 0;
+      overflow: hidden;
+    }
+    
+    /* Header styling */
+    header {
+      background-color: #007bff;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 28px;
+    }
+
+    /* Logo and Welcome Message */
+    header img {
+      width: 90px;
+      height: 90px;
+      vertical-align: middle;
+    }
+
+    /* Main content area */
+    .main-content {
+      text-align: center;
+      margin-top: 60px;
+    }
+
+    /* Animated 3D School Name (H1) */
+    h1 {
+      font-size: 60px;
+      font-weight: bold;
+      color: #fff;
+      animation: scaleColorChange 4s ease-in-out infinite;
+      margin-bottom: 20px;
+    }
+
+    @keyframes scaleColorChange {
+      0% {
+        transform: scale(1);
+        color: #ff6347;
+      }
+      50% {
+        transform: scale(1.2);
+        color: #32cd32;
+      }
+      100% {
+        transform: scale(1);
+        color: #1e90ff;
+      }
+    }
+
+    /* Button styles */
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 25px;
+      margin-top: 40px;
+    }
+
+    .button {
+      background: pink;
+      color: white;
+      border: none;
+      padding: 18px 35px;
+      font-size: 18px;
+      text-align: center;
+      border-radius: 10px;
+      box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      width: 220px;
+    }
+
+    .button:hover {
+      transform: translateY(-5px);
+    }
+
+    /* Footer styling */
+    footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background-color: #007bff;
+      color: white;
+      text-align: center;
+      padding: 12px 0;
+    }
+
+    /* Moving shapes */
+    .moving-shapes {
+      position: random;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      animation: moveShapes 12s linear infinite;
+    }
+
+    .shape {
+      position: absolute;
+      background-color: rgba(72, 133, 237, 0.6);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: moveInOut 6s infinite;
+    }
+
+    .shape:nth-child(odd) {
+      background-color: rgba(38, 185, 137, 0.6);
+    }
+
+    @keyframes moveShapes {
+      0% { transform: translate(100vw, 100vh); }
+      50% { transform: translate(-100vw, -100vh); }
+      100% { transform: translate(100vw, 100vh); }
+    }
+
+    @keyframes moveInOut {
+      0% { opacity: 0; transform: scale(0); }
+      25% { opacity: 1; transform: scale(1.2); }
+      50% { opacity: 0; transform: scale(0); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    /* Date and time styling */
+    .datetime {
+      position: fixed;
+      top: 9px;
+      right: 20px;
+      background-color: rgba(0, 0, 0, 0.6);
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .main-content h1 {
+        font-size: 34px;
+      }
+
+      .button-container {
+        flex-direction: flex;
+        justify-content: center;
+      }
+
+      .button {
+        width: 40%;
+        margin-bottom: 15px;
+      }
+  </style>
+</head>
+<body>
+
+  <!-- Header Section -->
+  <header>
+    <img src="logo.png" alt="Orli International Academy Logo">
+    <div>Orli International Academy</div>
+  </header>
+
+  <!-- Main Content Section -->
+  <div class="main-content">
+    <h1 id="school-name">Teaching</h1>
+    <p>Your resources are ready for the academic year. Navigate to your required sections:</p>
+
+    <!-- Buttons -->
+    <div class="button-container">
+      <button class="button"><a href="year4-third-term-assessment.html">Manage Assessments</button>
+      <button class="button"><a href="year4-third-term-lesson-teacher.html">Manage Lesson Notes</button>
+    </div>
+  </div>
+
+  <!-- Moving Shapes -->
+  <div class="moving-shapes">
+    <div class="shape" style="top: 10%; left: 20%;"></div>
+    <div class="shape" style="top: 30%; left: 60%;"></div>
+    <div class="shape" style="top: 50%; left: 40%;"></div>
+    <div class="shape" style="top: 70%; left: 80%;"></div>
+    <div class="shape" style="top: 90%; left: 10%;"></div>
+  </div>
+  <div class="moving-shapes">
+    <div class="shape" style="bottom: 10%; right: 20%;"></div>
+    <div class="shape" style="bottom: 30%; right: 60%;"></div>
+    <div class="shape" style="bottom: 50%; right: 40%;"></div>
+    <div class="shape" style="bottom: 70%; right: 80%;"></div>
+    <div class="shape" style="bottom: 90%; right: 10%;"></div>
+  </div>
+
+  <!-- Date and Time -->
+  <div class="datetime" id="datetime"></div>
+
+  <!-- Footer Section -->
+  <footer>
+    Orli International Academy &copy; 2024
+  </footer>
+
+  <!-- JavaScript for Word Cycling Animation and Date/Time -->
+  <script>
+    // Function to cycle words in the h1
+    const words = ['Teaching', 'Inspiration', 'Dedication', 'Impact', 'Growth'];
+    let wordIndex = 0;
+    const schoolNameElement = document.getElementById('school-name');
+
+    function changeWord() {
+      schoolNameElement.innerHTML = words[wordIndex];
+      wordIndex = (wordIndex + 1) % words.length;  // Loop through the words
+    }
+
+    setInterval(changeWord, 4000);  // Change every 4 seconds
+
+    // Function to update date and time
+    function updateTime() {
+      const now = new Date();
+      const date = now.toLocaleDateString();
+      const time = now.toLocaleTimeString();
+      document.getElementById('datetime').innerHTML = `${date} - ${time}`;
+    }
+    setInterval(updateTime, 1000); // Update every second
+    updateTime();
+  </script>
+
+</body>
+</html>
