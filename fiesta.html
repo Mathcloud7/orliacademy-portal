@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Orli International Academy Sport Fiesta</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #ff7f50, #ff1493, #1e90ff);
+            background-size: 400% 400%;
+            animation: gradientAnimation 15s ease infinite;
+        }
+
+        @keyframes gradientAnimation {
+            0% {
+                background: linear-gradient(135deg, #ff7f50, #ff1493, #1e90ff);
+            }
+            25% {
+                background: linear-gradient(135deg, #ff6347, #ff4500, #32cd32);
+            }
+            50% {
+                background: linear-gradient(135deg, #8a2be2, #ff00ff, #ff7f50);
+            }
+            75% {
+                background: linear-gradient(135deg, #00bfff, #ff1493, #ff6347);
+            }
+            100% {
+                background: linear-gradient(135deg, #ff7f50, #ff1493, #1e90ff);
+            }
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            color: white;
+            text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
+            font-size: 2.8rem;
+            letter-spacing: 2px;
+        }
+
+        .container {
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .btn {
+            padding: 20px 40px;
+            font-size: 1.5rem;
+            margin: 20px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .programme-btn {
+            background: linear-gradient(45deg, #32cd32, #228b22);
+            color: white;
+        }
+
+        .results-btn {
+            background: linear-gradient(45deg, #ff6347, #ff4500);
+            color: white;
+        }
+
+        /* 3D Button Effects */
+        .programme-btn:active, .results-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .animateText {
+            animation: textMove 2s infinite alternate;
+        }
+
+        @keyframes textMove {
+            0% {
+                transform: translateY(0);
+            }
+            100% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .content {
+            color: white;
+            margin-top: 20px;
+            font-size: 1.2rem;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6);
+            text-align: center; /* Centralizing content */
+            margin: 0 auto;
+            width: 70%; /* Limit width for readability */
+            font-family: 'Georgia', serif; /* Curvy font for the welcome message */
+        }
+
+    </style>
+</head>
+<body>
+    <header class="animateText">
+        Orli International Academy Sport Fiesta
+    </header>
+
+    <div class="container">
+        <button class="btn programme-btn" onclick="window.location.href='programme.html'">
+            Programme
+        </button>
+        <button class="btn results-btn" onclick="window.location.href='feedback-thanks.html'">
+            Event Results
+        </button>
+    </div>
+
+    <div class="content">
+        <p>Welcome to the exciting world of sports at Orli International Academy! Join us in celebrating sporting excellence, teamwork, and healthy competition.</p>
+    </div>
+</body>
+</html>

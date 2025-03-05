@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orli International Academy Sports Fiesta</title>
+  <link href="https://fonts.googleapis.com/css2?family=Kunstler+Script&family=Montserrat:wght@500&family=Roboto:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Allura&family=Roboto:wght@700&display=swap" rel="stylesheet">
+
+  <style>
+    /* Reset default margins and padding */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background-color: white;
+    }
+
+    /* Header Section */
+    .header {
+      color: #935116;
+      background-color: #16E2F5;
+      text-align: center;
+      padding: 20px;
+      animation: fadeIn 2s ease-out;
+    }
+
+    /* 3D block effect */
+    .header h1 {
+      font-size: 2.5rem;
+      font-family: 'Montserrat', sans-serif;
+      text-transform: uppercase;
+      text-shadow: 4px 4px 0px #004d73, /* Shadow to create depth */
+                   2px 2px 0px #00688e;
+    }
+
+    .header h1 span {
+      display: block; /* Moves "2024-2025 Sports Fiesta" to a new line */
+      font-size: 1.4rem; /* Changed font size */
+      font-family: 'Roboto', sans-serif; /* Changed font family */
+      color: #ffeb3b; /* Changed color */
+    }
+
+    .header p {
+      font-size: 1.3rem;
+      font-family: 'Curlz MT', cursive;
+      color: black;
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+/* Event Details Section */
+.event-details {
+  background-color: #16E2F5; /* Light peach for better readability */
+  color: #935116;
+  padding: 5px; /* Added padding for better spacing */
+  text-align: center;
+  position: relative;
+}
+
+.event-details h2 {
+  font-size: 2rem;
+  margin-bottom: 0;
+  animation: fadeInDetails 4s ease-out infinite;
+}
+
+.event-details p {
+  font-size: 1.1rem;
+  position: relative;
+  animation: fadeInDetails 4s ease-out infinite;
+}
+
+.event-details p:nth-child(2) {
+  animation-delay: 1s;
+}
+
+.event-details p:nth-child(3) {
+  animation-delay: 2s;
+}
+
+@keyframes fadeInDetails {
+  0% { opacity: 0; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.1); }
+  100% { opacity: 0; transform: scale(0.8); }
+}
+    /* Schedule Section */
+    .schedule {
+      background-color: #fff;
+      padding: 20px;
+      margin-top: 0;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .schedule h2 {
+      font-size: 2rem;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border-radius: 10px;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+      background: linear-gradient(145deg, #e0e0e0, #ffffff);
+    }
+
+    table th,
+    table td {
+      padding: 5px;
+      text-align: left;
+      border: 1.5px solid #000080;
+      font-size: 1.2rem;
+    }
+
+    table th {
+      background-color: #16E2F5;
+      color: white;
+      text-transform: uppercase;
+    }
+
+    table td {
+      background-color: white;
+      color: #935116;
+      font-family: 'Lucida Calligraphy', sans-serif; /* Changed font family */
+    }
+
+    table tr:hover {
+      background-color: #f1f1f1;
+      transform: translateY(-5px);
+      transition: 0.3s;
+    }
+
+    /* Footer Section */
+    .footer {
+      background-color: #16E2F5;
+      color: #000080;
+      text-align: center;
+      padding: 20px;
+      margin-top: 0;
+    }
+
+    .footer a {
+      color: #000080;
+      text-decoration: none;
+      margin: 0 10px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 2rem;
+      }
+
+      .event-details p {
+        font-size: 1rem;
+      }
+
+      .schedule h2 {
+        font-size: 1.8rem;
+      }
+
+      table th, table td {
+        padding: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header Section -->
+  <div class="header">
+    <h1>
+      Orli International Academy <span>2024-2025 Sports Fiesta</span>
+    </h1>
+    <p>Celebrating Sportsmanship, Teamwork & Excellence!</p>
+  </div>
+
+  <!-- Event Details Section -->
+  <div class="event-details">
+    <p><strong>Date:</strong> March 21st, 2025</p>
+    <p><strong>Time:</strong> 9:30 AM</p>
+    <p><strong>Venue:</strong> Orli International Academy</p>
+  </div>
+
+  <!-- Schedule Section -->
+  <div class="schedule">
+    <h2>Programme</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>S/N</th>
+          <th>Event</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>Entrance Parade</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Opening Prayer</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Anthems</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Welcome Address</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>Introduction of Judges</td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td>Choreography</td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td>First Set of Games: Picking the balls, Sprint, Filling the Bottle</td>
+        </tr>
+        <tr>
+          <td>8</td>
+          <td>Karate: Taekwondo team</td>
+        </tr>
+        <tr>
+          <td>9</td>
+          <td>Second Set Of Games: Sack Race, Egg Race, Sprint</td>
+        </tr>
+        <tr>
+          <td>10</td>
+          <td>Tug of War</td>
+        </tr>
+        <tr>
+          <td>11</td>
+          <td>Presentation of Trophies & Medals</td>
+        </tr>
+        <tr>
+          <td>12</td>
+          <td>Refreshment</td>
+        </tr>
+        <tr>
+          <td>13</td>
+          <td>Closing Remarks</td>
+        </tr>
+        <tr>
+          <td>14</td>
+          <td>Closing Prayer</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Footer Section -->
+  <div class="footer">
+    <p>&copy; 2025 Orli International Academy | <a href="https://orliacademy.com/">Visit Our Website</a></p>
+  </div>
+
+</body>
+</html>

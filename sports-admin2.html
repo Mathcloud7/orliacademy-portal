@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Orli International Academy Scoreboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      padding: 10px 0;
+      font-size: 1.2rem;
+      z-index: 1000;
+    }
+    main {
+      margin-top: 80px;
+      padding: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      border: 1px solid #ddd;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+    .coral-row { background-color: #ffcccc; }
+    .jasper-row { background-color: #cce5ff; }
+    .orli-row { background-color: #fff5cc; }
+    .jade-row { background-color: #d4edda; }
+    input[type="text"] {
+      width: 90%;
+      padding: 5px;
+    }
+    select {
+      padding: 5px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>Admin Panel - Update Scores</div>
+  </header>
+  <main id="events-container">
+    <!-- Event tables will be inserted here -->
+  </main>
+  
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCNQbqTQvKwrtpbGXHgu56hbAVaKgIQ7nc",
+      authDomain: "mathcloud-72a42.firebaseapp.com",
+      projectId: "mathcloud-72a42",
+      storageBucket: "mathcloud-72a42.firebasestorage.app",
+      messagingSenderId: "123322117435",
+      appId: "1:123322117435:web:ff3d2ac5c9dedc1a439b1e"
+    };
+    firebase.initializeApp(firebaseConfig);
+    var database = firebase.database();
+
+    const eventNames = [
+      "Picking the Balls Pre-Nursery", "Picking the Balls Nursery 1", "Picking the Balls Nursery 2",
+      "Sprint Pre-Nursery", "Sprint Nursery 1", "Sprint Nursery 2",
+      "Filling the Bottle Nursery 1", "Filling the Bottle Nursery 2",
+      "Colour Sorting Year 1", "Mat and Grass Pre-Nursery",
+      "Mat and Grass Nursery 1", "Mat and Grass Nursery 2", "Mat and Grass Junior Boys",
+      "Mat and Grass Junior Girls", "Mat and Grass Senior Boys", "Mat and Grass Senior Girls",
+      "Sack Race Junior Boys", "Sack Race Junior Girls", "Sack Race Senior Boys", "Sack Race Senior Girls",
+      "Sprint Junior Boys", "Sprint Junior Girls", "Sprint Senior Boys", "Sprint Senior Girls",
+      "Egg Race Junior Boys", "Egg Race Junior Girls", "Egg Race Senior Boys", "Egg Race Senior Girls"
+    ];
+
+    const houseColors = ["Coral", "Jasper", "Orli", "Jade"];
+    const houseClasses = ["coral-row", "jasper-row", "orli-row", "jade-row"];
+    const pointsPerPosition = [10, 7, 5, 3]; // Points for positions 1st, 2nd, 3rd, 4th
+
+    const eventsContainer = document.getElementById("events-container");
+
+    // Create event table
+    function createEventTable(eventIndex, eventName) {
+      let table = document.createElement("table");
+      table.setAttribute("data-event-index", eventIndex);
+
+      let tableHeader = `
+        <thead>
+          <tr>
+            <th colspan="3">${eventName}</th>
+          </tr>
+          <tr>
+            <th>Team</th>
+            <th>Contestant Name</th>
+            <th>Position</th>
+          </tr>
+        </thead>
+      `;
+
+      let tableBody = "<tbody>";
+      houseColors.forEach((house, index) => {
+        tableBody += `
+          <tr class="${houseClasses[index]}" data-house="${house}">
+            <td>${house}</td>
+            <td>
+              <input type="text" placeholder="Enter contestant name" onchange="updateFirebase()" />
+            </td>
+            <td>
+              <select onchange="updateFirebase()">
+                <option value="0">Select Position</option>
+                <option value="1">1st</option>
+                <option value="2">2nd</option>
+                <option value="3">3rd</option>
+                <option value="4">4th</option>
+              </select>
+            </td>
+          </tr>
+        `;
+      });
+      tableBody += "</tbody>";
+
+      table.innerHTML = tableHeader + tableBody;
+      eventsContainer.appendChild(table);
+
+      // Load data from localStorage if available
+      loadStoredData(eventIndex);
+    }
+
+    // Load data from localStorage (if data exists)
+    function loadStoredData(eventIndex) {
+      const eventKey = `event_${eventIndex}`;
+      const eventData = JSON.parse(localStorage.getItem(eventKey));
+      
+      if (eventData) {
+        const rows = document.querySelectorAll(`table[data-event-index="${eventIndex}"] tbody tr`);
+        rows.forEach((row) => {
+          const house = row.getAttribute("data-house");
+          const nameInput = row.querySelector("input[type='text']");
+          const positionSelect = row.querySelector("select");
+
+          const houseData = eventData.houses[house];
+          if (houseData) {
+            nameInput.value = houseData.name;
+            positionSelect.value = houseData.position;
+          }
+        });
+      }
+    }
+
+    // Save the form data to localStorage
+    function saveToLocalStorage() {
+      const eventData = {};
+      const tables = document.querySelectorAll("table[data-event-index]");
+      
+      tables.forEach((table) => {
+        const eventIndex = table.getAttribute("data-event-index");
+        const eventObj = { houses: {} };
+
+        const rows = table.querySelectorAll("tbody tr");
+        rows.forEach((row) => {
+          const house = row.getAttribute("data-house");
+          const nameInput = row.querySelector("input[type='text']").value;
+          const position = parseInt(row.querySelector("select").value);
+          eventObj.houses[house] = { name: nameInput, position: position };
+        });
+
+        eventData[eventIndex] = eventObj;
+
+        // Save data to localStorage
+        localStorage.setItem(`event_${eventIndex}`, JSON.stringify(eventObj));
+      });
+    }
+
+    // Update Firebase with scores and contestant info
+    function updateFirebase() {
+      let eventsData = {};
+      let houseScores = { Coral: 0, Jasper: 0, Orli: 0, Jade: 0 };
+
+      const tables = document.querySelectorAll("table[data-event-index]");
+      tables.forEach((table) => {
+        let eventIndex = table.getAttribute("data-event-index");
+        let eventName = eventNames[eventIndex];
+        let eventObj = { eventName: eventName, houses: {} };
+
+        const rows = table.querySelectorAll("tbody tr");
+        rows.forEach((row) => {
+          let house = row.getAttribute("data-house");
+          let nameInput = row.querySelector("input[type='text']").value;
+          let position = parseInt(row.querySelector("select").value);
+          eventObj.houses[house] = { name: nameInput, position: position };
+
+          if (position >= 1 && position <= 4) {
+            houseScores[house] += pointsPerPosition[position - 1];
+          }
+        });
+
+        eventsData[eventIndex] = eventObj;
+
+        // Save data to Firebase under /events/{eventIndex}
+        database.ref(`events/${eventIndex}`).set(eventObj);
+      });
+
+      // Save total scores to Firebase
+      database.ref("/scores").set(houseScores);
+
+      // Save to localStorage
+      saveToLocalStorage();
+    }
+
+    eventNames.forEach((eventName, index) => {
+      createEventTable(index, eventName);
+    });
+
+    // Run Firebase and LocalStorage sync
+    updateFirebase();
+  </script>
+</body>
+</html>

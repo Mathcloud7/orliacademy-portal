@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload CBT - Second Term Year 3</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7fb;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 100vh;
+        }
+        h1 {
+            font-size: 2.3rem;
+            color: #fff;
+            background-color: #007bff;
+            padding: 20px;
+            text-align: center;
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .school-name {
+            font-size: 1.5rem;
+            color: #FFD700;
+            text-align: center;
+            margin-top: 10px;
+            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
+        }
+        .logo-container {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px auto;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+        .logo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .editable {
+            background-color: #e0f7fa;
+        }
+        .delete-btn {
+            color: red;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+#uploadForm {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.form-group select, .form-group input[type="file"] {
+    padding: 12px;
+    font-size: 1rem;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    background-color: #fafafa;
+    color: #333;
+    outline: none;
+}
+
+.form-group select:focus, .form-group input[type="file"]:focus {
+    border-color: #007bff;
+}
+
+button {
+    padding: 14px 25px;
+    font-size: 1.1rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    text-align: center;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    #uploadForm {
+        padding: 20px;
+    }
+
+    .form-group label {
+        font-size: 0.9rem;
+    }
+
+    button {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    #uploadForm {
+        padding: 15px;
+    }
+
+    .form-group label {
+        font-size: 0.8rem;
+    }
+
+    button {
+        font-size: 0.9rem;
+    }
+}
+
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.2rem;
+            color: #007bff;
+        }
+        #uploadedAssessmentsTable {
+            width: 100%;
+            margin-top: 30px;
+            border-collapse: collapse;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        #uploadedAssessmentsTable th, #uploadedAssessmentsTable td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        #uploadedAssessmentsTable th {
+            background-color: #007bff;
+            color: #fff;
+        }
+        #uploadedAssessmentsTable tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .button-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 40px;
+        }
+        .btn {
+            padding: 12px 25px;
+            font-size: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            color: white;
+            text-decoration: none;
+        }
+        .upload-btn {
+            background-color: #28a745;
+            transition: background-color 0.3s ease;
+        }
+        .view-btn {
+            background-color: #17a2b8;
+            transition: background-color 0.3s ease;
+        }
+        .upload-btn:hover {
+            background-color: #218838;
+        }
+        .view-btn:hover {
+            background-color: #138496;
+        }
+        .delete-btn {
+            color: red;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .delete-btn:hover {
+            color: darkred;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+                padding: 15px;
+            }
+
+            .school-name {
+                font-size: 1.2rem;
+            }
+
+            .logo-container {
+                width: 100px;
+                height: 100px;
+            }
+
+            #uploadForm {
+                padding: 15px;
+            }
+
+            #uploadedAssessmentsTable {
+                width: 100%;
+            }
+
+            .button-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.6rem;
+                padding: 12px;
+            }
+
+            .school-name {
+                font-size: 1rem;
+            }
+
+            #uploadForm {
+                padding: 10px;
+            }
+
+            .btn {
+                font-size: 0.9rem;
+                padding: 10px 20px;
+            }
+        }
+    /* Footer styling */
+    footer {
+      bottom: 0;
+      width: 100%;
+      background-color: #007bff;
+      color: white;
+      text-align: center;
+      padding: 12px 0;
+      margin-top: 20px;
+    }
+    </style>
+</head>
+<body>
+    <h1>Year 3 Second Term Exams Portal</h1>
+    <div class="school-name">Orli International Academy</div>
+    <div class="logo-container">
+        <img src="logo.png" alt="Orli International Academy Logo">
+    </div>
+
+<div id="uploadForm">
+    <div class="form-group">
+        <label for="assessmentName">Assessment Name</label>
+        <select id="assessmentName" required>
+            <option value="Examination">Examination</option>
+            <option value="CA1">CA1</option>
+            <option value="CA2">CA2</option>
+            <option value="CA3">CA3</option>
+            <option value="Assignment">Assignment</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="subject">Subject</label>
+        <select id="subject" required>
+<option value="Science">Science</option>
+<option value="Home Economics">Home Economics</option>
+<option value="Geography">Geography</option>
+<option value="Agricultural Science">Agricultural Science</option>
+<option value="Mathematics">Mathematics</option>
+<option value="Civic Education">Civic Education</option>
+<option value="English Studies">English Studies</option>
+<option value="History">History</option>
+<option value="Christian Religious Studies">Christian Religious Studies</option>
+<option value="Islam Religious Studies">Islam Religious Studies</option>
+<option value="Information and Communication Technology">Information and Communication Technology</option>
+<option value="Personal Social and Health Education">Personal Social and Health Education</option>
+<option value="General Knowledge">General Knowledge</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="class">Class</label>
+        <input type="hidden" id="class" name="class" value="Year 3 Second Term">
+        <p>Class: Year 3 Second Term</p>
+    </div>
+
+    <div class="form-group">
+        <label for="excelFile">Upload Excel File</label>
+        <input type="file" id="excelFile" accept=".xlsx" required>
+    </div>
+
+    <button type="button" onclick="uploadExcel()">Upload Exam</button>
+
+    <button id="download-btn">Download the Sample Excel File</button>
+    <p><strong>Instructions:</strong> After downloading the Excel file, make sure to edit it by entering only text-based questions. Any questions that include diagrams should be moved to the theory section of the school assessment portal. Do not leave any cells blank in the Excel file. Remember, you can still edit the Excel file even after uploading it.</p>
+</div>
+    <div class="loading" id="loadingIndicator">Loading...</div>
+    <div id="questionTable" style="display: none;">
+        <h2>Edit Questions</h2>
+        <table id="editableTable">
+            <thead>
+                <tr>
+                    <th>Question</th>
+                    <th>Option A</th>
+                    <th>Option B</th>
+                    <th>Option C</th>
+                    <th>Option D</th>
+                    <th>Correct Answer</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+<!-- Hidden by default, will show when editing -->
+<button id="saveChangesBtn" style="display:none;">Save Changes</button>
+    </div>
+
+    <h2>Uploaded Assessments</h2>
+    <table id="uploadedAssessmentsTable">
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Subject</th>
+                <th>Class</th>
+                <th>Date Uploaded</th>
+                <th>Actions</th>
+                <th>Remove</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="uploadedAssessmentsBody"></tbody>
+    </table>
+  <!-- Footer Section -->
+  <footer>
+    Orli International Academy &copy; 2024
+  </footer>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyD4JRePybUbET67loPNw8VHNAIPcnHadXw",
+  authDomain: "year3s.firebaseapp.com",
+  projectId: "year3s",
+  storageBucket: "year3s.firebasestorage.app",
+  messagingSenderId: "676329764620",
+  appId: "1:676329764620:web:a9f4436324e2e40f88fb29"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// Function to upload and parse Excel file
+function uploadExcel() {
+    const assessmentName = document.getElementById('assessmentName').value;
+    const subject = document.getElementById('subject').value;
+    const className = document.getElementById('class').value;
+
+    if (!assessmentName || !subject || !className) {
+        alert("Please fill in all fields before uploading.");
+        return;
+    }
+
+    let input = document.getElementById('excelFile');
+    let file = input.files[0];
+    if (!file) return;
+
+    document.getElementById('loadingIndicator').style.display = 'block';
+
+    let reader = new FileReader();
+    reader.onload = function(e) {
+        let data = new Uint8Array(e.target.result);
+        let workbook = XLSX.read(data, { type: 'array' });
+        let firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        let jsonData = XLSX.utils.sheet_to_json(firstSheet);
+
+        const assessmentDetails = {
+            name: assessmentName,
+            subject: subject,
+            class: className,
+            questions: jsonData,
+            published: false // Set the default state as unpublished
+        };
+
+        // Check if an assessment already exists with the same name, subject, and class
+        checkAndSaveAssessment(assessmentDetails);
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+// Check if an assessment with the same name, subject, and class already exists
+function checkAndSaveAssessment(assessmentDetails) {
+    const { name, subject, class: className } = assessmentDetails;
+
+    // Query Firebase to check for the existing assessment
+    db.ref('assessments').orderByChild('name').equalTo(name).once('value', (snapshot) => {
+        let exists = false;
+        snapshot.forEach(assessmentSnapshot => {
+            const assessment = assessmentSnapshot.val();
+            if (assessment.name === name && assessment.subject === subject && assessment.class === className) {
+                exists = true; // Assessment with the same name, subject, and class exists
+            }
+        });
+
+        if (exists) {
+            alert('An assessment with the same name, subject, and class already exists. Please choose a different name or edit the existing one.');
+        } else {
+            // Save as a new entry
+            saveToFirebase(assessmentDetails);
+            addAssessmentToList(assessmentDetails);
+        }
+    });
+}
+
+// Save questions and assessment details to Firebase
+function saveToFirebase(assessmentDetails) {
+    const uniqueId = `${assessmentDetails.name}-${assessmentDetails.subject}-${assessmentDetails.class}-${Date.now()}`; // Append timestamp
+    db.ref('assessments').child(uniqueId).set(assessmentDetails, (error) => {
+        document.getElementById('loadingIndicator').style.display = 'none';
+        if (error) {
+            alert('Error saving to Firebase');
+        } else {
+            alert('Assessment uploaded successfully!');
+        }
+    });
+}
+
+// Add the uploaded assessment to the list
+function addAssessmentToList(assessmentDetails) {
+    const tableBody = document.getElementById('uploadedAssessmentsBody');
+    const date = new Date().toLocaleString();
+    const uniqueId = `${assessmentDetails.name}-${assessmentDetails.subject}-${assessmentDetails.class}-${Date.now()}`;
+    tableBody.innerHTML += `
+        <tr>
+            <td>${assessmentDetails.name}</td>
+            <td>${assessmentDetails.subject}</td>
+            <td>${assessmentDetails.class}</td>
+            <td>${date}</td>
+            <td><button onclick="editAssessment('${uniqueId}')">Edit</button></td>
+            <td><span class="delete-btn" onclick="deleteAssessmentFromDB('${uniqueId}')">Delete</span></td>
+            <td>
+                <button onclick="togglePublish('${uniqueId}', ${assessmentDetails.published})">
+                    ${assessmentDetails.published ? 'Unpublish' : 'Publish'}
+                </button>
+            </td>
+        </tr>
+    `;
+}
+
+// Toggle the published/unpublished state
+function togglePublish(assessmentId, currentState) {
+    const newState = !currentState;
+    db.ref('assessments').child(assessmentId).update({ published: newState }, (error) => {
+        if (error) {
+            alert('Error updating assessment status');
+        } else {
+            alert(newState ? 'Assessment published!' : 'Assessment unpublished!');
+            displayAssessments();
+        }
+    });
+}
+
+// Retrieve and display assessments from Firebase
+function displayAssessments() {
+    db.ref('assessments').on('value', (snapshot) => {
+        const tableBody = document.getElementById('uploadedAssessmentsBody');
+        tableBody.innerHTML = ''; // Clear previous list
+        snapshot.forEach(assessmentSnapshot => {
+            const assessmentData = assessmentSnapshot.val();
+            const date = new Date().toLocaleString();
+            tableBody.innerHTML += `
+                <tr>
+                    <td>${assessmentData.name}</td>
+                    <td>${assessmentData.subject}</td>
+                    <td>${assessmentData.class}</td>
+                    <td>${date}</td>
+                    <td><button onclick="editAssessment('${assessmentSnapshot.key}')">Edit</button></td>
+                    <td><span class="delete-btn" onclick="deleteAssessmentFromDB('${assessmentSnapshot.key}')">Delete</span></td>
+                    <td>
+                        <button onclick="togglePublish('${assessmentSnapshot.key}', ${assessmentData.published})">
+                            ${assessmentData.published ? 'Unpublish' : 'Publish'}
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+    });
+}
+
+// Edit assessment functionality
+function editAssessment(assessmentId) {
+    db.ref('assessments').child(assessmentId).once('value').then((snapshot) => {
+        const assessment = snapshot.val();
+        const questions = assessment.questions;
+        displayQuestions(questions, assessmentId);
+    });
+}
+
+// Display questions in a table for editing
+function displayQuestions(questions, assessmentId) {
+    const tableBody = document.getElementById('tableBody');
+    tableBody.innerHTML = ''; // Clear previous content
+    questions.forEach((q, index) => {
+        tableBody.innerHTML += `
+            <tr>
+                <td class="editable"><input type="text" value="${q.Question}" /></td>
+                <td class="editable"><input type="text" value="${q['Option A']}" /></td>
+                <td class="editable"><input type="text" value="${q['Option B']}" /></td>
+                <td class="editable"><input type="text" value="${q['Option C']}" /></td>
+                <td class="editable"><input type="text" value="${q['Option D']}" /></td>
+                <td class="editable">
+                    <select>
+                        <option value="A" ${q['Correct Answer'] === 'A' ? 'selected' : ''}>A</option>
+                        <option value="B" ${q['Correct Answer'] === 'B' ? 'selected' : ''}>B</option>
+                        <option value="C" ${q['Correct Answer'] === 'C' ? 'selected' : ''}>C</option>
+                        <option value="D" ${q['Correct Answer'] === 'D' ? 'selected' : ''}>D</option>
+                    </select>
+                </td>
+                <td><span class="delete-btn" onclick="deleteQuestion(${index}, '${assessmentId}')">Delete</span></td>
+            </tr>
+        `;
+    });
+    document.getElementById('questionTable').style.display = 'block'; // Show the table
+}
+
+// Save updated questions to Firebase
+function saveChanges(assessmentId) {
+    const updatedQuestions = [];
+    const rows = document.querySelectorAll('#questionTable tbody tr'); // Use #questionTable for your table
+
+    // Loop through all rows and extract the input values
+    rows.forEach(row => {
+        const inputs = row.querySelectorAll('input');
+        const select = row.querySelector('select');
+        
+        // Build the question object to be updated
+        updatedQuestions.push({
+            Question: inputs[0].value.trim(),
+            'Option A': inputs[1].value.trim(),
+            'Option B': inputs[2].value.trim(),
+            'Option C': inputs[3].value.trim(),
+            'Option D': inputs[4].value.trim(),
+            'Correct Answer': select.value
+        });
+    });
+
+    // Validate inputs (make sure none of the inputs are empty)
+    if (updatedQuestions.some(q => !q.Question || !q['Option A'] || !q['Option B'] || !q['Option C'] || !q['Option D'])) {
+        alert('All fields must be filled out before saving!');
+        return;
+    }
+
+    // Save updated questions to Firebase under the correct assessment ID
+    db.ref('assessments').child(assessmentId).update({ questions: updatedQuestions }, (error) => {
+        if (error) {
+            alert('Error saving changes to Firebase');
+        } else {
+            alert('Changes saved successfully to Firebase!');
+            displayAssessments(); // Refresh the assessments list
+        }
+    });
+}
+
+// Edit assessment functionality (Show questions for editing)
+function editAssessment(assessmentId) {
+    db.ref('assessments').child(assessmentId).once('value').then((snapshot) => {
+        const assessment = snapshot.val();
+        const questions = assessment.questions;
+        displayQuestions(questions, assessmentId); // Display the questions for editing
+    });
+}
+
+// Display questions in a table for editing
+function displayQuestions(questions, assessmentId) {
+    const tableBody = document.getElementById('questionTable').querySelector('tbody');
+    tableBody.innerHTML = ''; // Clear previous content
+    questions.forEach((q, index) => {
+        tableBody.innerHTML += `
+            <tr>
+                <td class="editable"><input type="text" value="${q.Question}" /></td>
+                <td class="editable"><input type="text" value="${q['Option A']}" /></td>
+                <td class="editable"><input type="text" value="${q['Option B']}" /></td>
+                <td class="editable"><input type="text" value="${q['Option C']}" /></td>
+                <td class="editable"><input type="text" value="${q['Option D']}" /></td>
+                <td class="editable">
+                    <select>
+                        <option value="A" ${q['Correct Answer'] === 'A' ? 'selected' : ''}>A</option>
+                        <option value="B" ${q['Correct Answer'] === 'B' ? 'selected' : ''}>B</option>
+                        <option value="C" ${q['Correct Answer'] === 'C' ? 'selected' : ''}>C</option>
+                        <option value="D" ${q['Correct Answer'] === 'D' ? 'selected' : ''}>D</option>
+                    </select>
+                </td>
+                <td><span class="delete-btn" onclick="deleteQuestion(${index}, '${assessmentId}')">Delete</span></td>
+            </tr>
+        `;
+    });
+
+    // Show the table and the save button
+    document.getElementById('questionTable').style.display = 'block';
+    document.getElementById('saveChangesBtn').style.display = 'block'; // Show the "Save Changes" button
+
+    // Pass the assessment ID to the save button
+    document.getElementById('saveChangesBtn').onclick = function() {
+        saveChanges(assessmentId);
+    };
+}
+
+    // Delete an assessment from Firebase
+    function deleteAssessmentFromDB(assessmentId) {
+        if (confirm('Are you sure you want to delete this assessment?')) {
+            db.ref('assessments').child(assessmentId).remove((error) => {
+                if (error) {
+                    alert('Error deleting assessment');
+                } else {
+                    alert('Assessment deleted successfully!');
+                }
+            });
+        }
+    }
+
+
+// Initialize the page by displaying all assessments
+window.onload = function() {
+    displayAssessments();
+};
+</script>
+
+</body>
+</html>

@@ -1,0 +1,294 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orli International Academy Portal</title>
+
+  <!-- FontAwesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+  <!-- Google Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <style>
+    /* Basic Styles */
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 20px; /* Reduced padding */
+      background-color: #003366;
+    }
+
+    header .logo img {
+      width: 130px; /* Reduced logo size */
+    }
+
+    nav ul {
+      display: flex;
+      list-style: none;
+    }
+
+    nav ul li {
+      margin-left: 20px; /* Reduced space between nav items */
+    }
+
+    nav ul li a {
+      text-decoration: none;
+      color: white;
+      font-weight: bold;
+      transition: color 0.3s ease;
+    }
+
+    nav ul li a:hover {
+      color: #ffcc00;
+    }
+
+    /* Hero Section */
+    .hero {
+      background-image: url('wellcome.jpg');
+      background-size: cover;
+      background-position: center;
+      text-align: center;
+      padding: 80px 20px; /* Reduced padding */
+      color: white;
+      position: relative;
+    }
+
+    .hero .animated-text {
+      font-size: 2.5rem; /* Reduced font size */
+      animation: fadeInUp 2s ease-in-out;
+    }
+
+    .cta-buttons .cta-btn {
+      display: inline-block;
+      background-color: #ffcc00;
+      padding: 12px 25px; /* Reduced padding */
+      margin-top: 15px; /* Reduced margin */
+      color: black;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+
+    .cta-btn:hover {
+      background-color: #ff9900;
+    }
+
+    /* Role Cards */
+    .roles {
+      display: flex;
+      justify-content: space-around;
+      margin: 30px 20px; /* Reduced margin */
+      flex-wrap: wrap;
+    }
+
+    .role-card {
+      text-align: center;
+      background-color: white;
+      padding: 20px; /* Reduced padding */
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      margin: 10px;
+      width: 25%; /* Reduced card width */
+    }
+
+    .role-card:hover {
+      transform: translateY(-5px); /* Reduced hover effect */
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .role-btn {
+      margin-top: 15px; /* Reduced margin */
+      display: inline-block;
+      background-color: #003366;
+      padding: 10px 20px; /* Reduced padding */
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+
+    .role-btn:hover {
+      background-color: #ffcc00;
+    }
+
+    /* Footer Section */
+    footer {
+      background-color: #003366;
+      color: white;
+      text-align: center;
+      padding: 15px; /* Reduced padding */
+    }
+
+    footer .social-icons a {
+      margin: 0 10px; /* Reduced margin */
+    }
+
+    footer .social-icons i {
+      font-size: 20px; /* Smaller icons */
+      transition: color 0.3s ease;
+    }
+
+    footer .social-icons a:hover i {
+      color: #ffcc00;
+    }
+
+    footer .footer-logo img {
+      width: 80px; /* Reduced logo size */
+    }
+
+    footer ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    footer ul li {
+      display: inline;
+      margin-right: 10px; /* Reduced margin */
+    }
+
+    footer ul li a {
+      text-decoration: none;
+      color: white;
+      font-weight: bold;
+    }
+
+    footer ul li a:hover {
+      color: #ffcc00;
+    }
+
+    /* Responsive Design */
+    @media screen and (max-width: 768px) {
+      .roles {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .role-card {
+        width: 80%; /* Adjusted width for smaller screens */
+        margin-bottom: 20px; /* Reduced bottom margin */
+      }
+    }
+
+    @media screen and (max-width: 480px) {
+      .hero .animated-text {
+        font-size: 1.8rem; /* Further reduced font size */
+      }
+
+      .cta-btn {
+        padding: 10px 20px; /* Reduced padding */
+      }
+    }
+
+    /* Animation Keyframes */
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header Section -->
+  <header>
+    <div class="logo"><img src="logo.png" alt="Orli International Academy" /></div>
+    <nav>
+      <ul>
+        <li><a href="https://www.orliacademy.com/">Home</a></li>
+        <li><a href="https://www.orliacademy.com/">About</a></li>
+        <li><a href="https://www.orliacademy.com/">Courses</a></li>
+        <li><a href="https://www.orliacademy.com/">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <h1 class="animated-text">Raising a Well-Informed Child</h1>
+    <div class="cta-buttons">
+      <a href="lhttps://www.orliacademy.com/homepage/contact" class="cta-btn">Contact Us</a>
+      <a href="https://www.orliacademy.com/homepage/about" class="cta-btn">Discover More About Orli</a>
+    </div>
+  </section>
+
+  <!-- Role-Specific Login Options -->
+  <section class="roles">
+    <div class="role-card">
+      <i class="fas fa-graduation-cap fa-3x"></i>
+      <p>Students: Access your courses and Assessments</p>
+      <a href="student-login.html" class="role-btn">Login Now</a>
+    </div>
+    <div class="role-card">
+      <i class="fas fa-chalkboard-teacher fa-3x"></i>
+      <p>Teachers: Manage your class lessons and assessments</p>
+      <a href="teacher-login.html" class="role-btn">Login Now</a>
+    </div>
+    <div class="role-card">
+      <i class="fas fa-cogs fa-3x"></i>
+      <p>Administrators: Manage the academy and users</p>
+      <a href="admin-login.html" class="role-btn">Login Now</a>
+    </div>
+  </section>
+
+  <!-- Footer Section -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-logo"><img src="logo-footer.png" alt="Orli Academy" /></div>
+      <ul>
+        <li><a href="https://www.orliacademy.com/">Privacy Policy</a></li>
+        <li><a href="https://www.orliacademy.com/">Terms of Service</a></li>
+      </ul>
+      <div class="social-icons">
+        <a href="https://web.facebook.com/orliacademy?mibextid=ZbWKwL&_rdc=1&_rdr#"><i class="fab fa-facebook-f"></i></a>
+        <a href="#"><i class="fab fa-twitter"></i></a>
+        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+        <a href="https://www.instagram.com/orli_academy/?igsh=OGQ5ZDc2ODk2ZA%3D%3D"><i class="fab fa-instagram"></i></a>
+      </div>
+    </div>
+    <p>&copy; 2025 Orli International Academy. All Rights Reserved.</p>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Hero Section Animation
+      const heroText = document.querySelector('.animated-text');
+      heroText.classList.add('fadeInUp');
+
+      // Smooth Scroll on Role Card Hover
+      const roleCards = document.querySelectorAll('.role-card');
+      roleCards.forEach(card => {
+        card.addEventListener('mouseover', function () {
+          card.style.transform = 'translateY(-5px)';
+        });
+
+        card.addEventListener('mouseout', function () {
+          card.style.transform = 'translateY(0)';
+        });
+      });
+    });
+  </script>
+
+</body>
+</html>
+<script async data-explicit-opt-in="true" data-cookie-opt-in="true" data-deployment-id="dpl_2b9QX6tcYCcFHeVrs5xc23c9R3Rs" src="https://vercel.live/_next-live/feedback/feedback.js"></script>

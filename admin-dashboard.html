@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+.header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.logo-container {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border: 5px solid #007bff;
+    border-radius: 50%;
+    animation: rotate 50s linear infinite;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo-container img {
+    width: 90%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.school-name {
+    font-size: 2.4em;
+    font-weight: bold;
+    color: #007bff;
+    text-transform: uppercase;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+    letter-spacing: 2px;
+    margin-top: 10px;
+    animation: text3D 1.5s ease-in-out infinite alternate;
+}
+        .btn {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px 15px;
+            font-size: 1.4em;
+            color: var(--secondary-color);
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 10px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes text3D {
+    0% {
+        text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+        transform: scale(1.1);
+    }
+    100% {
+        text-shadow: 2px 2px 20px rgba(0, 0, 0, 0.7);
+        transform: scale(1.2);
+    }
+}
+
+.nav {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.nav a {
+    text-decoration: none;
+    color: #007bff;
+    font-size: 1.1em;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.nav a:hover {
+    background-color: #007bff;
+    color: white;
+}
+        .admin-container {
+            max-width: 900px;
+            width: 100%;
+            padding: 20px;
+            margin: 20px auto;
+            background: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h2, h3 {
+            text-align: center;
+            color: #444;
+        }
+
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        form input, form select, form button {
+            padding: 10px;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        form button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+
+        form button:hover {
+            background-color: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th, table td {
+            text-align: left;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        table th {
+            background-color: #f2f2f2;
+        }
+
+        table tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .btn {
+            padding: 5px 10px;
+            font-size: 0.9em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .edit-btn {
+            background-color: #ffc107;
+            color: #fff;
+        }
+
+        .edit-btn:hover {
+            background-color: #e0a800;
+        }
+
+        .delete-btn {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        .delete-btn:hover {
+            background-color: #bd2130;
+        }
+
+        @media (max-width: 768px) {
+            .admin-container {
+                padding: 15px;
+            }
+
+            form {
+                flex-direction: column;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+        }
+    /* User count section */
+    #userCount {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 30px;
+        padding: 10px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    #userCount p {
+        font-size: 18px;
+        font-weight: 500;
+        margin: 0;
+    }
+
+    #userCount span {
+        font-weight: bold;
+    }
+
+    /* Filter section */
+    #classFilter {
+    margin-top: 20px;
+    width: 100px;
+    height: 30px;
+    border: 5px solid #007bff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    }
+
+    </style>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBXqFTnZqi1Uzo_4k1s-cZrm__eSrUQuV8",
+        authDomain: "home-1e252.firebaseapp.com",
+        projectId: "home-1e252",
+        storageBucket: "home-1e252.firebasestorage.app",
+        messagingSenderId: "702969034430",
+        appId: "1:702969034430:web:47ff6e815f2017fc8f10ef"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    window.logout = function logout() {
+        signOut(auth).then(() => {
+            window.location.replace('index.html');
+        }).catch((error) => {
+            console.error("Error during sign-out: ", error);
+        });
+    };
+
+    window.createUser = function createUser() {
+        const firstName = document.getElementById('firstName').value;
+        const lastName = document.getElementById('lastName').value;
+        const otherName = document.getElementById('otherName').value;
+        const userClass = document.getElementById('class').value;
+        const role = document.getElementById('role').value;
+        const sex = document.getElementById('sex').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        createUserWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+                const user = userCredential.user;
+                addDoc(collection(db, "users"), {
+                    firstName,
+                    lastName,
+                    otherName,
+                    userClass,
+                    role,
+                    sex,
+                    email,
+                    uid: user.uid
+                }).then(() => {
+                    alert('User created successfully!');
+                    clearForm();
+                    loadUsers(); // Reload user list after creation
+                    updateUserCount(); // Update user count after creation
+                }).catch((error) => {
+                    console.error("Error adding user to Firestore: ", error);
+                });
+            })
+            .catch((error) => {
+                console.error("Error creating user: ", error);
+                alert("Error: " + error.message);
+            });
+    };
+
+    // Update counters for Admin, Teacher, and Student
+    function updateUserCount() {
+        const userCountRef = document.getElementById('userCount');
+        const adminCount = document.getElementById('adminCount');
+        const teacherCount = document.getElementById('teacherCount');
+        const studentCount = document.getElementById('studentCount');
+
+        // Count users based on role
+        getDocs(collection(db, "users")).then((snapshot) => {
+            let adminCountValue = 0;
+            let teacherCountValue = 0;
+            let studentCountValue = 0;
+
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                if (data.role === "admin") adminCountValue++;
+                if (data.role === "teacher") teacherCountValue++;
+                if (data.role === "student") studentCountValue++;
+            });
+
+            // Update counts in the UI
+            adminCount.textContent = adminCountValue;
+            teacherCount.textContent = teacherCountValue;
+            studentCount.textContent = studentCountValue;
+        }).catch((error) => {
+            console.error("Error updating user count: ", error);
+        });
+    }
+
+    window.loadUsers = function loadUsers() {
+        const userClassFilter = document.getElementById('classFilter').value; // Get class filter value
+        const userList = document.getElementById('userList');
+        userList.innerHTML = '';
+
+        let userQuery = collection(db, "users");
+
+        if (userClassFilter) {
+            userQuery = query(userQuery, where("userClass", "==", userClassFilter));
+        }
+
+        getDocs(userQuery)
+            .then((snapshot) => {
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const userRow = document.createElement('tr');
+                    userRow.innerHTML = `
+                        <td>${data.firstName} ${data.lastName}</td>
+                        <td>${data.userClass}</td>
+                        <td>${data.role}</td>
+                        <td>${data.sex}</td>
+                        <td>${data.email}</td>
+                        <td>
+                            <button class="btn edit-btn" onclick="editUser('${doc.id}', '${data.firstName}', '${data.lastName}', '${data.otherName}', '${data.userClass}', '${data.role}', '${data.sex}', '${data.email}')">Edit</button>
+                            <button class="btn delete-btn" onclick="deleteUser('${doc.id}')">Delete</button>
+                        </td>
+                    `;
+                    userList.appendChild(userRow);
+                });
+            })
+            .catch((error) => {
+                console.error("Error loading users: ", error);
+            });
+    };
+
+    window.deleteUser = function deleteUser(userId) {
+        const userRef = doc(db, "users", userId);
+        deleteDoc(userRef)
+            .then(() => {
+                alert("User deleted successfully!");
+                loadUsers();
+                updateUserCount(); // Update count after deletion
+            })
+            .catch((error) => {
+                console.error("Error deleting user: ", error);
+            });
+    };
+
+    window.editUser = function editUser(userId, firstName, lastName, otherName, userClass, role, sex, email) {
+        document.getElementById('firstName').value = firstName;
+        document.getElementById('lastName').value = lastName;
+        document.getElementById('otherName').value = otherName;
+        document.getElementById('class').value = userClass;
+        document.getElementById('role').value = role;
+        document.getElementById('sex').value = sex;
+        document.getElementById('email').value = email;
+        document.getElementById('password').value = '';
+
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.textContent = 'Update User';
+        submitBtn.setAttribute('onclick', `updateUser('${userId}')`);
+    };
+
+    window.updateUser = function updateUser(userId) {
+        const firstName = document.getElementById('firstName').value;
+        const lastName = document.getElementById('lastName').value;
+        const otherName = document.getElementById('otherName').value;
+        const userClass = document.getElementById('class').value;
+        const role = document.getElementById('role').value;
+        const sex = document.getElementById('sex').value;
+        const email = document.getElementById('email').value;
+
+        const userRef = doc(db, "users", userId);
+        updateDoc(userRef, {
+            firstName,
+            lastName,
+            otherName,
+            userClass,
+            role,
+            sex,
+            email
+        }).then(() => {
+            alert("User updated successfully!");
+            clearForm();
+            loadUsers();
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.textContent = 'Create User';
+            submitBtn.setAttribute('onclick', 'createUser()');
+            updateUserCount(); // Update count after update
+        }).catch((error) => {
+            console.error("Error updating user: ", error);
+        });
+    };
+
+    window.clearForm = function clearForm() {
+        document.getElementById('firstName').value = '';
+        document.getElementById('lastName').value = '';
+        document.getElementById('otherName').value = '';
+        document.getElementById('class').value = 'Class 1';
+        document.getElementById('role').value = 'admin';
+        document.getElementById('sex').value = 'male';
+        document.getElementById('email').value = '';
+        document.getElementById('password').value = '';
+    };
+
+    // Load initial data
+    window.onload = function() {
+        loadUsers();
+        updateUserCount(); // Load user count on page load
+    };
+</script>
+
+</head>
+<body>
+    <!-- Header with logo and school name -->
+    <div class="header">
+        <!-- Logo -->
+        <div class="logo-container">
+            <img src="logo.png" alt="School Logo">
+        </div>
+        <!-- School Name with 3D effect -->
+        <div class="school-name">Orli International Academy</div>
+        <!-- Navigation Links -->
+        <div class="nav">
+            <a href="index.html">Home</a>
+            <a href="result.html">Students Results</a>
+        </div>
+    </div>
+    <div class="admin-container">
+        <button onclick="logout()">Logout</button>
+        <h2>Create or Update a User</h2>
+        <form>
+            <input type="text" id="firstName" placeholder="First Name" required />
+            <input type="text" id="lastName" placeholder="Last Name" required />
+            <input type="text" id="otherName" placeholder="Other Name (Optional)" />
+            <select id="class" required>
+                <option value="Year 1">Year 1</option>
+                <option value="Year 2">Year 2</option>
+                <option value="Year 3">Year 3</option>
+                <option value="Year 4">Year 4</option>
+                <option value="Year 5">Year 5</option>
+                <option value="Year 6">Year 6</option>
+            </select>
+            <select id="role" required>
+                <option value="admin">Admin</option>
+                <option value="teacher">Teacher</option>
+                <option value="student">Student</option>
+            </select>
+            <select id="sex" required>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+            <input type="email" id="email" placeholder="Email" required />
+            <input type="password" id="password" placeholder="Password" required />
+            <button type="button" id="submitBtn" onclick="createUser()">Create User</button>
+        </form>
+<!-- Dropdown for class filter -->
+<select id="classFilter" onchange="loadUsers()">
+    <option value="">ALL CLASSES</option>
+                <option value="Year 1">Year 1</option>
+                <option value="Year 2">Year 2</option>
+                <option value="Year 3">Year 3</option>
+                <option value="Year 4">Year 4</option>
+                <option value="Year 5">Year 5</option>
+                <option value="Year 6">Year 6</option>
+    <!-- Add more classes as needed -->
+</select>
+
+        <h3>Total Registered Users counts</h3>
+<div id="userCount">
+    <p>Admins: <span id="adminCount">0</span></p>
+    <p>Teachers: <span id="teacherCount">0</span></p>
+    <p>Students: <span id="studentCount">0</span></p>
+</div>
+
+        <h3>Registered Users</h3>
+        <table id="userList">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Class</th>
+                    <th>Role</th>
+                    <th>Sex</th>
+                    <th>Email</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- List of users will be populated here -->
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

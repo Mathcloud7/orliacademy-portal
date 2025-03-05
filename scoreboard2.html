@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>View Scoreboard - Orli International Academy</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* First Fixed Header: Score Description */
+    .score-description {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background-color: #007BFF; /* Blue background */
+      color: white;
+      text-align: center;
+      padding: 5px 0;
+      font-size: 0.9rem;
+      z-index: 1000; /* Stays on top of content */
+      margin-bottom: 10px; /* Adds space below the description header */
+    }
+    .score-description p {
+      margin: 0;
+    }
+
+    /* Second Fixed Header: Total Scores */
+    header {
+      position: fixed;
+      top: 70px; /* Below the score description header */
+      left: 0;
+      width: 100%;
+      background-color: #343A40; /* Dark background for total scores */
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+      font-size: 1.4rem;
+      z-index: 999; /* Just below the description header */
+      margin-bottom: 10px; /* Adds space below the total score header */
+    }
+
+    header div {
+      margin: 5px 0;
+    }
+
+    /* Main Content */
+    main {
+      margin-top: 140px; /* Space for both headers */
+      padding: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      border: 1px solid #ddd;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+    .coral-row { background-color: #ffcccc; }
+    .jasper-row { background-color: #cce5ff; }
+    .orli-row { background-color: #fff5cc; }
+    .jade-row { background-color: #d4edda; }
+  </style>
+</head>
+<body>
+
+  <!-- Fixed Description Header -->
+  <div class="score-description">
+    <p>Scores are updated in real-time. Points for positions: 1st - 10 points, 2nd - 7 points, 3rd - 5 points, 4th - 3 points. Below are the accumulated points for each team.</p>
+  </div>
+
+  <!-- Fixed Total Scores Header -->
+  <header>
+    <div>Total Score</div>
+    <div>
+      Coral: <span id="score-coral">0</span> | 
+      Jasper: <span id="score-jasper">0</span> | 
+      Orli: <span id="score-orli">0</span> | 
+      Jade: <span id="score-jade">0</span>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main id="events-container">
+    <!-- Event tables will be populated here in view-only mode -->
+  </main>
+
+
+
+
+  
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCNQbqTQvKwrtpbGXHgu56hbAVaKgIQ7nc",
+    authDomain: "mathcloud-72a42.firebaseapp.com",
+    projectId: "mathcloud-72a42",
+    storageBucket: "mathcloud-72a42.firebasestorage.app",
+    messagingSenderId: "123322117435",
+    appId: "1:123322117435:web:ff3d2ac5c9dedc1a439b1e"
+  };
+  firebase.initializeApp(firebaseConfig);
+  var database = firebase.database();
+
+  const houseColors = ["Coral", "Jasper", "Orli", "Jade"];
+  const houseClasses = ["coral-row", "jasper-row", "orli-row", "jade-row"];
+
+  const eventsContainer = document.getElementById("events-container");
+
+  database.ref("/").on("value", (snapshot) => {
+    const data = snapshot.val();
+    if (!data) return;
+
+    document.getElementById("score-coral").textContent = data.scores ? data.scores.Coral : 0;
+    document.getElementById("score-jasper").textContent = data.scores ? data.scores.Jasper : 0;
+    document.getElementById("score-orli").textContent = data.scores ? data.scores.Orli : 0;
+    document.getElementById("score-jade").textContent = data.scores ? data.scores.Jade : 0;
+
+    eventsContainer.innerHTML = "";
+
+    if (data.events) {
+      Object.keys(data.events).forEach((eventIndex) => {
+        const eventData = data.events[eventIndex];
+        const table = document.createElement("table");
+
+        let tableHeader = `
+          <thead>
+            <tr>
+              <th colspan="3">${eventData.eventName}</th>
+            </tr>
+            <tr>
+              <th>Team</th>
+              <th>Contestant Name</th>
+              <th>Position</th>
+            </tr>
+          </thead>
+        `;
+
+        let tableBody = "<tbody>";
+        houseColors.forEach((house, index) => {
+          const houseData = eventData.houses[house] || { name: "", position: 0 };
+          let posDisplay = "Not set";
+          if (houseData.position >= 1 && houseData.position <= 4) {
+            posDisplay = houseData.position;
+            if (houseData.position === 1) posDisplay += "st";
+            else if (houseData.position === 2) posDisplay += "nd";
+            else if (houseData.position === 3) posDisplay += "rd";
+            else posDisplay += "th";
+          }
+          tableBody += `
+            <tr class="${houseClasses[index]}">
+              <td>${house}</td>
+              <td>${houseData.name}</td>
+              <td>${posDisplay}</td>
+            </tr>
+          `;
+        });
+        tableBody += "</tbody>";
+        table.innerHTML = tableHeader + tableBody;
+        eventsContainer.appendChild(table);
+      });
+    }
+  });
+  </script>
+</body>
+</html>

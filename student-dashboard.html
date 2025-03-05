@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #ffffff;
+            --font-color: #333333;
+            --font-family: Arial, sans-serif;
+        }
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+.header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.logo-container {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border: 5px solid #007bff;
+    border-radius: 50%;
+    animation: rotate 50s linear infinite;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo-container img {
+    width: 90%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.school-name {
+    font-size: 2.4em;
+    font-weight: bold;
+    color: #007bff;
+    text-transform: uppercase;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+    letter-spacing: 2px;
+    margin-top: 10px;
+    animation: text3D 1.5s ease-in-out infinite alternate;
+}
+        .btn {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px 15px;
+            font-size: 1.4em;
+            color: var(--secondary-color);
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 10px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes text3D {
+    0% {
+        text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+        transform: scale(1.1);
+    }
+    100% {
+        text-shadow: 2px 2px 20px rgba(0, 0, 0, 0.7);
+        transform: scale(1.2);
+    }
+}
+
+.nav {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.nav a {
+    text-decoration: none;
+    color: #007bff;
+    font-size: 1.1em;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.nav a:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.admin-container {
+    max-width: 900px;
+    width: 100%;
+    padding: 20px;
+    margin: 20px auto;
+    background: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+h2, h3 {
+    text-align: center;
+    color: #444;
+}
+
+form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+}
+
+form input, form select, form button {
+    padding: 10px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+form button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+form button:hover {
+    background-color: #0056b3;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table th, table td {
+    text-align: left;
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+table th {
+    background-color: #f2f2f2;
+}
+
+table tr:hover {
+    background-color: #f9f9f9;
+}
+
+.btn {
+    padding: 5px 10px;
+    font-size: 0.9em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.edit-btn {
+    background-color: #ffc107;
+    color: #fff;
+}
+
+.edit-btn:hover {
+    background-color: #e0a800;
+}
+
+.delete-btn {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.delete-btn:hover {
+    background-color: #bd2130;
+}
+
+@media (max-width: 768px) {
+    .header {
+        margin-bottom: 15px;
+    }
+
+    .logo-container {
+        width: 120px;
+        height: 120px;
+    }
+
+    .school-name {
+        font-size: 1.7em;
+        margin-top: 10px;
+    }
+
+    .nav {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .nav a {
+        font-size: 1.0em;
+    }
+
+    .admin-container {
+        padding: 15px;
+    }
+
+    form {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    form input, form select, form button {
+        width: 100%;
+    }
+
+    table {
+        font-size: 0.9em;
+    }
+}
+
+@media (max-width: 480px) {
+    .school-name {
+        font-size: 1.0em;
+    }
+
+    .logo-container {
+        width: 100px;
+        height: 100px;
+    }
+
+    .nav a {
+        font-size: 1em;
+    }
+}
+    </style>
+
+    <!-- Firebase SDKs for version 9 and above (modular approach) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js";
+        
+        // Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyBXqFTnZqi1Uzo_4k1s-cZrm__eSrUQuV8",
+  authDomain: "home-1e252.firebaseapp.com",
+  projectId: "home-1e252",
+  storageBucket: "home-1e252.firebasestorage.app",
+  messagingSenderId: "702969034430",
+  appId: "1:702969034430:web:47ff6e815f2017fc8f10ef"
+};
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Listen for user authentication state
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const usersCollection = collection(db, "users");
+                const q = query(usersCollection, where("uid", "==", user.uid));
+
+                getDocs(q).then((querySnapshot) => {
+                    if (!querySnapshot.empty) {
+                        const userDoc = querySnapshot.docs[0].data();
+                        const role = userDoc.role;
+                        const name = userDoc.firstName + " " + userDoc.lastName;
+                        const userClass = userDoc.userClass;
+
+document.getElementById("welcomeMessage").innerHTML = `
+  <div style="font-family: 'Arial', sans-serif; font-size: 1.2em; color: #333; text-align: center; margin: 20px 0;">
+    <span style="font-size: 2em; color: #1e90ff; font-weight: bold;">Welcome, ${name}!</span><br>
+
+    <!-- Class Frame -->
+    <div style="display: inline-block; padding: 10px 20px; background-color: #4CAF50; color: white; border-radius: 8px; margin: 10px 0; font-size: 1.0em;">
+      <span>${userClass}</span>
+    </div><br>
+
+  <style>
+    /* Responsive adjustments for smaller screens */
+    @media (max-width: 768px) {
+      #welcomeMessage {
+        font-size: 1.0em;
+      }
+
+      #welcomeMessage span {
+        font-size: 1.0em;
+      }
+
+      #welcomeMessage span:first-child {
+        font-size: 1.0em;
+      }
+
+      #welcomeMessage span:nth-child(2) {
+        font-size: 1.0em;
+      }
+
+      #welcomeMessage span:nth-child(3) {
+        font-size: 1.0em;
+      }
+    }
+
+    @media (max-width: 480px) {
+      #welcomeMessage {
+        font-size: 0.8em;
+      }
+
+      #welcomeMessage span {
+        font-size: 0.8em;
+      }
+
+      #welcomeMessage span:first-child {
+        font-size: 0.8em;
+      }
+
+      #welcomeMessage span:nth-child(2),
+      #welcomeMessage span:nth-child(3) {
+        font-size: 0.8em;
+      }
+    }
+  </style>
+`;
+
+
+
+                        const resourceButton = document.getElementById("exploreResources");
+                        resourceButton.innerText = `Explore your ${userClass} class resources`;
+                        resourceButton.href = getResourceLink(userClass);
+                    }
+                }).catch((error) => {
+                    console.error("Error fetching user data from Firestore: ", error);
+                });
+            } else {
+                window.location.href = "/index";
+            }
+        });
+
+        function getResourceLink(userClass) {
+            let resourceLink = "";
+
+            switch(userClass) {
+                case "Year 1":
+                    resourceLink = "/year1-s.html";
+                    break;
+                case "Year 2":
+                    resourceLink = "/year2-s.html";
+                    break;
+                case "Year 3":
+                    resourceLink = "/year3-s.html";
+                    break;
+                case "Year 4":
+                    resourceLink = "/year4-s.html";
+                    break;
+                case "Year 5":
+                    resourceLink = "/year5-s.html";
+                    break;
+                case "Year 6":
+                    resourceLink = "/year6-s.html";
+                    break;
+                default:
+                    resourceLink = "https://www.example.com/default-resources";
+            }
+
+            return resourceLink;
+        }
+
+        window.logoutUser = function logoutUser() {
+            signOut(auth).then(() => {
+                window.location.href = "index.html";
+            }).catch((error) => {
+                console.error("Error logging out: ", error);
+            });
+        };
+    </script>
+</head>
+<body>
+    <!-- Header with logo and school name -->
+    <div class="header">
+        <!-- Logo -->
+        <div class="logo-container">
+            <img src="https://www.mathcloud.store/logo.png" alt="School Logo">
+        </div>
+        <!-- School Name with 3D effect -->
+        <div class="school-name">Student Dashboard</div>
+        <!-- Navigation Links -->
+        <div class="nav">
+            <a href="index.html">Home</a>
+        </div>
+    </div>
+
+    <!-- Dashboard container -->
+    <div class="dashboard-container">
+        <div id="welcomeMessage"></div>
+
+<style>
+    /* Default button styling */
+    .btn {
+        font-size: 18px; 
+        padding: 10px 20px;
+    }
+    /* Responsive styling for smaller screens */
+    @media (max-width: 600px) {
+        .btn {
+            font-size: 14px; /* Smaller text size */
+            padding: 8px 16px; /* Reduced padding */
+        }
+    }
+</style>
+
+<a id="exploreResources" href="#" class="btn">Explore class resources</a>
+<button onclick="logoutUser()" class="btn">Logout</button>
+    </div>
+</body>
+</html>
