@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Year 5 First Term Lesson Notes Upload</title>
+    <script type="module">
+        // Import Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getDatabase, ref, push, set, remove, onValue, get } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+
+        // Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyB-yDq_hasmJ-feBHqNv7d8TxiIRORw9nE",
+  authDomain: "year5f-ff94c.firebaseapp.com",
+  databaseURL: "https://year5f-ff94c-default-rtdb.firebaseio.com",
+  projectId: "year5f-ff94c",
+  storageBucket: "year5f-ff94c.firebasestorage.app",
+  messagingSenderId: "725619624649",
+  appId: "1:725619624649:web:8752cd00889bb07d41db18"
+};
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Fetch and display uploaded lesson notes based on filters
+        function fetchLessonNotes() {
+            const selectedSubject = document.getElementById('subjectFilter').value;
+            const selectedTopic = document.getElementById('topicFilter').value;
+
+            onValue(ref(database, 'lessonNotes'), (snapshot) => {
+                const lessonList = document.getElementById('lessonList');
+                lessonList.innerHTML = ''; // Clear previous content
+                const lessonNotes = snapshot.val();
+                if (lessonNotes) {
+                    for (const id in lessonNotes) {
+                        const lesson = lessonNotes[id];
+
+                        // Apply filters
+                        if ((selectedSubject === 'All' || lesson.subject === selectedSubject) &&
+                            (selectedTopic === 'All' || lesson.topic === selectedTopic)) {
+
+                            const lessonDiv = document.createElement('div');
+                            lessonDiv.classList.add('lesson');
+
+                            lessonDiv.innerHTML = `
+                                <p><strong>Subject:</strong> ${lesson.subject}</p>
+                                <p><strong>Topic:</strong> ${lesson.topic}</p>
+                                <p><strong>Duration:</strong> ${lesson.duration}</p>
+                                <p><a href="${lesson.link}" target="_blank" class="view-lesson">View Lesson</a></p>
+                                <p><strong>Status:</strong> ${lesson.published ? 'Published' : 'Unpublished'}</p>
+                                <button onclick="editLesson('${id}')">Edit</button>
+                                <button onclick="deleteLesson('${id}')">Delete</button>
+                                <button onclick="togglePublish('${id}', ${lesson.published})">${lesson.published ? 'Unpublish' : 'Publish'}</button>
+                            `;
+                            lessonList.appendChild(lessonDiv);
+                        }
+                    }
+                } else {
+                    lessonList.innerHTML = '<p>No lesson notes uploaded yet.</p>';
+                }
+            });
+        }
+
+        // Trigger lesson notes fetch when filters change
+        document.getElementById('subjectFilter').addEventListener('change', fetchLessonNotes);
+        document.getElementById('topicFilter').addEventListener('change', fetchLessonNotes);
+
+        // Handle form submission
+        document.getElementById('uploadForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const subject = document.getElementById('subject').value;
+            const topic = document.getElementById('topic').value;
+            const duration = document.getElementById('duration').value;
+            const link = document.getElementById('link').value;
+
+            // Validate input fields
+            if (!subject || !topic || !duration || !link) {
+                alert("Please make sure all fields are filled out.");
+                return;
+            }
+
+            // Create a new reference for the lesson note
+            const newLessonRef = push(ref(database, 'lessonNotes'));
+            set(newLessonRef, {
+                subject: subject,
+                topic: topic,
+                duration: duration,
+                link: link,
+                published: false
+            }).then(() => {
+                alert('Lesson Note uploaded successfully');
+                document.getElementById('uploadForm').reset();
+            }).catch((error) => {
+                alert('Error uploading lesson note: ' + error.message);
+            });
+        });
+
+        // Edit lesson function
+        window.editLesson = function(id) {
+            const topic = prompt('Enter new topic:');
+            const duration = prompt('Enter new duration:');
+            const link = prompt('Enter new link:');
+
+            // Ensure user input is not null or empty
+            if (topic && duration && link) {
+                const lessonRef = ref(database, 'lessonNotes/' + id);
+                get(lessonRef).then((snapshot) => {
+                    const lesson = snapshot.val();
+                    set(lessonRef, {
+                        subject: lesson.subject, // Preserve subject
+                        topic: topic,
+                        duration: duration,
+                        link: link,
+                        published: lesson.published // Preserve publish status
+                    }).then(() => {
+                        alert('Lesson updated successfully');
+                    }).catch((error) => {
+                        alert('Error updating lesson: ' + error.message);
+                    });
+                });
+            } else {
+                alert('All fields must be filled out.');
+            }
+        };
+
+        // Delete lesson function
+        window.deleteLesson = function(id) {
+            if (confirm('Are you sure you want to delete this lesson?')) {
+                const lessonRef = ref(database, 'lessonNotes/' + id);
+                remove(lessonRef).then(() => {
+                    alert('Lesson deleted successfully');
+                }).catch((error) => {
+                    alert('Error deleting lesson: ' + error.message);
+                });
+            }
+        };
+
+        // Toggle publish status function
+        window.togglePublish = function(id, currentStatus) {
+            const lessonRef = ref(database, 'lessonNotes/' + id);
+
+            // Fetch lesson data once using get()
+            get(lessonRef).then((snapshot) => {
+                const lesson = snapshot.val();
+
+                if (lesson) {
+                    set(lessonRef, {
+                        ...lesson, // Preserve other fields
+                        published: !currentStatus
+                    }).then(() => {
+                        alert(`Lesson ${currentStatus ? 'unpublished' : 'published'} successfully`);
+                    }).catch((error) => {
+                        alert('Error toggling publish status: ' + error.message);
+                    });
+                } else {
+                    alert('Lesson not found.');
+                }
+            }).catch((error) => {
+                alert('Error fetching lesson data: ' + error.message);
+            });
+        };
+
+        // Initial lesson notes fetch when page loads
+        window.onload = fetchLessonNotes;
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .logo img {
+            max-width: 120px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input, select, button {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #lessonList {
+            margin-top: 20px;
+        }
+
+        .lesson {
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .lesson p {
+            margin: 5px 0;
+        }
+
+        .lesson button {
+            margin-right: 5px;
+        }
+
+        .view-lesson {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .view-lesson:hover {
+            text-decoration: underline;
+        }
+
+        .filters {
+            display: flex; /* Flexbox layout for the container */
+            justify-content: space-between; /* Space items on both sides */
+            margin-bottom: 20px;
+        }
+
+        .filter-left, .filter-right {
+            display: flex;
+            flex-direction: column; /* Stack the label and select vertically */
+            padding: 10px;
+        }
+
+        label {
+            margin-bottom: 5px;
+        }
+
+        .filters select {
+            padding: 10px;
+            font-size: 16px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="logo.png" alt="Orli International Academy Logo">
+        </div>
+        <h1>Year 5 First Term - Lesson Notes Upload</h1>
+        <form id="uploadForm">
+            <div class="form-group">
+                <label for="class">Class:</label>
+                <input type="text" id="class" value="Year 5 First Term" disabled>
+            </div>
+            <div class="form-group">
+                <label for="subject">Subject:</label>
+                <select id="subject">
+<option value="Science">Science</option>
+<option value="Home Economics">Home Economics</option>
+<option value="Geography">Geography</option>
+<option value="Agricultural Science">Agricultural Science</option>
+<option value="Mathematics">Mathematics</option>
+<option value="Civic Education">Civic Education</option>
+<option value="English Studies">English Studies</option>
+<option value="History">History</option>
+<option value="Religious Studies (CRS/IRS)">Religious Studies (CRS/IRS)</option>
+<option value="Information and Communication Technology">Information and Communication Technology</option>
+<option value="Personal Social and Health Education (PSHE)">Personal Social and Health Education (PSHE)</option>
+<option value="General Knowledge">General Knowledge</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="topic">Topic:</label>
+                <input type="text" id="topic" required>
+            </div>
+            <div class="form-group">
+                <label for="duration">Duration:</label>
+                <input type="text" id="duration" required>
+            </div>
+            <div class="form-group">
+                <label for="link">Upload Link:</label>
+                <input type="url" id="link" placeholder="Enter Google Docs link" required>
+            </div>
+            <button type="submit">Upload to Your class</button>
+        </form>
+
+        <h2>Filters</h2>
+        <div class="filters">
+            <div class="filter-left">
+                <label for="subjectFilter">Filter by Subject:</label>
+                <select id="subjectFilter">
+                    <option value="All">All</option>
+<option value="Science">Science</option>
+<option value="Home Economics">Home Economics</option>
+<option value="Geography">Geography</option>
+<option value="Agricultural Science">Agricultural Science</option>
+<option value="Mathematics">Mathematics</option>
+<option value="Civic Education">Civic Education</option>
+<option value="English Studies">English Studies</option>
+<option value="History">History</option>
+<option value="Religious Studies (CRS/IRS)">Religious Studies (CRS/IRS)</option>
+<option value="Information and Communication Technology">Information and Communication Technology</option>
+<option value="Personal Social and Health Education (PSHE)">Personal Social and Health Education (PSHE)</option>
+<option value="General Knowledge">General Knowledge</option>
+                </select>
+            </div>
+            <div class="filter-right">
+                <label for="topicFilter">Filter by Topic:</label>
+                <select id="topicFilter">
+                    <option value="All">All</option>
+                    <!-- Dynamically generated topics will appear here -->
+                </select>
+            </div>
+        </div>
+
+        <h2>Uploaded Lesson Notes</h2>
+        <div id="lessonList"></div>
+    </div>
+</body>
+</html>

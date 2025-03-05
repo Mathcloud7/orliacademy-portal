@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Published Lesson Notes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        select {
+            padding: 5px;
+            margin: 10px;
+        }
+
+        .lesson {
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #e9f5ff;
+            border-radius: 4px;
+        }
+
+        .lesson button {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .lesson button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Published Lesson Notes</h1>
+
+        <!-- Filters -->
+        <label for="subjectFilter">Subject:</label>
+        <select id="subjectFilter">
+            <option value="All">All</option>
+        </select>
+
+        <label for="topicFilter">Topic:</label>
+        <select id="topicFilter">
+            <option value="All">All</option>
+        </select>
+
+        <!-- List of lessons -->
+        <div id="lessonList"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCW6TYLuKrj2HXoWTeBK8FiZ9-twKZNugI",
+  authDomain: "year5t.firebaseapp.com",
+  databaseURL: "https://year5t-default-rtdb.firebaseio.com",
+  projectId: "year5t",
+  storageBucket: "year5t.firebasestorage.app",
+  messagingSenderId: "1083265819906",
+  appId: "1:1083265819906:web:15c1289e1b1e8be5b50e1b"
+};
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        let lessonNotes = {}; // Store all lesson notes fetched from Firebase
+        let allSubjects = new Set(); // Set of all unique subjects
+        let allTopics = new Set(); // Set of all unique topics
+
+        // Fetch lesson notes and apply filters
+        function fetchLessonNotes() {
+            const subjectFilter = document.getElementById('subjectFilter').value;
+            const topicFilter = document.getElementById('topicFilter').value;
+
+            onValue(ref(database, 'lessonNotes'), (snapshot) => {
+                const lessonList = document.getElementById('lessonList');
+                lessonList.innerHTML = ''; // Clear the current list
+                lessonNotes = snapshot.val() || {}; // Get lesson notes from Firebase
+
+                // Reset the filter sets for subjects and topics
+                allSubjects.clear();
+                allTopics.clear();
+
+                // Populate the subject and topic sets
+                Object.values(lessonNotes).forEach(note => {
+                    if (note.published) {
+                        allSubjects.add(note.subject);
+                        allTopics.add(note.topic);
+                    }
+                });
+
+                // Populate subject filter dropdown
+                const subjectFilterElement = document.getElementById('subjectFilter');
+                subjectFilterElement.innerHTML = '<option value="All">All</option>';
+                allSubjects.forEach(subject => {
+                    const option = document.createElement('option');
+                    option.value = subject;
+                    option.textContent = subject;
+                    subjectFilterElement.appendChild(option);
+                });
+
+                // Populate topic filter dropdown
+                const topicFilterElement = document.getElementById('topicFilter');
+                topicFilterElement.innerHTML = '<option value="All">All</option>';
+                allTopics.forEach(topic => {
+                    const option = document.createElement('option');
+                    option.value = topic;
+                    option.textContent = topic;
+                    topicFilterElement.appendChild(option);
+                });
+
+                // Apply the filter logic and display filtered lessons
+                const filteredNotes = Object.entries(lessonNotes).filter(([id, note]) => {
+                    return (subjectFilter === 'All' || note.subject === subjectFilter) &&
+                        (topicFilter === 'All' || note.topic === topicFilter) &&
+                        note.published; // Only show published notes
+                });
+
+                // Render the filtered notes
+                if (filteredNotes.length > 0) {
+                    filteredNotes.forEach(([id, note]) => {
+                        const lessonDiv = document.createElement('div');
+                        lessonDiv.classList.add('lesson');
+                        lessonDiv.innerHTML = `
+                            <h3>${note.subject} - ${note.topic}</h3>
+                            <p><strong>Duration:</strong> ${note.duration}</p>
+                            <button onclick="viewLesson('${id}')">Click to View</button>
+                        `;
+                        lessonList.appendChild(lessonDiv);
+                    });
+                } else {
+                    lessonList.innerHTML = '<p>No published lesson notes found.</p>';
+                }
+            });
+        }
+
+        // Apply filters and update the displayed lessons
+        function applyFilters() {
+            fetchLessonNotes(); // Re-fetch lesson notes with the new filter applied
+        }
+
+        // View lesson page
+        window.viewLesson = function(id) {
+            const lesson = lessonNotes[id];
+            const viewPageContent = `
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>${lesson.subject} - ${lesson.topic}</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            margin: 0;
+                            padding: 0;
+                            background-color: #f4f4f9;
+                            color: #333;
+                        }
+                        .container {
+                            max-width: 800px;
+                            margin: 20px auto;
+                            padding: 20px;
+                            background: #fff;
+                            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                            border-radius: 8px;
+                        }
+                        h1 {
+                            text-align: center;
+                        }
+                        .back-button {
+                            display: block;
+                            margin: 20px auto;
+                            padding: 10px 20px;
+                            font-size: 16px;
+                            color: white;
+                            background-color: #4caf50;
+                            border: none;
+                            border-radius: 4px;
+                            text-align: center;
+                            cursor: pointer;
+                            text-decoration: none;
+                        }
+                        .back-button:hover {
+                            background-color: #45a049;
+                        }
+                        iframe {
+                            width: 100%;
+                            height: 500px;
+                            border: none;
+                            margin-top: 20px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <h1>${lesson.subject} - ${lesson.topic}</h1>
+                        <p><strong>Duration:</strong> ${lesson.duration}</p>
+                        <p><strong>Class:</strong> Year 5 Third Term - Lesson Notes</p>
+                        <a href="javascript:window.history.back()" class="back-button">Back to Published Notes</a>
+                        <iframe src="${lesson.link}"></iframe>
+                    </div>
+                </body>
+                </html>
+            `;
+
+            const newWindow = window.open('', '_blank');
+            newWindow.document.write(viewPageContent);
+            newWindow.document.close();
+        };
+
+        // Initialize the lesson notes fetch on page load
+        window.onload = fetchLessonNotes;
+
+        // Attach event listeners to filter changes
+        document.getElementById('subjectFilter').addEventListener('change', applyFilters);
+        document.getElementById('topicFilter').addEventListener('change', applyFilters);
+    </script>
+</body>
+
+</html>
