@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Year 1 Live Class Page for Orli International School">
+    <meta name="author" content="Orli International School">
+    <title>Orli International School</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        /* Header with logo and school name */
+        .header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .logo-container {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border: 5px solid #007bff;
+            border-radius: 50%;
+            animation: rotate 50s linear infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-container img {
+            width: 90%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        /* School name with 3D effect */
+        .school-name {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #007bff;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+            letter-spacing: 2px;
+            margin-top: 10px;
+            animation: text3D 1.5s ease-in-out infinite alternate;
+        }
+
+        /* Keyframe animation for logo rotation */
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Keyframe animation for 3D text effect */
+        @keyframes text3D {
+            0% {
+                text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+                transform: scale(1.1);
+            }
+            100% {
+                text-shadow: 2px 2px 20px rgba(0, 0, 0, 0.7);
+                transform: scale(1.2);
+            }
+        }
+
+        /* Media Queries for responsiveness */
+        @media (max-width: 768px) {
+            .logo-container {
+                width: 120px;
+                height: 120px;
+            }
+
+            .school-name {
+                font-size: 1.4em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .school-name {
+                font-size: 1.0em;
+            }
+        }
+
+        .welcome-message {
+            font-size: 2.2em;
+            color: #4CAF50;
+            margin-top: 15px;
+        }
+
+        .instructions {
+            font-size: 1.2em;
+            margin: 20px;
+        }
+
+        .buttons-container {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 50px;
+            margin-bottom: 80px;
+            flex-wrap: wrap;
+        }
+
+        .button {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background-color: #FFB74D;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            font-size: 1.5em;
+            color: #4CAF50;
+            transition: transform 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center; /* Ensures horizontal text alignment */
+            line-height: 1.2; /* Fine-tuning vertical alignment */
+        }
+
+        .button:hover {
+            transform: scale(1.1);
+        }
+
+        footer {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        footer p {
+            margin: 0;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header with rotating logo and 3D school name -->
+    <div class="header">
+        <div class="logo-container">
+            <!-- Add your logo here -->
+            <img src="logo.png" alt="School Logo">
+        </div>
+        <div class="school-name">Orli International Academy</div>
+    </div>
+
+    <div class="welcome-message">
+        Year 1 Results
+    </div>
+
+    <div class="instructions">
+        Click on the buttons below to select the term results.
+    </div>
+
+    <div class="buttons-container">
+        <a href="year1-first-term-results.html" class="button" target="_blank">
+            FIRST TERM
+        </a>
+        <a href="year1-second-term-results.html" class="button" target="_blank">
+            SECOND TERM
+        </a>
+        <a href="year1-third-term-results.html" class="button" target="_blank">
+            THIRD TERM
+        </a>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Orli International Academy. All Rights Reserved.</p>
+    </footer>
+</body>
+
+</html>
