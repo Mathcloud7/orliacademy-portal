@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orli International Academy - Section B View</title>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDT8o0g9464UFY0v86HfXRHqRZb-45Q2UU",
+  authDomain: "year2t-c8474.firebaseapp.com",
+  projectId: "year2t-c8474",
+  storageBucket: "year2t-c8474.firebasestorage.app",
+  messagingSenderId: "567262351040",
+  appId: "1:567262351040:web:78bff4e23278a3d479a725"
+};
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        let files = {};
+
+        function renderFiles(filteredFiles) {
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+
+            if (Object.keys(filteredFiles).length > 0) {
+                for (const id in filteredFiles) {
+                    const file = filteredFiles[id];
+                    const fileDiv = document.createElement('div');
+                    fileDiv.classList.add('file');
+
+                    fileDiv.innerHTML = `
+                        <h3>${file.subject}</h3>
+                        <p><strong>Type:</strong> ${file.type}</p>
+                        <button onclick="viewFile('${id}', '${file.subject}', '${file.type}', '${file.link}')">Click to View</button>
+                    `;
+                    fileList.appendChild(fileDiv);
+                }
+            } else {
+                fileList.innerHTML = '<p>No files match the selected filters.</p>';
+            }
+        }
+
+        function applyFilters() {
+            const subjectFilter = document.getElementById('subjectFilter').value;
+            const typeFilter = document.getElementById('typeFilter').value;
+
+            const filteredFiles = Object.fromEntries(Object.entries(files).filter(([id, file]) => {
+                return (subjectFilter === 'all' || file.subject === subjectFilter) &&
+                       (typeFilter === 'all' || file.type === typeFilter);
+            }));
+
+            renderFiles(filteredFiles);
+        }
+
+        // Make applyFilters globally accessible
+        window.applyFilters = applyFilters;
+
+        onValue(ref(database, 'files'), (snapshot) => {
+            files = snapshot.val() || {};
+            populateFilters();
+            applyFilters();
+        });
+
+
+        onValue(ref(database, 'files'), (snapshot) => {
+            files = snapshot.val() || {};
+            populateFilters();
+            applyFilters();
+        });
+
+        function populateFilters() {
+            const subjectSet = new Set(['all']);
+            const typeSet = new Set(['all']);
+
+            for (const id in files) {
+                const file = files[id];
+                subjectSet.add(file.subject);
+                typeSet.add(file.type);
+            }
+
+            const subjectFilter = document.getElementById('subjectFilter');
+            const typeFilter = document.getElementById('typeFilter');
+
+            subjectFilter.innerHTML = Array.from(subjectSet).map(subject => `<option value="${subject}">${subject}</option>`).join('');
+            typeFilter.innerHTML = Array.from(typeSet).map(type => `<option value="${type}">${type}</option>`).join('');
+        }
+
+        window.viewFile = function(id, subject, type, link) {
+            const viewPageContent = `<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>${subject} - ${type}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .back-button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #4caf50;
+            border: none;
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .back-button:hover {
+            background-color: #45a049;
+        }
+        iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <h1>${subject}</h1>
+        <p><strong>Type:</strong> ${type}</p>
+        <p><strong>Class:</strong> Third Term - Section B</p>
+        <a href="year2-third-term-theory-view.html" class="back-button">Back to Published Files</a>
+        <iframe src='${link}'></iframe>
+    </div>
+</body>
+</html>`;
+
+            const newWindow = window.open('', '_blank');
+            newWindow.document.write(viewPageContent);
+            newWindow.document.close();
+        };
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .filters {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .filters select {
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        #fileList {
+            margin-top: 20px;
+        }
+
+        .file {
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .file h3 {
+            margin: 5px 0;
+        }
+
+        .file button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .file button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Third Term - Section B Published Files</h1>
+        <div class="filters">
+            <select id="subjectFilter" onchange="applyFilters()">
+                <option value="all">All Subjects</option>
+            </select>
+            <select id="typeFilter" onchange="applyFilters()">
+                <option value="all">All Types</option>
+            </select>
+        </div>
+        <div id="fileList"></div>
+    </div>
+</body>
+</html>
