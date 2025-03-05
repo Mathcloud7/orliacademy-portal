@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CBT Assessment Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 15px;
+        }
+
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .results-list {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .detailed-result {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #e7f3e7;
+        }
+
+        .correct {
+            color: green;
+        }
+
+        .incorrect {
+            color: red;
+        }
+
+        .question-frame {
+            border: 2px solid #ddd;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        .filter-buttons {
+            margin-bottom: 20px;
+        }
+
+        .filter-buttons select {
+            padding: 10px;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+    /* Footer styling */
+    footer {
+      bottom: 0;
+      width: 100%;
+      background-color: #007bff;
+      color: white;
+      text-align: center;
+      padding: 12px 0;
+      margin-top: 20px;
+    }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>CBT Assessment Results</h1>
+    </header>
+
+    <div class="container">
+        <div id="filterSection" class="filter-buttons">
+            <select id="subjectFilter" onchange="onSubjectChange()">
+                <option value="">Select Subject</option>
+                <!-- Subject options will be populated here -->
+            </select>
+            <select id="assessmentTypeFilter" onchange="onAssessmentTypeChange()" disabled>
+                <option value="">Select Assessment Type</option>
+                <!-- Assessment type options will be populated here -->
+            </select>
+        </div>
+
+        <div id="resultsOverview">
+            <h2>Assessment Results</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Class</th>
+                        <th>Subject</th>
+                        <th>Student</th>
+                        <th>Score (%)</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsOverviewBody">
+                    <!-- Results Overview will be listed here -->
+                </tbody>
+            </table>
+        </div>
+
+        <div id="detailedResultContainer" class="detailed-result" style="display: none;">
+            <h3>ORLI INT'L ACADEMY - STUDENT'S ASSESSMENT</h3>
+            <div id="detailedResults"></div>
+            <button onclick="backToOverview()">Back to Overview</button>
+        </div>
+    </div>
+  <!-- Footer Section -->
+  <footer>
+    Orli International Academy &copy; 2024
+  </footer>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD4JRePybUbET67loPNw8VHNAIPcnHadXw",
+  authDomain: "year3s.firebaseapp.com",
+  projectId: "year3s",
+  storageBucket: "year3s.firebasestorage.app",
+  messagingSenderId: "676329764620",
+  appId: "1:676329764620:web:a9f4436324e2e40f88fb29"
+};
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    window.onload = displayResultsOverview;
+    window.viewDetailedResult = viewDetailedResult;
+    window.backToOverview = backToOverview;
+    window.filterResultsBySubjectAndType = filterResultsBySubjectAndType;
+    window.onSubjectChange = onSubjectChange;
+    window.onAssessmentTypeChange = onAssessmentTypeChange;
+
+    let allResults = [];  // Store all results for later use
+    let filteredResults = []; // Store filtered results based on subject and assessment type
+
+    // Function to display results overview
+    function displayResultsOverview() {
+        const resultsRef = ref(db, 'results');
+        get(resultsRef).then((snapshot) => {
+            const tableBody = document.getElementById('resultsOverviewBody');
+            tableBody.innerHTML = ''; 
+            if (snapshot.exists()) {
+                snapshot.forEach(resultSnapshot => {
+                    const resultData = resultSnapshot.val();
+                    resultData.id = resultSnapshot.key;  // Add unique ID for later reference
+                    allResults.push(resultData); // Store results to filter them later
+                });
+
+                // Generate subject buttons
+                const subjects = [...new Set(allResults.map(result => result.assessmentSubject))];
+                const subjectFilter = document.getElementById('subjectFilter');
+                subjectFilter.innerHTML = '<option value="">Select Subject</option>'; // Reset options
+                subjects.forEach(subject => {
+                    const option = document.createElement('option');
+                    option.value = subject;
+                    option.textContent = subject;
+                    subjectFilter.appendChild(option);
+                });
+            } else {
+                alert("No results found.");
+            }
+        }).catch((error) => {
+            console.error("Error retrieving results:", error);
+            alert("Error retrieving results. Please check your connection.");
+        });
+    }
+
+    // Function to calculate percentage score
+    function calculatePercentage(answers) {
+        let correctAnswers = 0;
+        answers.forEach(answer => {
+            if (answer.selectedAnswer === answer.correctAnswer) {
+                correctAnswers++;
+            }
+        });
+        return (correctAnswers / answers.length) * 100;
+    }
+
+    // Function to view detailed result for a specific student
+    function viewDetailedResult(resultId) {
+        const resultRef = ref(db, 'results/' + resultId);
+        get(resultRef).then((snapshot) => {
+            if (snapshot.exists()) {
+                const resultData = snapshot.val();
+                displayDetailedResult(resultData);
+            } else {
+                alert("Result not found.");
+            }
+        }).catch((error) => {
+            console.error("Error loading result:", error);
+            alert("Error loading result.");
+        });
+    }
+
+    // Function to display detailed result
+    function displayDetailedResult(resultData) {
+        const detailedContainer = document.getElementById('detailedResults');
+        detailedContainer.innerHTML = `
+            <h3>${resultData.assessmentName} - ${resultData.studentName}</h3>
+            <p>Class: ${resultData.assessmentClass}</p>
+            <p>Subject: ${resultData.assessmentSubject}</p>
+            <p><strong>Score: ${calculatePercentage(resultData.answers)}%</strong></p>
+            <p><strong>Answers:</strong></p>
+        `;
+
+        resultData.answers.forEach((answer, index) => {
+            const question = `
+                <div class="question-frame">
+                    <p><strong>Q${index + 1}: </strong>${answer.question}</p>
+                    <p><strong>Options:</strong></p>
+                    <p>A) ${answer.options.A}</p>
+                    <p>B) ${answer.options.B}</p>
+                    <p>C) ${answer.options.C}</p>
+                    <p>D) ${answer.options.D}</p>
+                    <p><strong>Your Answer:</strong> ${answer.selectedAnswer}</p>
+                    <p class="${answer.selectedAnswer === answer.correctAnswer ? 'correct' : 'incorrect'}"><strong>Correct Answer:</strong> ${answer.correctAnswer}</p>
+                </div>
+            `;
+            detailedContainer.innerHTML += question;
+        });
+
+        document.getElementById('resultsOverview').style.display = 'none';
+        document.getElementById('detailedResultContainer').style.display = 'block';
+    }
+
+    // Function to filter results by subject and assessment type
+    function filterResultsBySubjectAndType() {
+        const selectedSubject = document.getElementById('subjectFilter').value;
+        const selectedAssessmentType = document.getElementById('assessmentTypeFilter').value;
+
+        filteredResults = allResults.filter(result => {
+            const matchesSubject = selectedSubject ? result.assessmentSubject === selectedSubject : true;
+            const matchesAssessmentType = selectedAssessmentType ? result.assessmentName === selectedAssessmentType : true;
+            return matchesSubject && matchesAssessmentType;
+        });
+
+        displayFilteredResults();
+    }
+
+    // Function to handle subject change
+    function onSubjectChange() {
+        const selectedSubject = document.getElementById('subjectFilter').value;
+        const assessmentTypeFilter = document.getElementById('assessmentTypeFilter');
+
+        // Filter assessment types based on the selected subject
+        const assessmentTypes = [...new Set(allResults.filter(result => result.assessmentSubject === selectedSubject).map(result => result.assessmentName))];
+        assessmentTypeFilter.innerHTML = '<option value="">Select Assessment Type</option>'; // Reset options
+
+        assessmentTypes.forEach(type => {
+            const option = document.createElement('option');
+            option.value = type;
+            option.textContent = type;
+            assessmentTypeFilter.appendChild(option);
+        });
+
+        // Enable the assessment type filter once a subject is selected
+        assessmentTypeFilter.disabled = selectedSubject === '';
+    }
+
+    // Function to handle assessment type change
+    function onAssessmentTypeChange() {
+        filterResultsBySubjectAndType();
+    }
+
+    // Function to display filtered results
+    function displayFilteredResults() {
+        const tableBody = document.getElementById('resultsOverviewBody');
+        tableBody.innerHTML = '';
+        filteredResults.forEach(resultData => {
+            tableBody.innerHTML += `
+                <tr>
+                    <td>${resultData.assessmentName}</td>
+                    <td>${resultData.assessmentClass}</td>
+                    <td>${resultData.assessmentSubject}</td>
+                    <td>${resultData.studentName}</td>
+                    <td>${calculatePercentage(resultData.answers)}%</td>
+                    <td><button onclick="viewDetailedResult('${resultData.id}')">View Details</button></td>
+                </tr>
+            `;
+        });
+    }
+
+    // Function to go back to the results overview
+    function backToOverview() {
+        document.getElementById('resultsOverview').style.display = 'block';
+        document.getElementById('detailedResultContainer').style.display = 'none';
+    }
+</script>
+</body>
+</html>

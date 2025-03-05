@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orli International Academy - Theory Upload</title>
+<script type="module">
+    // Import Firebase SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+    import { getDatabase, ref, push, set, remove, onValue, get } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+
+    // Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyCXLVtpA7HmGE3i2zfhcGSBcQDR0zapxG0",
+  authDomain: "year3t-a8e15.firebaseapp.com",
+  projectId: "year3t-a8e15",
+  storageBucket: "year3t-a8e15.firebasestorage.app",
+  messagingSenderId: "927192490310",
+  appId: "1:927192490310:web:5ed5f2147b2d8f05ef0547"
+};
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // Fetch and display uploaded files based on filters
+    function fetchFiles() {
+        const selectedSubject = document.getElementById('subjectFilter').value;
+        const selectedType = document.getElementById('typeFilter').value;
+
+        onValue(ref(database, 'files'), (snapshot) => {
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = ''; // Clear previous content
+            const files = snapshot.val();
+            if (files) {
+                for (const id in files) {
+                    const file = files[id];
+
+                    // Apply filters
+                    if ((selectedSubject === 'All' || file.subject === selectedSubject) &&
+                        (selectedType === 'All' || file.type === selectedType)) {
+
+                        const fileDiv = document.createElement('div');
+                        fileDiv.classList.add('file');
+
+                        fileDiv.innerHTML = `
+                            <p><strong>Subject:</strong> ${file.subject}</p>
+                            <p><strong>Type:</strong> ${file.type}</p>
+                            <p><a href="${file.link}" target="_blank" class="view-file">View File</a></p>
+                            <p><strong>Status:</strong> ${file.published ? 'Published' : 'Unpublished'}</p>
+                            <button onclick="editFile('${id}')">Edit</button>
+                            <button onclick="deleteFile('${id}')">Delete</button>
+                            <button onclick="togglePublish('${id}', ${file.published})">${file.published ? 'Unpublish' : 'Publish'}</button>
+                        `;
+                        fileList.appendChild(fileDiv);
+                    }
+                }
+            } else {
+                fileList.innerHTML = '<p>No files uploaded yet.</p>';
+            }
+        });
+    }
+
+    // Trigger file fetch when filters change
+    document.getElementById('subjectFilter').addEventListener('change', fetchFiles);
+    document.getElementById('typeFilter').addEventListener('change', fetchFiles);
+
+    // Handle form submission
+    document.getElementById('uploadForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const subject = document.getElementById('subject').value;
+        const type = document.getElementById('type').value;
+        const link = document.getElementById('link').value;
+
+        // Validate input fields
+        if (!subject || !type || !link) {
+            alert("Please make sure all fields are filled out.");
+            return;
+        }
+
+        // Create a new reference for the file
+        const newFileRef = push(ref(database, 'files'));
+        set(newFileRef, {
+            subject: subject,
+            type: type,
+            link: link,
+            published: false
+        }).then(() => {
+            alert('File uploaded successfully');
+            document.getElementById('uploadForm').reset();
+        }).catch((error) => {
+            alert('Error uploading file: ' + error.message);
+        });
+    });
+
+    // Edit file function
+    window.editFile = function(id) {
+        const subject = prompt('Enter new subject:');
+        const type = prompt('Enter new type:');
+        const link = prompt('Enter new link:');
+
+        // Ensure user input is not null or empty
+        if (subject && type && link) {
+            const fileRef = ref(database, 'files/' + id);
+            get(fileRef).then((snapshot) => {
+                const file = snapshot.val();
+                set(fileRef, {
+                    subject: subject,
+                    type: type,
+                    link: link,
+                    published: file.published // Preserve publish status
+                }).then(() => {
+                    alert('File updated successfully');
+                }).catch((error) => {
+                    alert('Error updating file: ' + error.message);
+                });
+            });
+        } else {
+            alert('All fields must be filled out.');
+        }
+    };
+
+    // Delete file function
+    window.deleteFile = function(id) {
+        if (confirm('Are you sure you want to delete this file?')) {
+            const fileRef = ref(database, 'files/' + id);
+            remove(fileRef).then(() => {
+                alert('File deleted successfully');
+            }).catch((error) => {
+                alert('Error deleting file: ' + error.message);
+            });
+        }
+    };
+
+    // Toggle publish status function
+    window.togglePublish = function(id, currentStatus) {
+        const fileRef = ref(database, 'files/' + id);
+
+        // Fetch file data once using get()
+        get(fileRef).then((snapshot) => {
+            const file = snapshot.val();
+
+            if (file) {
+                set(fileRef, {
+                    ...file, // Preserve other fields
+                    published: !currentStatus
+                }).then(() => {
+                    alert(`File ${currentStatus ? 'unpublished' : 'published'} successfully`);
+                }).catch((error) => {
+                    alert('Error toggling publish status: ' + error.message);
+                });
+            } else {
+                alert('File not found.');
+            }
+        }).catch((error) => {
+            alert('Error fetching file data: ' + error.message);
+        });
+    };
+
+    // Initial file fetch when page loads
+    window.onload = fetchFiles;
+</script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .logo img {
+            max-width: 120px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input, select, button {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #fileList {
+            margin-top: 20px;
+        }
+
+        .file {
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .file p {
+            margin: 5px 0;
+        }
+
+        .file button {
+            margin-right: 5px;
+        }
+
+        .view-file {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .view-file:hover {
+            text-decoration: underline;
+        }
+.filters {
+    display: flex; /* Flexbox layout for the container */
+    justify-content: space-between; /* Space items on both sides */
+    margin-bottom: 20px;
+}
+
+.filter-left, .filter-right {
+    display: flex;
+    flex-direction: column; /* Stack the label and select vertically */
+    padding: 10px;
+}
+
+label {
+    margin-bottom: 5px;
+}
+
+        .filters select {
+            padding: 10px;
+            font-size: 16px;
+        }
+    /* Footer styling */
+    footer {
+      bottom: 0;
+      width: 100%;
+      background-color: #007bff;
+      color: white;
+      text-align: center;
+      padding: 12px 0;
+      margin-top: 20px;
+    }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="logo.png" alt="Orli International Academy Logo">
+        </div>
+        <h1>Year 3 Third Term - Theory Upload</h1>
+        <form id="uploadForm">
+            <div class="form-group">
+                <label for="class">Class:</label>
+                <input type="text" id="class" value="Year 3 Third Term" disabled>
+            </div>
+            <div class="form-group">
+                <label for="subject">Subject:</label>
+                <select id="subject">
+<option value="Science">Science</option>
+<option value="Home Economics">Home Economics</option>
+<option value="Geography">Geography</option>
+<option value="Agricultural Science">Agricultural Science</option>
+<option value="Mathematics">Mathematics</option>
+<option value="Civic Education">Civic Education</option>
+<option value="English Studies">English Studies</option>
+<option value="History">History</option>
+<option value="Religious Studies (CRS/IRS)">Religious Studies (CRS/IRS)</option>
+<option value="Information and Communication Technology">Information and Communication Technology</option>
+<option value="Personal Social and Health Education (PSHE)">Personal Social and Health Education (PSHE)</option>
+<option value="General Knowledge">General Knowledge</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="type">Type:</label>
+                <select id="type">
+                    <option value="Examination">Examination</option>
+                    <option value="CA1">CA1</option>
+                    <option value="CA2">CA2</option>
+                    <option value="CA3">CA3</option>
+                    <option value="Assignment">Assignment</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="link">Upload Link:</label>
+                <input type="url" id="link" placeholder="Enter Google Docs link" required>
+            </div>
+            <button type="submit">Upload to your Students</button>
+        </form>
+
+<h2>Filters</h2>
+<div class="filters">
+    <div class="filter-left">
+        <label for="subjectFilter">Filter by Subject:</label>
+        <select id="subjectFilter">
+            <option value="All">All</option>
+<option value="Science">Science</option>
+<option value="Home Economics">Home Economics</option>
+<option value="Geography">Geography</option>
+<option value="Agricultural Science">Agricultural Science</option>
+<option value="Mathematics">Mathematics</option>
+<option value="Civic Education">Civic Education</option>
+<option value="English Studies">English Studies</option>
+<option value="History">History</option>
+<option value="Religious Studies (CRS/IRS)">Religious Studies (CRS/IRS)</option>
+<option value="Information and Communication Technology">Information and Communication Technology</option>
+<option value="Personal Social and Health Education (PSHE)">Personal Social and Health Education (PSHE)</option>
+<option value="General Knowledge">General Knowledge</option>
+        </select>
+    </div>
+    <div class="filter-right">
+        <label for="typeFilter">Filter by Type:</label>
+        <select id="typeFilter">
+            <option value="All">All</option>
+            <option value="Examination">Examination</option>
+            <option value="CA1">CA1</option>
+            <option value="CA2">CA2</option>
+            <option value="CA3">CA3</option>
+            <option value="Assignment">Assignment</option>
+        </select>
+    </div>
+</div>
+
+
+        <h2>Uploaded Files</h2>
+        <div id="fileList"></div>
+    </div>
+  <!-- Footer Section -->
+  <footer>
+    Orli International Academy &copy; 2024
+  </footer>
+</body>
+</html>
