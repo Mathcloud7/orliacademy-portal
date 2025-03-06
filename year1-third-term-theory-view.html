@@ -17,6 +17,7 @@ const firebaseConfig = {
   appId: "1:463997299074:web:354209af1182ab7a53c79b"
 };
 
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
@@ -29,18 +30,22 @@ const firebaseConfig = {
             if (Object.keys(filteredFiles).length > 0) {
                 for (const id in filteredFiles) {
                     const file = filteredFiles[id];
-                    const fileDiv = document.createElement('div');
-                    fileDiv.classList.add('file');
 
-                    fileDiv.innerHTML = `
-                        <h3>${file.subject}</h3>
-                        <p><strong>Type:</strong> ${file.type}</p>
-                        <button onclick="viewFile('${id}', '${file.subject}', '${file.type}', '${file.link}')">Click to View</button>
-                    `;
-                    fileList.appendChild(fileDiv);
+                    // Display only published files
+                    if (file.published) {
+                        const fileDiv = document.createElement('div');
+                        fileDiv.classList.add('file');
+
+                        fileDiv.innerHTML = `
+                            <h3>${file.subject}</h3>
+                            <p><strong>Type:</strong> ${file.type}</p>
+                            <button onclick="viewFile('${file.subject}', '${file.type}', '${file.link}')">Click to View</button>
+                        `;
+                        fileList.appendChild(fileDiv);
+                    }
                 }
             } else {
-                fileList.innerHTML = '<p>No files match the selected filters.</p>';
+                fileList.innerHTML = '<p>No published files available.</p>';
             }
         }
 
@@ -48,24 +53,18 @@ const firebaseConfig = {
             const subjectFilter = document.getElementById('subjectFilter').value;
             const typeFilter = document.getElementById('typeFilter').value;
 
-            const filteredFiles = Object.fromEntries(Object.entries(files).filter(([id, file]) => {
-                return (subjectFilter === 'all' || file.subject === subjectFilter) &&
+            const filteredFiles = Object.fromEntries(Object.entries(files).filter(([_, file]) => {
+                return file.published &&
+                       (subjectFilter === 'all' || file.subject === subjectFilter) &&
                        (typeFilter === 'all' || file.type === typeFilter);
             }));
 
             renderFiles(filteredFiles);
         }
 
-        // Make applyFilters globally accessible
         window.applyFilters = applyFilters;
 
-        onValue(ref(database, 'files'), (snapshot) => {
-            files = snapshot.val() || {};
-            populateFilters();
-            applyFilters();
-        });
-
-
+        // Fetch files and update filters
         onValue(ref(database, 'files'), (snapshot) => {
             files = snapshot.val() || {};
             populateFilters();
@@ -78,68 +77,33 @@ const firebaseConfig = {
 
             for (const id in files) {
                 const file = files[id];
-                subjectSet.add(file.subject);
-                typeSet.add(file.type);
+                if (file.published) {
+                    subjectSet.add(file.subject);
+                    typeSet.add(file.type);
+                }
             }
 
-            const subjectFilter = document.getElementById('subjectFilter');
-            const typeFilter = document.getElementById('typeFilter');
-
-            subjectFilter.innerHTML = Array.from(subjectSet).map(subject => `<option value="${subject}">${subject}</option>`).join('');
-            typeFilter.innerHTML = Array.from(typeSet).map(type => `<option value="${type}">${type}</option>`).join('');
+            document.getElementById('subjectFilter').innerHTML = Array.from(subjectSet).map(subject => `<option value="${subject}">${subject}</option>`).join('');
+            document.getElementById('typeFilter').innerHTML = Array.from(typeSet).map(type => `<option value="${type}">${type}</option>`).join('');
         }
 
-        window.viewFile = function(id, subject, type, link) {
-            const viewPageContent = `<!DOCTYPE html>
-<html lang='en'>
-<head>
-    <meta charset='UTF-8'>
-    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>${subject} - ${type}</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f9;
-            color: #333;
-        }
-        .container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background: #fff;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-        }
-        h1 {
-            text-align: center;
-        }
-        .back-button {
-            display: block;
-            margin: 20px auto;
-            padding: 10px 20px;
-            font-size: 16px;
-            color: white;
-            background-color: #4caf50;
-            border: none;
-            border-radius: 4px;
-            text-align: center;
-            cursor: pointer;
-            text-decoration: none;
-        }
-        .back-button:hover {
-            background-color: #45a049;
-        }
-        iframe {
-            width: 100%;
-            height: 500px;
-            border: none;
-            margin-top: 20px;
-        }
-    </style>
-</head>
-<body>
+        window.viewFile = function(subject, type, link) {
+            const viewPageContent = `
+                <html lang='en'>
+                <head>
+                    <meta charset='UTF-8'>
+                    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                    <title>${subject} - ${type}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; background-color: #f4f4f9; color: #333; margin: 0; padding: 0; }
+                        .container { max-width: 800px; margin: 20px auto; padding: 20px; background: #fff; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); border-radius: 8px; }
+                        h1 { text-align: center; }
+                        .back-button { display: block; margin: 20px auto; padding: 10px 20px; font-size: 16px; color: white; background-color: #4caf50; border: none; border-radius: 4px; text-align: center; cursor: pointer; text-decoration: none; }
+                        .back-button:hover { background-color: #45a049; }
+                        iframe { width: 100%; height: 500px; border: none; margin-top: 20px; }
+                    </style>
+                </head>
+                <body>
     <div class='container'>
         <h1>${subject}</h1>
         <p><strong>Type:</strong> ${type}</p>
