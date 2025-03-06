@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,18 +9,18 @@
 <script type="module">
     // Import Firebase SDK
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-    import { getDatabase, ref, push, set, remove, onValue, get } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+    import { getDatabase, ref, push, set, remove, onValue, get, update } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
 
     // Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyDHnt70k984to5wlC_72HC4-B0tExQh0qw",
-  authDomain: "year6s.firebaseapp.com",
-  databaseURL: "https://year6s-default-rtdb.firebaseio.com",
-  projectId: "year6s",
-  storageBucket: "year6s.firebasestorage.app",
-  messagingSenderId: "671839650416",
-  appId: "1:671839650416:web:3ac2756a067d2238192ab5"
-};
+    const firebaseConfig = {
+        apiKey: "AIzaSyDHnt70k984to5wlC_72HC4-B0tExQh0qw",
+        authDomain: "year6s.firebaseapp.com",
+        databaseURL: "https://year6s-default-rtdb.firebaseio.com",
+        projectId: "year6s",
+        storageBucket: "year6s.firebasestorage.app",
+        messagingSenderId: "671839650416",
+        appId: "1:671839650416:web:3ac2756a067d2238192ab5"
+    };
 
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
@@ -51,7 +53,7 @@ const firebaseConfig = {
                             <p><strong>Status:</strong> ${file.published ? 'Published' : 'Unpublished'}</p>
                             <button onclick="editFile('${id}')">Edit</button>
                             <button onclick="deleteFile('${id}')">Delete</button>
-                            <button onclick="togglePublish('${id}', ${file.published})">${file.published ? 'Unpublish' : 'Publish'}</button>
+                            <button onclick="togglePublish('${id}')">${file.published ? 'Unpublish' : 'Publish'}</button>
                         `;
                         fileList.appendChild(fileDiv);
                     }
@@ -90,6 +92,7 @@ const firebaseConfig = {
         }).then(() => {
             alert('File uploaded successfully');
             document.getElementById('uploadForm').reset();
+            fetchFiles(); // Refresh the file list
         }).catch((error) => {
             alert('Error uploading file: ' + error.message);
         });
@@ -113,6 +116,7 @@ const firebaseConfig = {
                     published: file.published // Preserve publish status
                 }).then(() => {
                     alert('File updated successfully');
+                    fetchFiles(); // Refresh file list
                 }).catch((error) => {
                     alert('Error updating file: ' + error.message);
                 });
@@ -128,6 +132,7 @@ const firebaseConfig = {
             const fileRef = ref(database, 'files/' + id);
             remove(fileRef).then(() => {
                 alert('File deleted successfully');
+                fetchFiles(); // Refresh file list
             }).catch((error) => {
                 alert('Error deleting file: ' + error.message);
             });
@@ -135,22 +140,23 @@ const firebaseConfig = {
     };
 
     // Toggle publish status function
-    window.togglePublish = function(id, currentStatus) {
+    window.togglePublish = function(id) {
         const fileRef = ref(database, 'files/' + id);
 
-        // Fetch file data once using get()
         get(fileRef).then((snapshot) => {
-            const file = snapshot.val();
+            if (snapshot.exists()) {
+                const file = snapshot.val();
 
-            if (file) {
-                set(fileRef, {
-                    ...file, // Preserve other fields
-                    published: !currentStatus
-                }).then(() => {
-                    alert(`File ${currentStatus ? 'unpublished' : 'published'} successfully`);
-                }).catch((error) => {
-                    alert('Error toggling publish status: ' + error.message);
-                });
+                // Toggle the published status
+                update(fileRef, { published: !file.published })
+                    .then(() => {
+                        alert(`File ${!file.published ? 'unpublished' : 'published'} successfully`);
+                        fetchFiles(); // Refresh file list to reflect the change
+                    })
+                    .catch((error) => {
+                        alert('Error toggling publish status: ' + error.message);
+                    });
+
             } else {
                 alert('File not found.');
             }
@@ -162,6 +168,7 @@ const firebaseConfig = {
     // Initial file fetch when page loads
     window.onload = fetchFiles;
 </script>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -378,3 +385,4 @@ label {
   </footer>
 </body>
 </html>
+<script async data-explicit-opt-in="true" data-cookie-opt-in="true" data-deployment-id="dpl_8ody5LfPd9stx74oUnJWx797mpi6" src="https://vercel.live/_next-live/feedback/feedback.js"></script>
