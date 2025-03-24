@@ -1,0 +1,331 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            text-align: center;
+            padding: 20px;
+            background-color: #0073e6;
+            color: white;
+        }
+        .school-name {
+            font-size: 3rem;
+            color: #FFD700; /* Gold color */
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+            margin: 10px 0;
+            transform: perspective(500px) rotateX(10deg);
+            transition: transform 0.3s;
+        }
+        .school-name:hover {
+            transform: perspective(500px) rotateX(0deg);
+        }
+        .logo-container {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px auto;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .logo-container img {
+            width: 100%;
+            height: auto;
+        }
+        #display-word {
+            text-align: center;
+            font-size: 2.0rem;
+            color: #FFD700; /* Gold color */
+            text-shadow: 2px 2px 4px rgba(0, 100, 0, 0.8);
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column-reverse; /* Reverse the order of results */
+        }
+        .student-result {
+            margin-bottom: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #0073e6;
+            position: relative; /* Position for stacking */
+        }
+        .student-name {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .score-frame {
+            font-size: 18px;
+            font-weight: bold;
+            color: #0073e6;
+            margin-bottom: 15px;
+        }
+        .correct {
+            background-color: #d4edda; /* Green */
+            color: #155724;
+        }
+        .incorrect {
+            background-color: #f8d7da; /* Red */
+            color: #721c24;
+        }
+        .question-container {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .question-container.correct {
+            border-color: green;
+        }
+        .question-container.incorrect {
+            border-color: red;
+        }
+        .question-text {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+        .answer {
+            font-size: 14px;
+        }
+        .options {
+            margin-top: 5px;
+            font-style: italic;
+        }
+        .correct-answer {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .print-button {
+            background-color: #0073e6;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        .print-button:hover {
+            background-color: #005bb5;
+        }
+        @media print {
+            .print-button {
+                display: none;
+            }
+        }
+/* Container for the text and button */
+.link-container {
+    display: flex;
+    justify-content: center;  /* Horizontally centers the content */
+    align-items: center;      /* Vertically aligns the content (optional) */
+    margin-top: 20px;         /* Adds space above the link */
+}
+
+/* Button styling */
+.upload-btn {
+    padding: 12px 20px;
+    background-color: #007bff;
+    color: white;
+    font-size: 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    text-align: center;
+    margin-left: 10px;  /* Adds space between the text and the button */
+}
+
+/* Hover effect for the button */
+.upload-btn:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px); /* Adds lift effect */
+}
+
+/* Focus effect for the button */
+.upload-btn:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Optional: Styling for the surrounding paragraph */
+.link-container p {
+    font-size: 1rem;
+    color: #333;
+    margin: 0;
+    text-align: center;
+}
+
+
+    </style>
+</head>
+<body>
+    <h1>RESULTS - STUDENTS</h1>
+    <div class="school-name">Orli International Academy</div>
+    <div class="logo-container">
+        <img src="logo.png" alt="Orli International Academy Logo">
+    </div>
+
+    <!-- Display the word below the logo -->
+    <p id="display-word">Loading word...</p>
+
+    <div id="resultsSection" class="container"></div>
+<div class="link-container">
+    <p>Already saved or printed the previous results? <button class="upload-btn" onclick="location.href='111u.html';">Upload New Questions</button></p>
+</div>
+
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js" type="module"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js" type="module"></script>
+
+    <script type="module">
+        // Import Firebase functions
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
+        import { getDatabase, ref, get, onValue } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
+
+        // Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyB0CvAHPnOcCh9_eHJxFWAeNa7JSSvb-ac",
+  authDomain: "enterance-s.firebaseapp.com",
+  databaseURL: "https://enterance-s-default-rtdb.firebaseio.com",
+  projectId: "enterance-s",
+  storageBucket: "enterance-s.firebasestorage.app",
+  messagingSenderId: "1043655893566",
+  appId: "1:1043655893566:web:8d0569fd0c557120b4676f"
+};
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Reference to the word in Firebase
+        const wordRef = ref(database, 'word');
+
+        // Function to display the word
+        function displayWord() {
+            const displayWordElement = document.getElementById('display-word');
+            onValue(wordRef, (snapshot) => {
+                const word = snapshot.val();
+                displayWordElement.textContent = word || 'No questions available';
+            });
+        }
+
+        // Load the word when the page loads
+        displayWord();
+
+        // Function to load all student results from Firebase
+async function loadAllResults() {
+    const resultsSection = document.getElementById('resultsSection');
+    resultsSection.innerHTML = ''; // Clear previous results
+
+    try {
+        // Fetch results from Firebase
+        const resultsRef = ref(database, 'results');
+        const snapshot = await get(resultsRef);
+        const allResults = snapshot.val() || {};
+
+        const questionsRef = ref(database, 'questions');
+        const questionsSnapshot = await get(questionsRef);
+        const questions = questionsSnapshot.val();
+        if (!questions) {
+            alert('No questions found.');
+            return;
+        }
+
+        const resultsArray = Object.values(allResults).reverse();
+        resultsArray.forEach((student, index) => {
+            let correctCount = 0;
+            student.answers.forEach((answer, questionIndex) => {
+                const correctAnswer = questions[questionIndex]['Correct Answer'];
+                if (answer === correctAnswer) correctCount++;
+            });
+            const scorePercentage = ((correctCount / questions.length) * 100).toFixed(2);
+
+            // Create student result block
+            let studentBlock = `
+                <div class="student-result" id="student-result-${index}">
+                    <div class="student-name">Student: ${student.name}</div>
+                    <div class="score-frame">Score: <strong>${scorePercentage}%</strong></div>
+            `;
+
+            student.answers.forEach((answer, questionIndex) => {
+                const question = questions[questionIndex];
+                const correctAnswer = question['Correct Answer'];
+                const isCorrect = answer === correctAnswer;
+
+                studentBlock += `
+                    <div class="question-container ${isCorrect ? 'correct' : 'incorrect'}">
+                        <div class="question-text"><strong>Q${questionIndex + 1}:</strong> ${question.Question}</div>
+                        <div class="options">
+                            <strong>Options:</strong>
+                            <ul>
+                                <li>A) ${question['Option A']}</li>
+                                <li>B) ${question['Option B']}</li>
+                                <li>C) ${question['Option C']}</li>
+                                <li>D) ${question['Option D']}</li>
+                            </ul>
+                        </div>
+                        <div class="answer">
+                            <strong>Your Answer:</strong> ${answer || 'No Answer'}<br>
+                            <strong>Correct Answer:</strong> ${correctAnswer}
+                        </div>
+                    </div>
+                `;
+            });
+            studentBlock += `
+                <button class="print-button" onclick="printResult(${index})">Print Result</button>
+                </div>
+            `;
+            resultsSection.innerHTML += studentBlock;
+        });
+    } catch (error) {
+        console.error("Error fetching data from Firebase:", error);
+        alert("Failed to load results. Please try again later.");
+    }
+}
+
+
+        // Function to print a specific student's result
+        function printResult(index) {
+            const resultBlock = document.getElementById(`student-result-${index}`).cloneNode(true);
+            const originalContent = document.body.innerHTML;
+
+            document.body.innerHTML = '';
+            document.body.appendChild(resultBlock);
+
+            window.print();
+            document.body.innerHTML = originalContent;
+            loadAllResults(); // Reload the results after printing
+        }
+
+        // Load all results when the page loads
+        loadAllResults();
+    </script>
+</body>
+</html>

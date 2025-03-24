@@ -1,0 +1,225 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 40px;
+            padding: 0;
+        }
+        h1 {
+            text-align: center;
+            padding: 20px;
+            background-color: #0073e6;
+            color: white;
+        }
+        .school-name {
+            font-size: 3rem;
+            color: #FFD700;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+            margin: 10px 0;
+        }
+        .logo-container {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px auto;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .logo-container img {
+            width: 100%;
+            height: auto;
+        }
+        #display-word {
+            text-align: center;
+            font-size: 2.0rem;
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0, 100, 0, 0.8);
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .name-section {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .name-section label {
+            display: block;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        .name-section input {
+            width: 300px;
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .question-container {
+            margin-bottom: 40px;
+        }
+        .question {
+            font-weight: bold;
+        }
+        .option {
+            margin: 12px 0;
+        }
+        button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 1rem;
+            background-color: #0073e6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #005bb5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+    <!-- Firebase SDKs (version 8.x) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+</head>
+<body>
+    <h1>Enterance</h1>
+    <div class="school-name">ORLI INTERNATIONAL ACADEMY</div>
+    <div class="logo-container">
+        <img src="logo.png" alt="Orli International Academy">
+    </div>
+    <p id="display-word">Loading word...</p>
+    <div class="name-section">
+        <label for="studentName">Enter Your Name:</label>
+        <input type="text" id="studentName" placeholder="Your Name" required>
+    </div>
+
+    <div id="assessmentSection"></div>
+
+    <button onclick="submitAssessment()">Submit and start Section B</button>
+
+    <script>
+        // Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyB0CvAHPnOcCh9_eHJxFWAeNa7JSSvb-ac",
+  authDomain: "enterance-s.firebaseapp.com",
+  databaseURL: "https://enterance-s-default-rtdb.firebaseio.com",
+  projectId: "enterance-s",
+  storageBucket: "enterance-s.firebasestorage.app",
+  messagingSenderId: "1043655893566",
+  appId: "1:1043655893566:web:8d0569fd0c557120b4676f"
+};
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // Reference to the Firebase database
+        const dbRef = firebase.database().ref('word');
+
+        // Function to listen for changes and update the display word
+        dbRef.on('value', function(snapshot) {
+            const word = snapshot.val();
+            document.getElementById('display-word').innerText = word;
+        });
+
+        // Load Assessment questions from Firebase
+        function loadAssessment() {
+            const assessmentSection = document.getElementById('assessmentSection');
+
+            // Retrieve questions from Firebase
+            db.ref('questions').once('value').then(snapshot => {
+                const questions = snapshot.val();
+
+                // Handle case where no questions are found
+                if (!questions) {
+                    alert("No assessment found. Please upload the file first.");
+                    return;
+                }
+
+                // Display each question
+                questions.forEach((question, index) => {
+                    const questionBlock = `
+                        <div class="question-container">
+                            <div class="question">Q${index + 1}: ${question.Question}</div>
+                            <div class="option"><input type="radio" name="q${index}" value="A"> A: ${question['Option A']}</div>
+                            <div class="option"><input type="radio" name="q${index}" value="B"> B: ${question['Option B']}</div>
+                            <div class="option"><input type="radio" name="q${index}" value="C"> C: ${question['Option C']}</div>
+                            <div class="option"><input type="radio" name="q${index}" value="D"> D: ${question['Option D']}</div>
+                        </div>
+                    `;
+                    assessmentSection.innerHTML += questionBlock;
+                });
+            });
+        }
+
+        // Submit Assessment and ensure all questions are answered
+        function submitAssessment() {
+            const studentName = document.getElementById('studentName').value;
+
+            if (!studentName) {
+                alert('Please enter your name before submitting.');
+                return;
+            }
+
+            db.ref('questions').once('value').then(snapshot => {
+                const questions = snapshot.val();
+                let studentAnswers = [];
+                let allAnswered = true;
+
+                // Check if all questions are answered
+                questions.forEach((_, index) => {
+                    const answer = document.querySelector(`input[name="q${index}"]:checked`);
+                    if (answer) {
+                        studentAnswers.push(answer.value);
+                    } else {
+                        studentAnswers.push(null);
+                        allAnswered = false;
+                    }
+                });
+
+                if (!allAnswered) {
+                    alert('Please answer all questions before submitting.');
+                    return;
+                }
+
+                // Save student results
+                db.ref('results/' + studentName).set({
+                    name: studentName,
+                    answers: studentAnswers
+                }).then(() => {
+                    alert('Assessment submitted successfully!');
+                    localStorage.setItem('currentStudent', studentName);
+                    window.location.href = '/y6sb';
+                }).catch(error => {
+                    console.error('Error submitting assessment:', error);
+                });
+            });
+        }
+
+        // Load the assessment questions on page load
+        loadAssessment();
+    </script>
+</body>
+</html>

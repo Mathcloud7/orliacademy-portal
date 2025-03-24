@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Assessment | Orli International Academy</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 50px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .btn {
+            display: inline-block;
+            margin: 20px;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-decoration: none;
+            color: white;
+            background: linear-gradient(145deg, #007bff, #0056b3);
+            border: none;
+            border-radius: 8px;
+            box-shadow: 5px 5px 10px #aaa, -5px -5px 10px #fff;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background: linear-gradient(145deg, #0056b3, #003d80);
+            transform: translateY(-3px);
+        }
+        .login-container {
+            display: none;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .input-field {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .login-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
+    <script>
+        function showLogin(action) {
+            document.getElementById("login-container").style.display = "block";
+            document.getElementById("login-form").dataset.action = action;
+        }
+        
+        function login(event) {
+            event.preventDefault();
+            let username = document.getElementById("username").value;
+            let password = document.getElementById("password").value;
+            let action = event.target.dataset.action;
+            
+            if ((action === "create-assessment" && username === "teacher001" && password === "Welcome001") ||
+                (action === "take-assessment" && username === "Welcome005" && password === "Orli005")) {
+                alert("Login successful!");
+                let redirectPage = action === "create-assessment" ? "111u.html" : "111.html";
+                window.location.href = redirectPage;
+            } else {
+                alert("Invalid username or password.");
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Orli International Academy</h1>
+        <h2>Teacher Assessment Portal</h2>
+        <button class="btn" onclick="showLogin('create-assessment')">Create Assessment</button>
+        <button class="btn" onclick="showLogin('take-assessment')">Take Assessment</button>
+    </div>
+
+    <div id="login-container" class="login-container">
+        <h2>Login</h2>
+        <form id="login-form" onsubmit="login(event)">
+            <input type="text" id="username" class="input-field" placeholder="Username" required>
+            <input type="password" id="password" class="input-field" placeholder="Password" required>
+            <button type="submit" class="login-btn">Login</button>
+        </form>
+    </div>
+</body>
+</html>
