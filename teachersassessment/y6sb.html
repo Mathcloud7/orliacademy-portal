@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orli International Academy - Section B</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .class-subject {
+            font-size: 18px;
+            font-weight: normal;
+            color: white;
+            margin-top: 5px;
+        }
+        main {
+            margin: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .section-title {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .instructions {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #e7f7e6;
+            border-left: 5px solid #4CAF50;
+            font-size: 16px;
+        }
+        .questions {
+            margin-top: 20px;
+            padding-left: 20px;
+        }
+        .questions li {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        footer {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-size: 14px;
+            position: absolute;
+            width: 100%;
+            margin-bottom: 0;
+        }
+        .highlight {
+            font-weight: bold;
+            color: #2e7d32;
+        }
+
+        .fixed-text {
+            color: black; /* Ensure this part is visible */
+            font-weight: normal;
+            font-size: 16px; /* Ensure readability */
+        }
+
+        .hidden {
+            display: none; /* Used to hide the first part if needed */
+        }
+        .exam-completion-section {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f4f7fa;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .exam-completion-section p {
+            font-size: 16px;
+            color: #333;
+        }
+
+        .submit-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .submit-button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    Orli International Academy - Section B
+    <div class="class-subject">Class: Teacher | Subject: Assessment</div>
+</header>
+
+<main>
+    <section>
+        <p class="section-title">SECTION B</p>
+
+    <div class="instructions">
+        <p><span class="highlight">INSTRUCTION:</span> <span id="first-part">Answer any four (4) questions of your choice. </span><span class="fixed-text">Read each question carefully and write the correct answers in the answer booklet provided.</span></p>
+    </div>
+
+
+        <ul class="questions" id="questionsList"></ul>
+    </section>
+</main>
+    <!-- Completion Section -->
+    <div class="exam-completion-section">
+        <p>Once you have answered all the questions in this section, click the button below to exit.</p>
+        <button class="submit-button" onclick="submitExam()">Exit</button>
+    </div>
+<footer>
+    Orli International Academy | All rights reserved | 2024
+</footer>
+
+<!-- Firebase Legacy SDK (Non-Module) -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCGEphhLAPg2hH7N3bNwBKQVzdu5VgzKQQ",
+  authDomain: "year6-477dd.firebaseapp.com",
+  databaseURL: "https://year6-477dd-default-rtdb.firebaseio.com",
+  projectId: "year6-477dd",
+  storageBucket: "year6-477dd.firebasestorage.app",
+  messagingSenderId: "115928739324",
+  appId: "1:115928739324:web:c9995db657e4a94fc39679"
+};
+
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
+window.onload = function() {
+    const examRef = database.ref('exams').limitToLast(1); // Get the latest exam
+
+    examRef.once('value').then(function(snapshot) {
+        const examData = snapshot.val();
+        if (examData) {
+            const exam = examData[Object.keys(examData)[0]]; // Get the first exam entry
+            
+            // Insert the class and subject
+            document.querySelector('.class-subject').textContent = `Class: ${exam.class} | Subject: ${exam.subject}`;
+            
+            // Instructions: Separate first and fixed text, both merged in one instruction block
+            const instructionsContainer = document.querySelector('.instructions');
+            
+            // Check if instructions exist and assign first part, else leave empty
+            const firstPart = exam.instructions ? exam.instructions.split('.')[0] + '.' : '';  // First part of the instruction (before first period)
+            const secondPart = "Read each question carefully and write the correct answers in the answer booklet provided.";  // Fixed second part
+
+            instructionsContainer.innerHTML = `
+                <span class="highlight">INSTRUCTION:</span> 
+                <span id="first-part">${firstPart}</span> 
+                <span class="fixed-text">${secondPart}</span>
+            `;
+
+            // If the first part is empty or needs to be hidden, apply the "hidden" class
+            if (!firstPart) {
+                document.getElementById('first-part').classList.add('hidden');
+            }
+
+            const questionsList = document.getElementById('questionsList');
+            let questionNumber = 1; // Initialize question number counter
+
+            // Loop through each question and add it to the list
+            exam.questions.forEach(function(question) {
+                // Strip out any existing numbers (e.g., '1.' from the beginning of the question)
+                question = question.replace(/^\d+\.\s*/, '');  // This regex removes any leading number and period
+                
+                const listItem = document.createElement('li');
+                listItem.textContent = `${questionNumber}. ${question}`; // Numbering starts from 1
+                questionsList.appendChild(listItem);
+                questionNumber++; // Increment the question number
+            });
+        }
+    }).catch(function(error) {
+        console.error('Error fetching exam data:', error);
+    });
+};
+        function submitExam() {
+            // Logic to handle exam submission (e.g., saving the answers, sending data to the server, etc.)
+            alert('Good luck! Your teacher will review your examination and send your scores to you shortly. Thank you for completing the exam.');
+
+            // Redirect to the next page (2.html)
+            window.location.href = '/ex';  // This will redirect the user to 2.html
+        }
+</script>
+
+</script>
+
+</body>
+</html>
