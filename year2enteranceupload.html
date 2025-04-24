@@ -388,16 +388,14 @@ button:hover {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyDud4J9uxXMCZWjGlL9tB41uuwp9GDWAZc",
-  authDomain: "year2-fc6a8.firebaseapp.com",
-  databaseURL: "https://year2-fc6a8-default-rtdb.firebaseio.com", // ✅ ADDED this line
-  projectId: "year2-fc6a8",
-  storageBucket: "year2-fc6a8.appspot.com", // ✅ FIXED typo here
-  messagingSenderId: "822721362532",
-  appId: "1:822721362532:web:cf8fdf629989f6248f3d71"
-};
-
+  const firebaseConfig = {
+    apiKey: "AIzaSyDud4J9uxXMCZWjGlL9tB41uuwp9GDWAZc",
+    authDomain: "year2-fc6a8.firebaseapp.com",
+    projectId: "year2-fc6a8",
+    storageBucket: "year2-fc6a8.firebasestorage.app",
+    messagingSenderId: "822721362532",
+    appId: "1:822721362532:web:cf8fdf629989f6248f3d71"
+  };
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
