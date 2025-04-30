@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,18 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel</title>
     <style>
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background-color: #f9f9f9;
-    color: #333;
-}
-
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #f9f9f9;
+            color: #333;
+        }
 .header {
     display: flex;
     flex-direction: column;
@@ -27,24 +27,24 @@ body {
 
 .logo-container {
     position: relative;
-    width: 150px;
-    height: 150px;
+    width: 100px;
+    height: 100px;
     border: 5px solid #007bff;
     border-radius: 50%;
-    animation: rotate 10s linear infinite;
+    animation: rotate 50s linear infinite;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .logo-container img {
-    width: 80%;
+    width: 90%;
     border-radius: 50%;
     object-fit: cover;
 }
 
 .school-name {
-    font-size: 3em;
+    font-size: 2.4em;
     font-weight: bold;
     color: #007bff;
     text-transform: uppercase;
@@ -53,6 +53,23 @@ body {
     margin-top: 10px;
     animation: text3D 1.5s ease-in-out infinite alternate;
 }
+        .btn {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px 15px;
+            font-size: 1.4em;
+            color: var(--secondary-color);
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 10px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
 
 @keyframes rotate {
     0% {
@@ -93,151 +110,137 @@ body {
     background-color: #007bff;
     color: white;
 }
+        .admin-container {
+            max-width: 900px;
+            width: 100%;
+            padding: 20px;
+            margin: 20px auto;
+            background: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
 
-.admin-container {
-    max-width: 900px;
-    width: 100%;
-    padding: 20px;
-    margin: 20px auto;
-    background: #fff;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-}
+        h2, h3 {
+            text-align: center;
+            color: #444;
+        }
 
-h2, h3 {
-    text-align: center;
-    color: #444;
-}
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
 
-form {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    justify-content: center;
-}
+        form input, form select, form button {
+            padding: 10px;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
 
-form input, form select, form button {
-    padding: 10px;
-    font-size: 1em;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    width: 100%;
-    box-sizing: border-box;
-}
+        form button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
 
-form button {
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-}
+        form button:hover {
+            background-color: #0056b3;
+        }
 
-form button:hover {
-    background-color: #0056b3;
-}
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
+        table th, table td {
+            text-align: left;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        table th {
+            background-color: #f2f2f2;
+        }
+
+        table tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .btn {
+            padding: 5px 10px;
+            font-size: 0.9em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .edit-btn {
+            background-color: #ffc107;
+            color: #fff;
+        }
+
+        .edit-btn:hover {
+            background-color: #e0a800;
+        }
+
+        .delete-btn {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        .delete-btn:hover {
+            background-color: #bd2130;
+        }
+
+        @media (max-width: 768px) {
+            .admin-container {
+                padding: 15px;
+            }
+
+            form {
+                flex-direction: column;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+        }
+    /* User count section */
+    #userCount {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 30px;
+        padding: 10px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    #userCount p {
+        font-size: 18px;
+        font-weight: 500;
+        margin: 0;
+    }
+
+    #userCount span {
+        font-weight: bold;
+    }
+
+    /* Filter section */
+    #classFilter {
     margin-top: 20px;
-}
-
-table th, table td {
-    text-align: left;
-    padding: 10px;
-    border: 1px solid #ddd;
-}
-
-table th {
-    background-color: #f2f2f2;
-}
-
-table tr:hover {
-    background-color: #f9f9f9;
-}
-
-.btn {
-    padding: 5px 10px;
-    font-size: 0.9em;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.edit-btn {
-    background-color: #ffc107;
-    color: #fff;
-}
-
-.edit-btn:hover {
-    background-color: #e0a800;
-}
-
-.delete-btn {
-    background-color: #dc3545;
-    color: #fff;
-}
-
-.delete-btn:hover {
-    background-color: #bd2130;
-}
-
-@media (max-width: 768px) {
-    .header {
-        margin-bottom: 15px;
+    width: 100px;
+    height: 30px;
+    border: 5px solid #007bff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     }
 
-    .logo-container {
-        width: 120px;
-        height: 120px;
-    }
-
-    .school-name {
-        font-size: 2.2em;
-        margin-top: 10px;
-    }
-
-    .nav {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .nav a {
-        font-size: 1.2em;
-    }
-
-    .admin-container {
-        padding: 15px;
-    }
-
-    form {
-        flex-direction: column;
-        width: 100%;
-    }
-
-    form input, form select, form button {
-        width: 100%;
-    }
-
-    table {
-        font-size: 0.9em;
-    }
-}
-
-@media (max-width: 480px) {
-    .school-name {
-        font-size: 1.8em;
-    }
-
-    .logo-container {
-        width: 100px;
-        height: 100px;
-    }
-
-    .nav a {
-        font-size: 1em;
-    }
-}
     </style>
 
     <script type="module">
@@ -302,45 +305,84 @@ const firebaseConfig = {
                 });
         };
 
-        window.loadUsers = function loadUsers() {
-            getDocs(collection(db, "users"))
-                .then((snapshot) => {
-                    const userList = document.getElementById('userList');
-                    userList.innerHTML = '';
-                    snapshot.forEach(doc => {
-                        const data = doc.data();
-                        const userRow = document.createElement('tr');
-                        userRow.innerHTML = `
-                            <td>${data.firstName} ${data.lastName}</td>
-                            <td>${data.userClass}</td>
-                            <td>${data.role}</td>
-                            <td>${data.sex}</td>
-                            <td>${data.email}</td>
-                            <td>
-                                <button class="btn edit-btn" onclick="editUser('${doc.id}', '${data.firstName}', '${data.lastName}', '${data.otherName}', '${data.userClass}', '${data.role}', '${data.sex}', '${data.email}')">Edit</button>
-                                <button class="btn delete-btn" onclick="deleteUser('${doc.id}')">Delete</button>
-                            </td>
-                        `;
-                        userList.appendChild(userRow);
-                    });
-                })
-                .catch((error) => {
-                    console.error("Error loading users: ", error);
-                });
-        };
+window.loadUsers = function loadUsers() {
+    getDocs(collection(db, "users")).then((snapshot) => {
+        const adminList = document.getElementById('adminList').getElementsByTagName('tbody')[0];
+        const teacherList = document.getElementById('teacherList').getElementsByTagName('tbody')[0];
+        const studentTablesContainer = document.getElementById('studentTablesContainer');
 
-        window.deleteUser = function deleteUser(userId) {
-            const userRef = doc(db, "users", userId);
-            deleteDoc(userRef)
-                .then(() => {
-                    alert("User deleted successfully!");
-                    loadUsers();
-                })
-                .catch((error) => {
-                    console.error("Error deleting user: ", error);
-                });
-        };
+        adminList.innerHTML = '';
+        teacherList.innerHTML = '';
+        studentTablesContainer.innerHTML = '';
 
+        const studentGroups = {};
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const row = `
+                <tr>
+                    <td>${data.firstName} ${data.lastName}</td>
+                    <td>${data.userClass}</td>
+                    <td>${data.role}</td>
+                    <td>${data.sex}</td>
+                    <td>${data.email}</td>
+                    <td>
+                        <button class="btn edit-btn" onclick="editUser('${doc.id}', '${data.firstName}', '${data.lastName}', '${data.otherName}', '${data.userClass}', '${data.role}', '${data.sex}', '${data.email}')">Edit</button>
+                        <button class="btn delete-btn" onclick="deleteUser('${doc.id}')">Delete</button>
+                    </td>
+                </tr>`;
+
+            if (data.role === 'admin') {
+                adminList.innerHTML += row;
+            } else if (data.role === 'teacher') {
+                teacherList.innerHTML += row;
+            } else if (data.role === 'student') {
+                if (!studentGroups[data.userClass]) {
+                    studentGroups[data.userClass] = [];
+                }
+                studentGroups[data.userClass].push(row);
+            }
+        });
+
+        // Render student tables
+        Object.keys(studentGroups).sort().forEach(className => {
+            const table = document.createElement('table');
+            table.innerHTML = `
+                <thead>
+                    <tr><th colspan="6">${className}</th></tr>
+                    <tr>
+                        <th>Name</th>
+                        <th>Class</th>
+                        <th>Role</th>
+                        <th>Sex</th>
+                        <th>Email</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${studentGroups[className].join('')}
+                </tbody>
+            `;
+            studentTablesContainer.appendChild(table);
+        });
+
+    }).catch((error) => {
+        console.error("Error loading users: ", error);
+    });
+};
+
+    window.deleteUser = function deleteUser(userId) {
+        const userRef = doc(db, "users", userId);
+        deleteDoc(userRef)
+            .then(() => {
+                alert("User deleted successfully!");
+                loadUsers();
+                updateUserCount(); // Update count after deletion
+            })
+            .catch((error) => {
+                console.error("Error deleting user: ", error);
+            });
+    };
         window.editUser = function editUser(userId, firstName, lastName, otherName, userClass, role, sex, email) {
             document.getElementById('firstName').value = firstName;
             document.getElementById('lastName').value = lastName;
@@ -405,19 +447,16 @@ const firebaseConfig = {
     <div class="header">
         <!-- Logo -->
         <div class="logo-container">
-            <img src="https://www.mathcloud.store/logo.png" alt="School Logo">
+            <img src="logo.png" alt="School Logo">
         </div>
         <!-- School Name with 3D effect -->
-        <div class="school-name">Your School Name</div>
+        <div class="school-name">Orli International Academy</div>
         <!-- Navigation Links -->
         <div class="nav">
             <a href="index.html">Home</a>
             <a href="result.html">Students Results</a>
-            <a href="#">Contact</a>
         </div>
     </div>
-
-    <!-- Admin Panel Section -->
     <div class="admin-container">
         <button onclick="logout()">Logout</button>
         <h2>Create or Update a User</h2>
@@ -447,22 +486,40 @@ const firebaseConfig = {
             <button type="button" id="submitBtn" onclick="createUser()">Create User</button>
         </form>
 
-        <h3>Registered Users</h3>
-        <table id="userList">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Class</th>
-                    <th>Role</th>
-                    <th>Sex</th>
-                    <th>Email</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- List of users will be populated here -->
-            </tbody>
-        </table>
-    </div>
+    <h3>Admins</h3>
+    <table id="adminList">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Class</th>
+                <th>Role</th>
+                <th>Sex</th>
+                <th>Email</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <h3>Teachers</h3>
+    <table id="teacherList">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Class</th>
+                <th>Role</th>
+                <th>Sex</th>
+                <th>Email</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <h3>Students (Grouped by Class)</h3>
+    <div id="studentTablesContainer"></div>
+</div>
+
 </body>
 </html>
+<script async data-explicit-opt-in="true" data-cookie-opt-in="true" data-deployment-id="dpl_FhJgcA9msN1mHaFrVN9YCKagH9Pa" src="https://vercel.live/_next-live/feedback/feedback.js"></script>
