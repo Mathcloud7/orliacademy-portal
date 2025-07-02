@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Teacher - Manage Assessments (Year 4)</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      padding: 2rem;
+      background: #f4faff;
+      max-width: 1000px;
+      margin: auto;
+    }
+    select, input, button {
+      display: block;
+      width: 100%;
+      max-width: 500px;
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    h2, h3 {
+      color: #333;
+      margin-top: 2rem;
+    }
+    .box {
+      background: #fff;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.08);
+      margin-top: 2rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      font-size: 0.95rem;
+      vertical-align: top;
+    }
+    th {
+      background-color: #007bff;
+      color: white;
+      text-align: left;
+    }
+    .published {
+      color: green;
+      font-weight: bold;
+    }
+    .btn-small {
+      font-size: 0.8rem;
+      padding: 5px 8px;
+      margin: 2px;
+      border-radius: 4px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+    }
+    .btn-small:hover {
+      background-color: #0056b3;
+    }
+    .timestamp {
+      font-size: 0.85rem;
+      color: #666;
+    }
+    .filters {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+    .filters select {
+      width: auto;
+      flex: 1;
+      min-width: 150px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Upload a New Assessment (Year 4)</h2>
+
+  <select id="classInput" disabled>
+    <option value="Year 4" selected>Year 4</option>
+  </select>
+
+  <select id="subjectInput">
+    <option value="">Select Subject</option>
+    <option>Science</option>
+    <option>Home Economics</option>
+    <option>Geography</option>
+    <option>Agricultural Science</option>
+    <option>Mathematics</option>
+    <option>Civic Education</option>
+    <option>English Studies</option>
+    <option>History</option>
+    <option>Christian Religious Studies</option>
+    <option>Islam Religious Studies</option>
+    <option>Information and Communication Technology</option>
+    <option>Personal Social and Health Education</option>
+    <option>General Knowledge</option>
+  </select>
+
+  <input id="docLinkInput" placeholder="Paste Google Doc link here" />
+  <button onclick="uploadAssessment()">Save Assessment (Not Published)</button>
+
+  <div class="box" id="assessmentList">
+    <h3>Saved & Published Assessments (Year 4)</h3>
+    <div class="filters">
+      <select id="filterSubject" onchange="loadAssessments()">
+        <option value="">Filter by Subject</option>
+        <option>Science</option>
+        <option>Home Economics</option>
+        <option>Geography</option>
+        <option>Agricultural Science</option>
+        <option>Mathematics</option>
+        <option>Civic Education</option>
+        <option>English Studies</option>
+        <option>History</option>
+        <option>Christian Religious Studies</option>
+        <option>Islam Religious Studies</option>
+        <option>Information and Communication Technology</option>
+        <option>Personal Social and Health Education</option>
+        <option>General Knowledge</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="box" id="submissionsBox">
+    <h3>Student Submissions (Year 4)</h3>
+    <div class="filters">
+      <select id="filterSubjectSub" onchange="loadSubmissions()">
+        <option value="">Filter by Subject</option>
+        <option>Science</option>
+        <option>Home Economics</option>
+        <option>Geography</option>
+        <option>Agricultural Science</option>
+        <option>Mathematics</option>
+        <option>Civic Education</option>
+        <option>English Studies</option>
+        <option>History</option>
+        <option>Christian Religious Studies</option>
+        <option>Islam Religious Studies</option>
+        <option>Information and Communication Technology</option>
+        <option>Personal Social and Health Education</option>
+        <option>General Knowledge</option>
+      </select>
+    </div>
+    <div id="submissions"></div>
+  </div>
+
+  <script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAt1_h1qNpsvvTtJNojAq70eCqrfdJ0Sn0",
+  authDomain: "year-5.firebaseapp.com",
+  databaseURL: "https://year-5-default-rtdb.firebaseio.com",
+  projectId: "year-5",
+  storageBucket: "year-5.firebasestorage.app",
+  messagingSenderId: "289843229551",
+  appId: "1:289843229551:web:7fe690010e854fd6a7ae9a"
+};
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const fixedClass = "Year 4";
+
+    function uploadAssessment() {
+      const subject = document.getElementById("subjectInput").value;
+      const link = document.getElementById("docLinkInput").value.trim();
+      if (!subject || !link) return alert("Fill all fields");
+
+      const id = Date.now();
+      db.ref(`assessmentBank/${fixedClass}/${subject}/${id}`).set({
+        link,
+        timestamp: new Date().toISOString()
+      }).then(() => {
+        alert("Assessment saved.");
+        loadAssessments();
+      });
+    }
+
+    function publishAssessment(subject, link) {
+      db.ref(`assessments/${fixedClass}/${subject}`).set({ link })
+        .then(() => {
+          alert("Assessment published.");
+          loadAssessments();
+        });
+    }
+
+    function deleteAssessment(subject, id) {
+      if (confirm("Delete this saved assessment?")) {
+        db.ref(`assessmentBank/${fixedClass}/${subject}/${id}`).remove()
+          .then(loadAssessments);
+      }
+    }
+
+    function deletePublished(subject) {
+      if (confirm("Remove published assessment?")) {
+        db.ref(`assessments/${fixedClass}/${subject}`).remove()
+          .then(loadAssessments);
+      }
+    }
+
+    function deleteSubmission(subject, studentName) {
+      if (confirm("Delete this student's submission?")) {
+        db.ref(`submissions/${fixedClass}/${subject}/${studentName}`).remove()
+          .then(loadSubmissions);
+      }
+    }
+
+    function formatDate(isoString) {
+      const d = new Date(isoString);
+      return d.toLocaleString();
+    }
+
+    async function loadAssessments() {
+      const container = document.getElementById("assessmentList");
+      const filterSubject = document.getElementById("filterSubject").value;
+      container.querySelectorAll("table").forEach(t => t.remove());
+
+      db.ref(`assessmentBank/${fixedClass}`).once("value", async (snap) => {
+        const data = snap.val();
+        if (!data) return;
+
+        const table = document.createElement("table");
+        table.innerHTML = `
+          <thead><tr>
+            <th>Class</th><th>Subject</th><th>Link</th>
+            <th>Timestamp</th><th>Status</th><th>Actions</th>
+          </tr></thead><tbody></tbody>`;
+        const tbody = table.querySelector("tbody");
+
+        for (const subject in data) {
+          if (filterSubject && subject !== filterSubject) continue;
+          const publishedSnap = await db.ref(`assessments/${fixedClass}/${subject}/link`).once("value");
+          const publishedLink = publishedSnap.val();
+          const items = data[subject];
+
+          for (const id in items) {
+            const { link, timestamp } = items[id];
+            const isPublished = link === publishedLink;
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td>${fixedClass}</td>
+              <td>${subject}</td>
+              <td><a href="${link}" target="_blank">Open</a></td>
+              <td class="timestamp">${formatDate(timestamp)}</td>
+              <td>${isPublished ? '<span class="published">Published</span>' : 'Saved'}</td>
+              <td>
+                ${isPublished
+                  ? `<button class="btn-small" onclick="deletePublished('${subject}')">Unpublish</button>`
+                  : `<button class="btn-small" onclick="publishAssessment('${subject}', '${link}')">Publish</button>`}
+                <button class="btn-small" onclick="deleteAssessment('${subject}', '${id}')">Delete</button>
+              </td>`;
+            tbody.appendChild(tr);
+          }
+        }
+        container.appendChild(table);
+      });
+    }
+
+    function loadSubmissions() {
+      const container = document.getElementById("submissions");
+      const filterSubject = document.getElementById("filterSubjectSub").value;
+      container.innerHTML = "";
+
+      db.ref(`submissions/${fixedClass}`).once("value", (snap) => {
+        const data = snap.val();
+        if (!data) return;
+
+        const table = document.createElement("table");
+        table.innerHTML = `
+          <thead><tr>
+            <th>Class</th><th>Subject</th><th>Student</th>
+            <th>Link</th><th>Timestamp</th><th>Actions</th>
+          </tr></thead><tbody></tbody>`;
+        const tbody = table.querySelector("tbody");
+
+        for (const subject in data) {
+          if (filterSubject && subject !== filterSubject) continue;
+          const students = data[subject];
+
+          for (const student in students) {
+            const entry = students[student];
+            const link = typeof entry === "string" ? entry : entry.link;
+            const timestamp = typeof entry === "object" ? formatDate(entry.timestamp) : "N/A";
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td>${fixedClass}</td>
+              <td>${subject}</td>
+              <td>${student}</td>
+              <td><a href="${link}" target="_blank">View</a></td>
+              <td class="timestamp">${timestamp}</td>
+              <td><button class="btn-small" onclick="deleteSubmission('${subject}', '${student}')">Delete</button></td>`;
+            tbody.appendChild(tr);
+          }
+        }
+        container.appendChild(table);
+      });
+    }
+
+    loadAssessments();
+    loadSubmissions();
+  </script>
+</body>
+</html>

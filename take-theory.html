@@ -1,0 +1,211 @@
+
+<!-- student.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student - Assessments</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f7fa;
+      color: #333;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+      padding: 2rem;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 2rem;
+      color: #1d3557;
+    }
+
+    label {
+      font-weight: 600;
+      margin-top: 1rem;
+      display: block;
+    }
+
+    select, input, button {
+      padding: 0.75rem 1rem;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 100%;
+      font-size: 1rem;
+    }
+
+    button {
+      background-color: #1d3557;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #457b9d;
+    }
+
+    .assessment {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: #ffffff;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    }
+
+    .assessment h4 {
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      color: #2a9d8f;
+    }
+
+    .assessment a {
+      color: #1d3557;
+      text-decoration: underline;
+    }
+
+    iframe {
+      width: 100%;
+      height: 500px;
+      border: none;
+      margin-top: 1rem;
+      border-radius: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 1rem;
+      }
+
+      iframe {
+        height: 400px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Section B Assessment Portal</h2>
+
+    <label for="classSelect">Select Class:</label>
+    <select id="classSelect"></select>
+
+    <label for="subjectSelect">Select Subject:</label>
+    <select id="subjectSelect"></select>
+
+    <label for="nameInput">Your Full Name:</label>
+    <input type="text" id="nameInput" placeholder="Enter your full name"/>
+
+    <button onclick="startAssessment()">Start Assessment</button>
+
+    <div class="assessment" id="assessmentContainer" style="display:none;">
+      <h4>Assessment Link:</h4>
+      <p><a id="assessmentLink" href="#" target="_blank">Open Your Assessment</a></p>
+      <iframe id="assessmentIframe"></iframe>
+    </div>
+  </div>
+
+  <script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAt1_h1qNpsvvTtJNojAq70eCqrfdJ0Sn0",
+  authDomain: "year-5.firebaseapp.com",
+  databaseURL: "https://year-5-default-rtdb.firebaseio.com",
+  projectId: "year-5",
+  storageBucket: "year-5.firebasestorage.app",
+  messagingSenderId: "289843229551",
+  appId: "1:289843229551:web:7fe690010e854fd6a7ae9a"
+};
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const classSelect = document.getElementById("classSelect");
+    const subjectSelect = document.getElementById("subjectSelect");
+
+    function populateDropdowns() {
+      db.ref("assessments").once("value", snapshot => {
+        const data = snapshot.val();
+        const classes = Object.keys(data || {});
+        classSelect.innerHTML = '<option value="">-- Select Class --</option>';
+        classes.forEach(cls => {
+          const option = document.createElement("option");
+          option.value = cls;
+          option.textContent = cls;
+          classSelect.appendChild(option);
+        });
+      });
+    }
+
+    classSelect.addEventListener("change", () => {
+      const selectedClass = classSelect.value;
+      if (!selectedClass) return;
+      db.ref(`assessments/${selectedClass}`).once("value", snap => {
+        const subjects = Object.keys(snap.val() || {});
+        subjectSelect.innerHTML = '<option value="">-- Select Subject --</option>';
+        subjects.forEach(sub => {
+          const option = document.createElement("option");
+          option.value = sub;
+          option.textContent = sub;
+          subjectSelect.appendChild(option);
+        });
+      });
+    });
+
+    async function startAssessment() {
+      const className = classSelect.value;
+      const subject = subjectSelect.value;
+      const studentName = document.getElementById("nameInput").value.trim();
+      if (!className || !subject || !studentName) {
+        alert("Please select class, subject and enter your name.");
+        return;
+      }
+
+      const linkSnap = await db.ref(`assessments/${className}/${subject}/link`).once("value");
+      const originalUrl = linkSnap.val();
+      if (!originalUrl) return alert("Assessment link not found.");
+
+      const scriptUrl = 'https://script.google.com/macros/s/AKfycbzGSvL_Ey5gzvb9K2Ba-OauEmQP-pn4pm8I9FVaX_7E0Du77pO0EsWUjCeqWqVPm1CEzg/exec';
+      const requestUrl = `${scriptUrl}?name=${encodeURIComponent(studentName)}&class=${encodeURIComponent(className)}&assign=${encodeURIComponent(subject)}&url=${encodeURIComponent(originalUrl)}`;
+
+      try {
+        const res = await fetch(requestUrl);
+        const result = await res.json();
+
+        if (result.url) {
+          const finalLink = result.url;
+          await db.ref(`submissions/${className}/${subject}/${studentName}`).set(finalLink);
+
+          document.getElementById("assessmentLink").href = finalLink;
+          document.getElementById("assessmentIframe").src = finalLink;
+          document.getElementById("assessmentContainer").style.display = "block";
+        } else {
+          alert("Copy creation failed.");
+        }
+      } catch (err) {
+        console.error("Fetch error:", err);
+        alert("Failed to start assessment.");
+      }
+    }
+
+    populateDropdowns();
+  </script>
+</body>
+</html>
