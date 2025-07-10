@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Name Confirmation - Orli International College</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+
+  <div class="max-w-xl w-full bg-white p-8 rounded-2xl shadow-lg">
+    <!-- Logo and School Name -->
+    <div class="flex items-center space-x-4 mb-6">
+      <img src="https://www.orliacademy.online/logo.png" alt="School Logo" class="w-14 h-14 rounded-full">
+      <h1 class="text-2xl font-bold text-purple-800">Orli International College</h1>
+    </div>
+
+    <!-- Message -->
+    <h2 class="text-xl font-semibold text-purple-700 mb-4">Confirmation of Student Name</h2>
+    <p class="text-gray-700 mb-6 leading-relaxed">
+      Dear Parents,<br><br>
+      We kindly ask that you confirm how you would like your child’s name to appear on their final documents.<br><br>
+      Kindly send your confirmation on or before <strong>Friday, 11th July 2025</strong> to enable us proceed accordingly and avoid the need for corrections.<br><br>
+      Thank you for your continued support and cooperation.<br><br>
+      <span class="block font-semibold">Warm regards,</span>
+      <span class="text-gray-800">Admin</span>
+    </p>
+
+    <!-- Form -->
+    <form onsubmit="handleSubmit(event)" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Parent Full Name</label>
+        <input id="parentName" type="text" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-purple-500 focus:border-purple-500" placeholder="e.g. Mrs. Jane Doe">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Student Full Name (as you want it to appear)</label>
+        <input id="studentName" type="text" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-purple-500 focus:border-purple-500" placeholder="e.g. John Michael Doe">
+      </div>
+
+      <button type="submit" class="w-full bg-purple-700 text-white py-2 px-4 rounded-md hover:bg-purple-800 transition">
+        Submit Confirmation
+      </button>
+    </form>
+  </div>
+
+  <!-- JavaScript for handling submission -->
+  <script>
+    function handleSubmit(event) {
+      event.preventDefault();
+
+      // Collect the input values
+      const parent = document.getElementById("parentName").value;
+      const student = document.getElementById("studentName").value;
+
+      // Store in sessionStorage (for use in admin-name.html if needed)
+      sessionStorage.setItem("parentName", parent);
+      sessionStorage.setItem("studentName", student);
+
+      // Redirect to admin-name.html (confidential handling)
+      window.location.href = "admin-name.html";
+    }
+  </script>
+</body>
+</html>

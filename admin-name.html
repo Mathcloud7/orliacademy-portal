@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin - Name Confirmation</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+
+  <div class="max-w-md w-full bg-white p-8 rounded-xl shadow-xl text-center">
+    <h1 class="text-2xl font-bold text-purple-700 mb-4">Parent Submission</h1>
+
+    <div id="confirmationData" class="text-gray-800 space-y-4">
+      <!-- Data will be inserted here -->
+    </div>
+
+    <div class="mt-6">
+      <a href="index.html" class="text-purple-700 underline text-sm hover:text-purple-900">Go back to form</a>
+    </div>
+  </div>
+
+  <script>
+    const parent = sessionStorage.getItem("parentName");
+    const student = sessionStorage.getItem("studentName");
+    const container = document.getElementById("confirmationData");
+
+    if (parent && student) {
+      container.innerHTML = `
+        <p><strong>Parent Name:</strong> ${parent}</p>
+        <p><strong>Student Name:</strong> ${student}</p>
+        <p class="text-green-600 font-medium mt-4">Submission received successfully.</p>
+      `;
+      // Clear the session after viewing
+      sessionStorage.removeItem("parentName");
+      sessionStorage.removeItem("studentName");
+    } else {
+      container.innerHTML = `
+        <p class="text-red-600 font-semibold">No submission data found. Please fill the form first.</p>
+      `;
+    }
+  </script>
+
+</body>
+</html>
