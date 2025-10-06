@@ -188,6 +188,48 @@
 
   <!-- HERO -->
   <section class="hero" aria-label="Hero section">
+    <div class="hero-slider">
+      <div class="slide active">
+        <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=1200&q=80&auto=format&fit=crop" alt="Creative workspace" loading="lazy">
+        <div class="caption">
+          <h2>Innovative Web Solutions</h2>
+          <p>Clean code, modern design, measurable impact.</p>
+        </div>
+      </div>
+      <div class="slide">
+        <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200&q=80&auto=format&fit=crop" alt="Team collaboration" loading="lazy">
+        <div class="caption">
+          <h2>Collaboration First</h2>
+          <p>Partnering with startups and small teams to grow ideas into brands.</p>
+        </div>
+      </div>
+      <div class="slide">
+        <img src="https://images.unsplash.com/photo-1487014679447-9f8336841d58?w=1200&q=80&auto=format&fit=crop" alt="Analytics dashboard" loading="lazy">
+        <div class="caption">
+          <h2>Data-Driven Strategy</h2>
+          <p>Every decision backed by insights and analytics.</p>
+        </div>
+      </div>
+      <div class="slide">
+        <img src="https://images.unsplash.com/photo-1581091870622-7a26c7e4c4f0?w=1200&q=80&auto=format&fit=crop" alt="E-commerce design" loading="lazy">
+        <div class="caption">
+          <h2>E-Commerce Excellence</h2>
+          <p>From store setup to seamless checkout experiences.</p>
+        </div>
+      </div>
+      <div class="slide">
+        <img src="https://images.unsplash.com/photo-1556761175-129418cb2dfe?w=1200&q=80&auto=format&fit=crop" alt="Modern branding" loading="lazy">
+        <div class="caption">
+          <h2>Memorable Branding</h2>
+          <p>Designs that stick, messages that resonate.</p>
+        </div>
+      </div>
+
+      <!-- Slider Controls -->
+      <button class="prev">&#10094;</button>
+      <button class="next">&#10095;</button>
+    </div>
+
     <div class="container hero-inner">
       <div>
         <div class="kicker badge">Trusted by small teams & startups</div>
@@ -218,6 +260,115 @@
       </aside>
     </div>
   </section>
+
+  <style>
+    /* Hero Slider */
+    .hero-slider {
+      position: relative;
+      width: 100%;
+      height: 520px;
+      overflow: hidden;
+      border-radius: var(--radius);
+      margin-bottom: 28px;
+    }
+    .hero-slider .slide {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+    }
+    .hero-slider .slide.active {
+      opacity: 1;
+      z-index: 1;
+    }
+    .hero-slider img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .hero-slider .caption {
+      position: absolute;
+      bottom: 40px;
+      left: 40px;
+      background: rgba(0,0,0,0.55);
+      color: #fff;
+      padding: 18px 24px;
+      border-radius: 10px;
+      max-width: 480px;
+    }
+    .hero-slider .caption h2 {
+      margin: 0 0 6px;
+      font-family: "Montserrat";
+      font-size: 26px;
+      font-weight: 700;
+    }
+    .hero-slider .caption p {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.4;
+    }
+    .hero-slider .prev,
+    .hero-slider .next {
+      cursor: pointer;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      padding: 10px;
+      font-size: 24px;
+      color: #fff;
+      background: rgba(0,0,0,0.4);
+      border: none;
+      border-radius: 50%;
+      transition: background 0.3s;
+    }
+    .hero-slider .prev:hover,
+    .hero-slider .next:hover {
+      background: rgba(0,0,0,0.7);
+    }
+    .hero-slider .prev { left: 15px; }
+    .hero-slider .next { right: 15px; }
+  </style>
+
+  <script>
+    // Hero Slider JS
+    const slides = document.querySelectorAll('.hero-slider .slide');
+    const prevBtn = document.querySelector('.hero-slider .prev');
+    const nextBtn = document.querySelector('.hero-slider .next');
+    let currentIndex = 0;
+    let autoSlide;
+
+    function showSlide(index) {
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('active', i === index);
+      });
+      currentIndex = index;
+    }
+
+    function nextSlide() {
+      let nextIndex = (currentIndex + 1) % slides.length;
+      showSlide(nextIndex);
+    }
+
+    function prevSlide() {
+      let prevIndex = (currentIndex - 1 + slides.length) % slides.length;
+      showSlide(prevIndex);
+    }
+
+    function startAutoSlide() {
+      autoSlide = setInterval(nextSlide, 5000);
+    }
+
+    function stopAutoSlide() {
+      clearInterval(autoSlide);
+    }
+
+    prevBtn.addEventListener('click', () => { prevSlide(); stopAutoSlide(); startAutoSlide(); });
+    nextBtn.addEventListener('click', () => { nextSlide(); stopAutoSlide(); startAutoSlide(); });
+
+    startAutoSlide();
+  </script>
+
 
   <!-- SERVICES -->
   <section id="services" class="section">
