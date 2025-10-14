@@ -436,109 +436,103 @@
     </div>
   </footer>
 
-  <script>
-    /* Toggle panels */
-    function togglePanel(id){
-      const panel = document.getElementById(id);
-      const body = panel.querySelector('.panel-body');
-      body.style.display = (body.style.display === 'block') ? 'none' : 'block';
-      // scroll into view for small screens
-      if (body.style.display === 'block') { panel.scrollIntoView({behavior:'smooth', block:'start'}); }
+<script>
+  /* Toggle panels */
+  function togglePanel(id) {
+    const panel = document.getElementById(id);
+    if (!panel) return;
+    const body = panel.querySelector('.panel-body');
+    const isVisible = body.style.display === 'block';
+    body.style.display = isVisible ? 'none' : 'block';
+    if (!isVisible) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  /* Compute class averages and generate summary text */
+  function computeAverages() {
+    const classIds = ['year6', 'year5', 'year4', 'year3', 'year2', 'year1'];
+    const averages = {};
+
+    function avgFromTable(tableId) {
+      const table = document.getElementById(tableId);
+      if (!table) return null;
+      const rows = Array.from(table.querySelectorAll('tbody tr'));
+      const scores = rows.map(r => parseFloat(r.cells[r.cells.length - 1].textContent.trim()) || 0);
+      if (scores.length === 0) return null;
+      const sum = scores.reduce((a, b) => a + b, 0);
+      return Math.round((sum / scores.length) * 10) / 10;
     }
 
-    /* Compute class averages and generate summary text */
-    function computeAverages(){
-      const classes = ['y6','y5','y4','y3','y2','y1'];
-      const results = {};
-      classes.forEach(c=>{
-        const table = document.getElementById('year' + c.slice(1) + '-table') || document.getElementById('year' + c + '-table');
-        // The IDs used above are year6-table ... so map appropriately:
-      });
-
-      /* Helper to compute from table id */
-      function avgFromTable(tableId){
-        const table = document.getElementById(tableId);
-        if(!table) return null;
-        const rows = Array.from(table.querySelectorAll('tbody tr'));
-        const vals = rows.map(r=>{
-          const cell = r.cells[r.cells.length -1];
-          return parseFloat(cell.textContent.trim()) || 0;
-        });
-        if(vals.length === 0) return null;
-        const sum = vals.reduce((a,b)=>a+b,0);
-        return Math.round((sum / vals.length) * 10) / 10; // 1 decimal
-      }
-
-      // IDs defined: year6-table, year5-table, year4-table, year3-table, year2-table, year1-table
-      const avgY6 = avgFromTable('year6-table');
-      const avgY5 = avgFromTable('year5-table');
-      const avgY4 = avgFromTable('year4-table');
-      const avgY3 = avgFromTable('year3-table');
-      const avgY2 = avgFromTable('year2-table');
-      const avgY1 = avgFromTable('year1-table');
-
-      if(avgY6 !== null) document.getElementById('avg-y6').textContent = avgY6 + '%';
-      if(avgY5 !== null) document.getElementById('avg-y5').textContent = avgY5 + '%';
-      if(avgY4 !== null) document.getElementById('avg-y4').textContent = avgY4 + '%';
-      if(avgY3 !== null) document.getElementById('avg-y3').textContent = avgY3 + '%';
-      if(avgY2 !== null) document.getElementById('avg-y2').textContent = avgY2 + '%';
-      if(avgY1 !== null) document.getElementById('avg-y1').textContent = avgY1 + '%';
-
-      // Create short summaries
-      const summaries = [];
-      function summarize(tableId, className, avg){
-        const table = document.getElementById(tableId);
-        if(!table) return;
-        const rows = Array.from(table.querySelectorAll('tbody tr'));
-        const above = [];
-        const below = [];
-        rows.forEach(r=>{
-          const student = r.cells[2].textContent.trim();
-          const score = parseFloat(r.cells[r.cells.length-1].textContent.trim());
-          if(score >= avg) above.push(student + ' (' + score + '%)');
-          else below.push(student + ' (' + score + '%)');
-        });
-        const s = `<strong>${className} (Avg: ${avg !== null ? avg + '%' : 'N/A'})</strong><br>
-                   <em>Above or equal to average:</em> ${above.length ? above.join(', ') : 'None'}<br>
-                   <em>Below average:</em> ${below.length ? below.join(', ') : 'None'}`;
-        summaries.push(s);
-      }
-
-      summarize('year6-table','Year 6', avgY6);
-      summarize('year5-table','Year 5', avgY5);
-      summarize('year4-table','Year 4', avgY4);
-      summarize('year3-table','Year 3', avgY3);
-      summarize('year2-table','Year 2', avgY2);
-      summarize('year1-table','Year 1', avgY1);
-
-      document.getElementById('class-summaries').innerHTML = summaries.join('<hr style="border:none;border-top:1px dashed #e1e6f2;margin:10px 0">');
-    }
-
-    // on load
-    window.addEventListener('DOMContentLoaded', () => {
-      // open top panels by default for presentation
-      document.querySelectorAll('.panel .panel-body').forEach(el=> el.style.display = 'block');
-      computeAverages();
+    // Compute averages
+    classIds.forEach(id => {
+      averages[id] = avgFromTable(id + '-table');
+      const avgCell = document.getElementById('avg-' + id);
+      if (avgCell && averages[id] !== null) avgCell.textContent = averages[id] + '%';
     });
 
-    /* PDF Export function using html2pdf */
-    function exportPDF(){
-      // Prepare options
-      const element = document.body; // We'll export whole body for full-length report
-      const opt = {
-        margin:       [10, 10, 10, 10], // top, left, bottom, right (mm)
-        filename:     'ORLI_ICT_MIDTERM_REPORT_14_Oct_2025.pdf',
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, logging: false, allowTaint: true },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['css', 'legacy'] }
-      };
-
-      // Add temporary print styles to show header on each page (html2pdf handles running headers weakly;
-      // we rely on current styles and page breaks via .page-break class if needed)
-      // Use html2pdf
-      html2pdf().set(opt).from(element).save();
+    // Summaries
+    const summaries = [];
+    function summarize(tableId, className, avg) {
+      const table = document.getElementById(tableId);
+      if (!table) return;
+      const rows = Array.from(table.querySelectorAll('tbody tr'));
+      const above = [], below = [];
+      rows.forEach(r => {
+        const student = r.cells[2].textContent.trim();
+        const score = parseFloat(r.cells[r.cells.length - 1].textContent.trim());
+        if (score >= avg) above.push(`${student} (${score}%)`);
+        else below.push(`${student} (${score}%)`);
+      });
+      const s = `
+        <strong>${className} (Avg: ${avg !== null ? avg + '%' : 'N/A'})</strong><br>
+        <em>Above or equal to average:</em> ${above.length ? above.join(', ') : 'None'}<br>
+        <em>Below average:</em> ${below.length ? below.join(', ') : 'None'}
+      `;
+      summaries.push(s);
     }
-  </script>
+
+    summarize('year6-table', 'Year 6', averages.year6);
+    summarize('year5-table', 'Year 5', averages.year5);
+    summarize('year4-table', 'Year 4', averages.year4);
+    summarize('year3-table', 'Year 3', averages.year3);
+    summarize('year2-table', 'Year 2', averages.year2);
+    summarize('year1-table', 'Year 1', averages.year1);
+
+    document.getElementById('class-summaries').innerHTML = summaries.join('<hr style="border:none;border-top:1px dashed #e1e6f2;margin:10px 0">');
+  }
+
+  /* Export as full-page PDF */
+  function exportPDF() {
+    // Make sure all panels are open for full capture
+    document.querySelectorAll('.panel-body').forEach(el => el.style.display = 'block');
+
+    // Wait a moment for layout to adjust before capture
+    setTimeout(() => {
+      const element = document.body;
+      const opt = {
+        margin: [10, 10, 10, 10],
+        filename: 'ORLI_ICT_MIDTERM_REPORT_14_Oct_2025.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          windowWidth: document.body.scrollWidth,
+          windowHeight: document.body.scrollHeight,
+        },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+      };
+      html2pdf().set(opt).from(element).save();
+    }, 300);
+  }
+
+  // On load
+  window.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.panel .panel-body').forEach(el => (el.style.display = 'block'));
+    computeAverages();
+  });
+</script>
+
 </body>
 </html>
+
