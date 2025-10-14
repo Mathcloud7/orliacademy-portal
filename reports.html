@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Orli International Academy - ICT Mid Term Report</title>
+<style>
+  body {
+    font-family: "Segoe UI", sans-serif;
+    background-color: #f8f9fc;
+    color: #222;
+    margin: 0;
+    padding: 0;
+  }
+
+  header {
+    background: #004aad;
+    color: white;
+    text-align: center;
+    padding: 25px;
+  }
+
+  header img {
+    height: 70px;
+    margin-bottom: 10px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 1.8em;
+  }
+
+  .container {
+    width: 95%;
+    max-width: 1100px;
+    margin: 20px auto;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+  }
+
+  .info {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .info p {
+    margin: 4px 0;
+  }
+
+  .toggle-section {
+    background: #004aad;
+    color: white;
+    padding: 12px 15px;
+    cursor: pointer;
+    border-radius: 6px;
+    margin-top: 10px;
+    font-weight: bold;
+  }
+
+  .section-content {
+    display: none;
+    padding: 15px;
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+  }
+
+  th {
+    background-color: #f0f2f8;
+  }
+
+  .note {
+    background: #e8f0fe;
+    padding: 10px;
+    border-left: 4px solid #004aad;
+    margin-top: 10px;
+  }
+
+  .btn-3d {
+    display: inline-block;
+    padding: 10px 20px;
+    background: linear-gradient(145deg, #004aad, #007bff);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    box-shadow: 0 5px #00367a;
+    transition: all 0.2s;
+  }
+
+  .btn-3d:active {
+    box-shadow: none;
+    transform: translateY(5px);
+  }
+
+  .download-btn {
+    display: block;
+    text-align: center;
+    background: #198754;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+    text-decoration: none;
+    cursor: pointer;
+    width: 200px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  @keyframes fadeIn {
+    from {opacity: 0; transform: translateY(-5px);}
+    to {opacity: 1; transform: translateY(0);}
+  }
+
+  footer {
+    text-align: center;
+    padding: 15px;
+    background: #004aad;
+    color: white;
+    margin-top: 30px;
+  }
+
+  @media print {
+    .toggle-section, .download-btn, .btn-3d {display: none;}
+    .section-content {display: block !important;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/3/3b/School_icon.svg" alt="School Logo">
+  <h1>ORLI INTERNATIONAL ACADEMY</h1>
+  <p><strong>MID TERM ICT REPORTS</strong></p>
+  <p>Presented by ICT Coordinator: <b>Marshall Jacob</b></p>
+  <p>Date: 14 October, 2025</p>
+</header>
+
+<div class="container">
+
+  <div class="info">
+    <p><b>Students Lesson Link:</b></p>
+    <a href="https://marshall-ict-class.vercel.app/" target="_blank" class="btn-3d">Visit ICT Lesson Page</a>
+  </div>
+
+  <!-- Curriculum -->
+  <div class="toggle-section" onclick="toggleSection(this)">📘 Curriculum Overview</div>
+  <div class="section-content">
+    <table>
+      <tr><th>Class</th><th>Topic</th><th>Learning Objective</th></tr>
+      <tr><td>Year 6 & 5</td><td>Computing systems and networks – Systems and Searching</td><td>Understand how information flows through systems.</td></tr>
+      <tr><td>Year 4</td><td>Computing systems and networks – The Internet</td><td>Explain how the internet connects people and devices globally.</td></tr>
+      <tr><td>Year 3</td><td>Computing systems and networks – Connecting Computers</td><td>Describe how computers connect in networks.</td></tr>
+      <tr><td>Year 2</td><td>Computing systems and networks – IT around us</td><td>Identify uses of IT safely around us.</td></tr>
+      <tr><td>Year 1</td><td>Computing systems and networks – Technology Around Us</td><td>Recognize common technology in daily life.</td></tr>
+    </table>
+  </div>
+
+  <!-- Student Performance -->
+  <div class="toggle-section" onclick="toggleSection(this)">🎓 Student Performance (First CA 2025/2026)</div>
+  <div class="section-content">
+
+    <h3>Year 6</h3>
+    <table>
+      <tr><th>Type</th><th>Class</th><th>Subject</th><th>Student</th><th>Score (%)</th><th>Details</th></tr>
+      <tr><td>CA1</td><td>Year 6 First Term</td><td>ICT</td><td>Zikora Ifebigh</td><td>75%</td><td>View Details</td></tr>
+    </table>
+    <p><b>Summary:</b> Zikora performed well, demonstrating solid understanding of systems. Class average: <b>75%</b>.</p>
+
+    <h3>Year 5</h3>
+    <table>
+      <tr><th>Type</th><th>Class</th><th>Subject</th><th>Student</th><th>Score (%)</th><th>Details</th></tr>
+      <tr><td>CA1</td><td>Year 5 First Term</td><td>ICT</td><td>Elias Joshua</td><td>95%</td><td>View Details</td></tr>
+    </table>
+    <p><b>Summary:</b> Excellent performance. Elias demonstrated high creativity. Class average: <b>95%</b>.</p>
+
+    <h3>Year 4</h3>
+    <table>
+      <tr><th>Type</th><th>Class</th><th>Subject</th><th>Student</th><th>Score (%)</th><th>Details</th></tr>
+      <tr><td colspan="6"><b>All students scored 100%</b></td></tr>
+      <tr><td>CA1</td><td>Year 4</td><td>ICT</td><td>Emmanuel Ebubechukwu</td><td>100%</td><td>View Details</td></tr>
+      <tr><td>CA1</td><td>Year 4</td><td>ICT</td><td>Abdulrahman Adam Aliyu</td><td>100%</td><td>View Details</td></tr>
+      <tr><td>CA1</td><td>Year 4</td><td>ICT</td><td>Barachel Akobi</td><td>100%</td><td>View Details</td></tr>
+      <tr><td>CA1</td><td>Year 4</td><td>ICT</td><td>Amayanvbo Adesuwa Vera</td><td>100%</td><td>View Details</td></tr>
+      <tr><td>CA1</td><td>Year 4</td><td>ICT</td><td>Ifebigh Chizua</td><td>100%</td><td>View Details</td></tr>
+      <tr><td>CA1</td><td>Year 4</td><td>ICT</td><td>Uchechukwu Tochukwu</td><td>100%</td><td>View Details</td></tr>
+    </table>
+    <p><b>Summary:</b> Excellent overall. Class average: <b>100%</b>.</p>
+
+    <h3>Year 3</h3>
+    <table>
+      <tr><th>Type</th><th>Class</th><th>Subject</th><th>Student</th><th>Score (%)</th><th>Details</th></tr>
+      <tr><td>CA1</td><td>Year 3</td><td>ICT</td><td>Adibenma Amarachimoma Ojukwu</td><td>80%</td><td>View Details</td></tr>
+      <tr><td>CA1</td><td>Year 3</td><td>ICT</td><td>Eghsoa</td><td>75%</td><td>View Details</td></tr>
+      <tr><td>CA1</td><td>Year 3</td><td>ICT</td><td>Mahmoud Abdullahi</td><td>80%</td><td>View Details</td></tr>
+      <tr><td>CA1</td><td>Year 3</td><td>ICT</td><td>Joanna Joshua-Anar</td><td>60%</td><td>View Details</td></tr>
+      <tr><td>CA1</td><td>Year 3</td><td>ICT</td><td>Nichole</td><td>85%</td><td>View Details</td></tr>
+      <tr><td>CA1</td><td>Year 3</td><td>ICT</td><td>OMONMEHELE PEARL</td><td>100%</td><td>View Details</td></tr>
+      <tr><td>CA1</td><td>Year 3</td><td>ICT</td><td>IFECHIMKELUNMA AMAMCHIM ADEBENMA</td><td>65%</td><td>View Details</td></tr>
+    </table>
+    <p><b>Summary:</b> Most students performed well. Below average: Joanna (60%) and Ifechimkelunma (65%). Class average: <b>78%</b>.</p>
+
+    <h3>Year 2</h3>
+    <table>
+      <tr><th>Type</th><th>Class</th><th>Subject</th><th>Student</th><th>Score (%)</th><th>Details</th></tr>
+      <tr><td>CA1</td><td>Year 2</td><td>ICT</td><td>Chimatoka Ifebigh</td><td>85%</td><td>View Details</td></tr>
+      <tr><td>CA1</td><td>Year 2</td><td>ICT</td><td>Mohammed Abdulrahman Adam</td><td>95%</td><td>View Details</td></tr>
+      <tr><td>CA1</td><td>Year 2</td><td>ICT</td><td>Joshua Samson</td><td>80%</td><td>View Details</td></tr>
+      <tr><td>CA1</td><td>Year 2</td><td>ICT</td><td>Ramiah Akobi</td><td>90%</td><td>View Details</td></tr>
+      <tr><td>CA1</td><td>Year 2</td><td>ICT</td><td>Jason Orieru</td><td>85%</td><td>View Details</td></tr>
+    </table>
+    <p><b>Summary:</b> Class average: <b>87%</b>. Excellent performance overall.</p>
+
+    <h3>Year 1</h3>
+    <table>
+      <tr><th>Type</th><th>Class</th><th>Subject</th><th>Student</th><th>Score (%)</th><th>Details</th></tr>
+      <tr><td>CA1</td><td>Year 1</td><td>ICT</td><td>Nora Akinyinka</td><td>86.7%</td><td>View Details</td></tr>
+      <tr><td>CA1</td><td>Year 1</td><td>ICT</td><td>Firefunmi Akingunola</td><td>86.7%</td><td>View Details</td></tr>
+      <tr><td>CA1</td><td>Year 1</td><td>ICT</td><td>Jayden Imabekhai</td><td>53.3%</td><td>View Details</td></tr>
+      <tr><td>CA1</td><td>Year 1</td><td>ICT</td><td>Jayson Imabekhai</td><td>73.3%</td><td>View Details</td></tr>
+      <tr><td>CA1</td><td>Year 1</td><td>ICT</td><td>Asher Aronu</td><td>80%</td><td>View Details</td></tr>
+    </table>
+    <p><b>Summary:</b> Good performance. Jayden below average. Class average: <b>76%</b>.</p>
+
+  </div>
+
+  <!-- ICT Tools -->
+  <div class="toggle-section" onclick="toggleSection(this)">💻 ICT Tools & Resources</div>
+  <div class="section-content">
+    <table>
+      <tr><th>Equipment</th><th>Quantity</th><th>Working</th><th>Remarks</th></tr>
+      <tr><td>Desktop Computers</td><td>24</td><td>20</td><td>4 need replacement</td></tr>
+      <tr><td>Laptops</td><td>6</td><td>6</td><td>Fully operational</td></tr>
+      <tr><td>Smartboards</td><td>2</td><td>2</td><td>Used in daily lessons</td></tr>
+      <tr><td>Printers</td><td>2</td><td>1</td><td>Cartridge replacement needed</td></tr>
+      <tr><td>Routers</td><td>2</td><td>2</td><td>Internet signal weak</td></tr>
+    </table>
+
+    <div class="note">
+      <b>Notes:</b><br>
+      • School portal pending activation (temporary portal used for 1st CA) <a href="https://www.orliacademy.online/" target="_blank" class="btn-3d">Visit Portal</a><br>
+      • Most Year 1 students lack devices – class teacher notified parents.<br>
+      • Elias in Year 4 does not have a device.<br>
+      • Internet connection still affecting optimum ICT usage.
+    </div>
+  </div>
+
+  <!-- Recommendations -->
+  <div class="toggle-section" onclick="toggleSection(this)">🪄 Recommendations</div>
+  <div class="section-content">
+    <ul>
+      <li>Upgrade the school’s internet connection to a stronger, more stable service provider.</li>
+      <li>Replace 4 non-working computers in the ICT lab.</li>
+      <li>Provide additional laptops for teachers to enhance ICT integration.</li>
+      <li>Encourage parents of Year 1 students to provide learning devices.</li>
+      <li>Activate the official school portal for continuous online assessment and CA integration.</li>
+    </ul>
+  </div>
+
+  <button class="download-btn" onclick="window.print()">📄 Download PDF Report</button>
+
+</div>
+
+<footer>
+  © 2025 Orli International Academy – ICT Department
+</footer>
+
+<script>
+  function toggleSection(el) {
+    const content = el.nextElementSibling;
+    content.style.display = content.style.display === 'block' ? 'none' : 'block';
+  }
+</script>
+
+</body>
+</html>
