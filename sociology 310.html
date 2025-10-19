@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SOC 310 | Introduction to Social Work</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    /* Global Styles */
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f4f6f8;
+      color: #333;
+    }
+
+    header {
+      background: #0052cc;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 600;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .container {
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    h2 {
+      margin-top: 30px;
+      font-size: 1.4rem;
+      color: #0052cc;
+    }
+
+    p {
+      line-height: 1.6;
+      margin-bottom: 15px;
+    }
+
+    /* 3D Button */
+    .topic-button {
+      display: block;
+      width: 100%;
+      background: linear-gradient(145deg, #007bff, #0052cc);
+      color: white;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 15px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 6px #003d99;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .topic-button:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px #003d99;
+    }
+
+    .topic-content {
+      background: white;
+      padding: 20px;
+      margin-top: 10px;
+      border-radius: 12px;
+      display: none;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .read-buttons {
+      margin-top: 10px;
+    }
+
+    .read-buttons button {
+      padding: 10px 15px;
+      margin-right: 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .read-btn {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .stop-btn {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    @media (max-width: 600px) {
+      header {
+        font-size: 1.2rem;
+      }
+      .topic-button {
+        font-size: 0.9rem;
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    SOC 310 - Introduction to Social Work
+  </header>
+
+  <div class="container">
+
+    <h2>Course Outline</h2>
+
+    <!-- Topic Buttons -->
+    <button class="topic-button" onclick="toggleTopic('topic1')">1. Introduction to Social Work</button>
+    <div id="topic1" class="topic-content">
+      <p><strong>Definition:</strong> Social work is a profession dedicated to helping individuals, families, and communities improve their well-being and social functioning.</p>
+      <p><strong>Scope:</strong> It covers healthcare, education, community development, and social justice initiatives.</p>
+      <p><strong>Real-life Example:</strong> A social worker helping a family find affordable housing or assisting children in foster care.</p>
+      <div class="read-buttons">
+        <button class="read-btn" onclick="readText('topic1')">🔊 Read Aloud</button>
+        <button class="stop-btn" onclick="stopReading()">⏹ Stop</button>
+      </div>
+    </div>
+
+    <button class="topic-button" onclick="toggleTopic('topic2')">2. Historical Development of Social Work</button>
+    <div id="topic2" class="topic-content">
+      <p><strong>Origin & Evolution:</strong> Social work began in the 19th century to address poverty and social inequality.</p>
+      <p><strong>Western Growth:</strong> Developed professional standards and organizations in Europe & USA.</p>
+      <p><strong>Africa & Nigeria:</strong> Introduced through colonial influence; now includes government and NGO interventions.</p>
+      <p><strong>Example:</strong> Establishment of NGOs in Nigeria to support child welfare and education programs.</p>
+      <div class="read-buttons">
+        <button class="read-btn" onclick="readText('topic2')">🔊 Read Aloud</button>
+        <button class="stop-btn" onclick="stopReading()">⏹ Stop</button>
+      </div>
+    </div>
+
+    <button class="topic-button" onclick="toggleTopic('topic3')">3. Values and Ethics in Social Work</button>
+    <div id="topic3" class="topic-content">
+      <p><strong>Core Values:</strong> Respect for human dignity, social justice, integrity, and compassion.</p>
+      <p><strong>Ethical Principles:</strong> Ensure confidentiality, fairness, and advocacy for vulnerable populations.</p>
+      <p><strong>Example:</strong> Supporting victims of domestic violence while protecting their privacy.</p>
+      <div class="read-buttons">
+        <button class="read-btn" onclick="readText('topic3')">🔊 Read Aloud</button>
+        <button class="stop-btn" onclick="stopReading()">⏹ Stop</button>
+      </div>
+    </div>
+
+    <button class="topic-button" onclick="toggleTopic('topic4')">4. Fields and Settings of Social Work Practice</button>
+<div id="topic4" class="topic-content">
+  <p><strong>Social Work in Various Fields:</strong> Social workers operate in healthcare, education, industry, military, corrections, and community programs.</p>
+  <p><strong>Social Welfare Agencies:</strong> Government and non-governmental organizations provide support services such as counseling, housing, and food aid.</p>
+  <p><strong>Roles of Social Workers:</strong> They help individuals and groups solve problems, advocate for rights, and connect people with resources.</p>
+  <p><strong>Example:</strong> A social worker in a school helping students with emotional challenges or linking families to community health services.</p>
+  <div class="read-buttons">
+    <button class="read-btn" onclick="readText('topic4')">🔊 Read Aloud</button>
+    <button class="stop-btn" onclick="stopReading()">⏹ Stop</button>
+  </div>
+</div>
+
+<button class="topic-button" onclick="toggleTopic('topic5')">5. Methods of Social Work</button>
+<div id="topic5" class="topic-content">
+  <p><strong>Casework (Individual):</strong> Working one-on-one with clients to solve personal or family issues.</p>
+  <p><strong>Group Work:</strong> Helping groups of people with similar problems, like support groups for addiction recovery.</p>
+  <p><strong>Community Organization:</strong> Planning and leading community projects to improve living conditions.</p>
+  <p><strong>Social Welfare Administration:</strong> Managing programs and services that help vulnerable populations.</p>
+  <p><strong>Social Work Research:</strong> Studying social problems to create effective solutions.</p>
+  <p><strong>Example:</strong> Running a community literacy program or a youth mentorship group.</p>
+  <div class="read-buttons">
+    <button class="read-btn" onclick="readText('topic5')">🔊 Read Aloud</button>
+    <button class="stop-btn" onclick="stopReading()">⏹ Stop</button>
+  </div>
+</div>
+
+<button class="topic-button" onclick="toggleTopic('topic6')">6. The Helping Process in Social Work</button>
+<div id="topic6" class="topic-content">
+  <p><strong>Steps in Helping:</strong> Engagement, assessment, planning, intervention, evaluation, and termination.</p>
+  <p><strong>Skills Required:</strong> Listening carefully, showing empathy, interviewing, clear communication, and problem-solving.</p>
+  <p><strong>Example:</strong> A social worker helping a family plan a budget, connecting them to resources, following up, and gradually ending direct support once the family is self-sufficient.</p>
+  <div class="read-buttons">
+    <button class="read-btn" onclick="readText('topic6')">🔊 Read Aloud</button>
+    <button class="stop-btn" onclick="stopReading()">⏹ Stop</button>
+  </div>
+</div>
+    <button class="topic-button" onclick="toggleTopic('topic7')">7. Social Problems and Social Work Responses</button>
+<div id="topic7" class="topic-content">
+  <p><strong>Social Problems:</strong> Poverty, unemployment, family breakdown, child abuse, gender-based violence, drug abuse, and crime.</p>
+  <p><strong>Social Work Responses:</strong> Social workers provide support, advocacy, counseling, and connect people to resources to address these issues.</p>
+  <p><strong>Example:</strong> Helping families access job training programs, counseling abused children, or organizing community crime-prevention initiatives.</p>
+  <div class="read-buttons">
+    <button class="read-btn" onclick="readText('topic7')">🔊 Read Aloud</button>
+    <button class="stop-btn" onclick="stopReading()">⏹ Stop</button>
+  </div>
+</div>
+
+<button class="topic-button" onclick="toggleTopic('topic8')">8. Contemporary Issues in Social Work</button>
+<div id="topic8" class="topic-content">
+  <p><strong>Globalization:</strong> Social workers face challenges like migration, cultural diversity, and global social issues.</p>
+  <p><strong>Human Rights & Advocacy:</strong> Promoting equality, protecting vulnerable populations, and speaking against injustice.</p>
+  <p><strong>Sustainable Development Goals (SDGs):</strong> Social workers support education, health, gender equality, and poverty reduction initiatives.</p>
+  <p><strong>Example:</strong> Advocating for refugees’ rights or running programs that support girls’ education in communities.</p>
+  <div class="read-buttons">
+    <button class="read-btn" onclick="readText('topic8')">🔊 Read Aloud</button>
+    <button class="stop-btn" onclick="stopReading()">⏹ Stop</button>
+  </div>
+</div>
+
+<button class="topic-button" onclick="toggleTopic('topic9')">9. The Future of Social Work in Nigeria</button>
+<div id="topic9" class="topic-content">
+  <p><strong>Challenges:</strong> Limited resources, lack of professional recognition, and social inequality.</p>
+  <p><strong>Professionalization & Regulation:</strong> Efforts to establish standards, licensing, and professional associations for social workers in Nigeria.</p>
+  <p><strong>Opportunities:</strong> Growth in specialized areas such as child protection, mental health, community development, and policy advocacy.</p>
+  <p><strong>Example:</strong> Young social workers creating NGOs to address youth unemployment or mental health awareness programs in Nigerian communities.</p>
+  <div class="read-buttons">
+    <button class="read-btn" onclick="readText('topic9')">🔊 Read Aloud</button>
+    <button class="stop-btn" onclick="stopReading()">⏹ Stop</button>
+  </div>
+</div>
+    <!-- Add more topics similarly -->
+    <!-- You can continue topics 4–9 here following the same structure -->
+
+  </div>
+
+  <script>
+    // Toggle topic content visibility
+    function toggleTopic(id) {
+      const content = document.getElementById(id);
+      content.style.display = content.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // Speech synthesis for read aloud
+    let synth = window.speechSynthesis;
+    let currentUtterance;
+
+    function readText(id) {
+      stopReading(); // stop any ongoing speech
+      const content = document.getElementById(id).innerText;
+      currentUtterance = new SpeechSynthesisUtterance(content);
+      currentUtterance.rate = 0.8; // slower rate for clarity
+      currentUtterance.pitch = 1;
+      synth.speak(currentUtterance);
+    }
+
+    function stopReading() {
+      if (synth.speaking) {
+        synth.cancel();
+      }
+    }
+  </script>
+
+</body>
+</html>
