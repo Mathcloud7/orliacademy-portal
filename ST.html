@@ -310,15 +310,25 @@
     }
 
     function speakText(text) {
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const utter = new SpeechSynthesisUtterance(text);
-        utter.lang = 'en-GB';
-        utter.rate = 0.85; // 👈 Slower and clear voice
-        utter.pitch = 1;
-        window.speechSynthesis.speak(utter);
-      } else alert('Read Aloud not supported on this browser.');
-    }
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'en-GB';           // British English
+    utter.rate = 0.7;               // Slower pace for clarity
+    utter.pitch = 1.2;              // Slightly higher pitch for naturalness
+
+    // Optional: Choose a more natural voice if available
+    const voices = window.speechSynthesis.getVoices();
+    const selectedVoice = voices.find(voice => voice.lang === 'en-GB' && voice.name.includes('Female')) 
+                          || voices[0];
+    if (selectedVoice) utter.voice = selectedVoice;
+
+    window.speechSynthesis.speak(utter);
+  } else {
+    alert('Read Aloud not supported on this browser.');
+  }
+}
   </script>
 </body>
 </html>
