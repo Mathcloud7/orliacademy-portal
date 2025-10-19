@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ORLI International Academy | Holiday Learning Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #f0f6ff, #e4ebff);
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(135deg, #002b80, #0044cc);
+      color: white;
+      text-align: center;
+      padding: 25px 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    }
+
+    .header-text {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .header-text img {
+      width: 70px;
+      height: 70px;
+      border-radius: 14px;
+      background: white;
+    }
+
+    header h1 {
+      font-size: 1.8em;
+      font-weight: 700;
+    }
+
+    header p {
+      font-size: 1em;
+      color: #e0e0e0;
+      margin-top: 5px;
+      font-style: italic;
+    }
+
+    main {
+      flex: 1;
+      padding: 25px;
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .intro, .login-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      padding: 25px;
+      margin-bottom: 25px;
+      animation: fadeIn 1s ease;
+    }
+
+    .intro h2 { color: #003366; font-size: 1.5em; margin-bottom: 10px; }
+    .intro p { font-size: 1em; line-height: 1.6; color: #555; }
+
+    .login-card input {
+      padding: 12px 15px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      width: 80%;
+      max-width: 300px;
+      font-size: 1em;
+      margin-bottom: 15px;
+      outline: none;
+    }
+
+    .login-card button {
+      padding: 12px 25px;
+      background: linear-gradient(145deg, #0044cc, #0066ff);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+    }
+    .login-card button:hover { transform: translateY(-3px); }
+
+    .lesson-container { display: none; animation: fadeIn 1s ease; }
+
+    .lesson-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 25px rgba(0,0,0,0.15);
+      padding: 25px;
+      text-align: left;
+      margin-bottom: 20px;
+      animation: fadeIn 0.8s ease;
+    }
+
+    .lesson-title {
+      color: #003366;
+      font-size: 1.3em;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 10px;
+      border-left: 4px solid #003366;
+      padding-left: 10px;
+    }
+
+    .lesson-content {
+      display: none;
+      margin-top: 10px;
+      line-height: 1.6;
+      color: #444;
+    }
+
+    .lesson-content.active { display: block; }
+
+    .btn-group {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .meet-btn, .read-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+      color: white;
+    }
+
+    .meet-btn { background: #0077ff; }
+    .read-btn { background: #008037; }
+
+    .meet-btn:hover { background: #005fd1; }
+    .read-btn:hover { background: #00a74a; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    footer {
+      background: #002b80;
+      color: white;
+      text-align: center;
+      padding: 15px;
+      font-size: 0.9em;
+      margin-top: auto;
+    }
+
+    @media (max-width: 600px) {
+      .lesson-card { padding: 20px; }
+      .meet-btn, .read-btn { flex: 1; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-text">
+      <img src="https://orli-international-academy.vercel.app/logo.png" alt="ORLI Logo">
+      <div>
+        <h1>ORLI International Academy</h1>
+        <p>"To Raise a Well-Informed Student"</p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="intro" id="intro">
+      <h2>Welcome to ORLI Holiday Learning Portal</h2>
+      <p>Students can access all class lessons and their Google Meet links by entering the class passcode below.<br><br>
+      🌟 <em>"Learning never stops — even during holidays!"</em></p>
+      <button class="read-btn" onclick="readIntro()">🔊 Read Aloud</button>
+    </div>
+
+    <div class="login-card" id="loginCard">
+      <h3>Enter Your Class Passcode</h3>
+      <input type="password" id="passcodeInput" placeholder="Enter passcode e.g. Orli-Y002" />
+      <br>
+      <button onclick="verifyPasscode()">Access Class</button>
+      <p id="errorText" style="color:red; margin-top:10px;"></p>
+    </div>
+
+    <div class="lesson-container" id="lessonContainer">
+      <h2 id="classHeader" style="color:#003366; margin-bottom:20px;"></h2>
+      <div id="lessonsList"></div>
+    </div>
+  </main>
+
+  <footer>© 2025 ORLI International Academy. All Rights Reserved.</footer>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyB4DMYZJHWgbRUZV-uamOy7TpxLM1sGYPY",
+      authDomain: "chats-afcff.firebaseapp.com",
+      databaseURL: "https://chats-afcff-default-rtdb.firebaseio.com",
+      projectId: "chats-afcff",
+      storageBucket: "chats-afcff.appspot.com",
+      messagingSenderId: "764250889947",
+      appId: "1:764250889947:web:2c843497ce389edf5876fe"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const passcodes = {
+      "Orli-N001": "Nursery 1",
+      "Orli-N002": "Nursery 2",
+      "Orli-Y001": "Year 1",
+      "Orli-Y002": "Year 2",
+      "Orli-Y003": "Year 3",
+      "Orli-Y004": "Year 4",
+      "Orli-Y005": "Year 5",
+      "Orli-Y006": "Year 6"
+    };
+
+    function verifyPasscode() {
+      const code = document.getElementById('passcodeInput').value.trim();
+      const errorText = document.getElementById('errorText');
+      if (!passcodes[code]) {
+        errorText.textContent = "❌ Invalid passcode. Please check and try again.";
+        return;
+      }
+      errorText.textContent = "";
+      const className = passcodes[code];
+      document.getElementById('loginCard').style.display = 'none';
+      document.getElementById('intro').style.display = 'none';
+      loadLessons(className);
+    }
+
+    function loadLessons(className) {
+      const container = document.getElementById('lessonContainer');
+      const list = document.getElementById('lessonsList');
+      document.getElementById('classHeader').textContent = `${className} Holiday Lessons`;
+      container.style.display = 'block';
+      list.innerHTML = "<p>Loading lessons...</p>";
+
+      db.ref('holiday_lessons/' + className).on('value', snapshot => {
+        const lessons = snapshot.val();
+        if (!lessons) {
+          list.innerHTML = "<p>No lessons posted yet for this class.</p>";
+          return;
+        }
+
+        list.innerHTML = "";
+        Object.entries(lessons).forEach(([id, data]) => {
+          const card = document.createElement('div');
+          card.className = 'lesson-card';
+          card.innerHTML = `
+            <div class="lesson-title" onclick="toggleLesson('${id}')">${data.title || 'Untitled Lesson'}</div>
+            <div class="lesson-content" id="content-${id}">
+              <div>${data.lesson || ''}</div>
+              <div class="btn-group">
+                <button class="read-btn" onclick="readLesson('${id}', '${className}')">🔊 Read Aloud</button>
+                ${data.link ? `<a href="${data.link}" target="_blank" class="meet-btn">🎥 Google Meet</a>` : ''}
+              </div>
+            </div>
+          `;
+          list.appendChild(card);
+        });
+      });
+    }
+
+    function toggleLesson(id) {
+      const content = document.getElementById('content-' + id);
+      content.classList.toggle('active');
+    }
+
+    function readIntro() {
+      speakText(document.getElementById('intro').innerText);
+    }
+
+    function readLesson(id, className) {
+      db.ref(`holiday_lessons/${className}/${id}`).once('value').then(snap => {
+        const text = snap.val().lesson.replace(/<[^>]*>/g, '');
+        speakText(text);
+      });
+    }
+
+    function speakText(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'en-GB';
+        utter.rate = 1;
+        utter.pitch = 1;
+        window.speechSynthesis.speak(utter);
+      } else alert('Read Aloud not supported on this browser.');
+    }
+  </script>
+</body>
+</html>
