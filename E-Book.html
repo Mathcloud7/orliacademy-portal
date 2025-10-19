@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Easy-to-Read Study Companion</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: #f0f4f8;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(90deg, #4e54c8, #8f94fb);
+      padding: 20px 40px;
+      text-align: center;
+      color: #fff;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+    }
+
+    header p {
+      font-size: 1rem;
+      font-weight: 400;
+    }
+
+    main {
+      flex: 1;
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .courses {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 30px;
+      width: 100%;
+      max-width: 1200px;
+    }
+
+    .course-btn {
+      background: linear-gradient(145deg, #ff7e5f, #feb47b);
+      color: #fff;
+      padding: 25px 20px;
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 15px;
+      box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      perspective: 1000px;
+    }
+
+    .course-btn:hover {
+      transform: rotateX(10deg) scale(1.05);
+      box-shadow: 0 12px 20px rgba(0,0,0,0.3);
+    }
+
+    .course-btn a {
+      text-decoration: none;
+      color: #fff;
+      display: block;
+    }
+
+    footer {
+      background: #4e54c8;
+      color: #fff;
+      padding: 40px 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      animation: fadeIn 1.5s ease-in-out;
+    }
+
+    footer p {
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+    }
+
+    .subscribe-btn {
+      background: #ff7e5f;
+      color: #fff;
+      padding: 15px 30px;
+      border: none;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .subscribe-btn:hover {
+      background: #feb47b;
+      transform: scale(1.05);
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0;}
+      to {opacity: 1;}
+    }
+
+    @media(max-width: 600px){
+      header h1 {
+        font-size: 1.8rem;
+      }
+
+      .course-btn {
+        padding: 20px 15px;
+        font-size: 1rem;
+      }
+
+      footer p {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>My Easy-to-Read Study Companion</h1>
+    <p>Your go-to platform for easy learning and better understanding</p>
+  </header>
+
+  <main>
+    <h2 style="margin-bottom:30px;">Explore Our Courses</h2>
+    <div class="courses">
+      <div class="course-btn"><a href="sociology 310.html">SOC 310</a></div>
+      <div class="course-btn"><a href="course2.html">English</a></div>
+      <div class="course-btn"><a href="course3.html">Science</a></div>
+      <div class="course-btn"><a href="course4.html">Social Studies</a></div>
+      <div class="course-btn"><a href="course5.html">History</a></div>
+      <div class="course-btn"><a href="course6.html">Geography</a></div>
+      <div class="course-btn"><a href="course7.html">Computer Studies</a></div>
+      <div class="course-btn"><a href="course8.html">Art & Design</a></div>
+      <div class="course-btn"><a href="course9.html">Economics</a></div>
+      <div class="course-btn"><a href="course10.html">Civic Education</a></div>
+    </div>
+  </main>
+
+  <footer>
+    <p>Subscribe now to receive easy-to-follow study tips and course updates straight to your WhatsApp!</p>
+    <a class="subscribe-btn" href="https://wa.me/2348102341648?text=Hello%20MathCloud%20Web%20Services,%20I%20want%20to%20subscribe" target="_blank">Subscribe via WhatsApp</a>
+    <p style="margin-top:20px; font-size:0.9rem;">Join thousands of learners making studying simple and fun!</p>
+  </footer>
+
+</body>
+</html>
