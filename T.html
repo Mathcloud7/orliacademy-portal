@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teacher Portal | ORLI International Academy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- Quill Editor -->
+  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f5f7fb;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #003366;
+      color: white;
+      padding: 18px 20px;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.12);
+    }
+    .header-text {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+    .header-text img {
+      width: 56px;
+      height: 56px;
+      border-radius: 8px;
+      background: white;
+    }
+    header h1 { margin: 0; font-size: 1.2rem; }
+    header p { margin-top: 6px; color: #d7e6ff; font-size: 0.95rem; }
+
+    main {
+      flex: 1;
+      padding: 22px;
+      max-width: 980px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .form-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+      margin-bottom: 26px;
+    }
+
+    .top-row {
+      display:flex;
+      gap:12px;
+      align-items:center;
+      margin-bottom:12px;
+    }
+
+    label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 8px;
+      margin-top: 10px;
+    }
+
+    select, input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #d0d7df;
+      font-size: 0.98rem;
+    }
+
+    #editor-container {
+      height: 220px;
+      background: #fff;
+      border: 1px solid #e1e6eb;
+      border-radius: 8px;
+      margin-top: 10px;
+      margin-bottom: 8px;
+    }
+
+    .controls {
+      display:flex;
+      gap:10px;
+      align-items:center;
+      margin-top:12px;
+    }
+
+    .btn {
+      background: #003366;
+      color: white;
+      border: none;
+      padding: 10px 14px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor:pointer;
+    }
+    .btn.secondary { background: #6c757d; }
+    .btn.danger { background: #c0392b; }
+
+    .lesson-list {
+      background: white;
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+    }
+
+    .lesson-item {
+      border-bottom: 1px solid #f0f0f0;
+      padding: 14px 0;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .lesson-item:last-child { border-bottom: none; }
+    .lesson-meta { color:#555; font-size:0.92rem; display:flex; gap:12px; flex-wrap:wrap; }
+    .lesson-actions { margin-top:6px; display:flex; gap:8px; }
+
+    .lesson-actions button {
+      padding:7px 11px;
+      border-radius:8px;
+      border: none;
+      cursor:pointer;
+      font-weight:600;
+    }
+    .lesson-actions .edit { background:#ffb74d; color:#3d2f00; }
+    .lesson-actions .delete { background:#e57373; color:white; }
+    .lesson-actions .open { background:#64b5f6; color:white; }
+
+    footer {
+      background: #003366;
+      color: white;
+      text-align: center;
+      padding: 12px;
+      font-size: 0.9em;
+      margin-top: 26px;
+    }
+
+    .small-muted { color:#6b7280; font-size:0.9rem; }
+
+    @media (max-width: 680px) {
+      .top-row { flex-direction:column; }
+      header h1 { font-size: 1rem; }
+      #editor-container { height:180px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-text">
+      <img src="https://orli-international-academy.vercel.app/logo.png" alt="ORLI Logo" onerror="this.src='https://via.placeholder.com/56';">
+      <div>
+        <h1>ORLI International Academy</h1>
+        <p>Holiday Learning Portal — Teacher Page</p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="form-card">
+      <h2 style="color:#003366; margin-bottom:8px;">Share / Edit Lesson</h2>
+
+      <div class="top-row">
+        <div style="flex:1">
+          <label for="classSelect">Select Class</label>
+          <select id="classSelect">
+            <option value="">-- Select Class --</option>
+            <option>Nursery 1</option><option>Nursery 2</option>
+            <option>Year 1</option><option>Year 2</option>
+            <option>Year 3</option><option>Year 4</option>
+            <option>Year 5</option><option>Year 6</option>
+          </select>
+          <div class="small-muted" style="margin-top:6px;">Choose a class to view or post lessons.</div>
+        </div>
+
+        <div style="width:220px">
+          <label for="meetLink">Google Meet Link</label>
+          <input type="text" id="meetLink" placeholder="https://meet.google.com/abc-defg-hij">
+        </div>
+      </div>
+
+      <label>Lesson Note</label>
+      <div id="editor-container"></div>
+
+      <div class="controls">
+        <button class="btn" id="saveBtn" onclick="onSaveClick()">📤 Post Lesson</button>
+        <button class="btn secondary" id="cancelEditBtn" onclick="cancelEdit()" style="display:none">✖ Cancel Edit</button>
+        <div style="flex:1"></div>
+        <div class="small-muted" id="editingIndicator" style="display:none; align-self:center">Editing lesson — changes will update the existing lesson.</div>
+      </div>
+    </div>
+
+    <div class="lesson-list">
+      <h2 style="color:#003366; margin-bottom:6px;">Posted Lessons</h2>
+      <div id="lessonContainer" class="small-muted">Select a class to view posted lessons.</div>
+    </div>
+  </main>
+
+  <footer>© 2025 ORLI International Academy. All Rights Reserved.</footer>
+
+  <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+
+  <script>
+    // Firebase config (same as your original)
+    const firebaseConfig = {
+      apiKey: "AIzaSyB4DMYZJHWgbRUZV-uamOy7TpxLM1sGYPY",
+      authDomain: "chats-afcff.firebaseapp.com",
+      databaseURL: "https://chats-afcff-default-rtdb.firebaseio.com",
+      projectId: "chats-afcff",
+      storageBucket: "chats-afcff.appspot.com",
+      messagingSenderId: "764250889947",
+      appId: "1:764250889947:web:2c843497ce389edf5876fe"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Quill editors
+    const quill = new Quill('#editor-container', {
+      theme: 'snow',
+      modules: {
+        toolbar: [
+          [{ 'font': [] }, { 'size': [] }],
+          ['bold', 'italic', 'underline', 'strike'],
+          [{ 'color': [] }, { 'background': [] }],
+          [{ 'align': [] }],
+          ['link', 'image'],
+          ['clean']
+        ]
+      }
+    });
+
+    // Editing state
+    let editing = false;
+    let currentEditClass = '';
+    let currentEditKey = '';
+
+    // Save / Update logic
+    async function onSaveClick() {
+      const className = document.getElementById('classSelect').value.trim();
+      const link = document.getElementById('meetLink').value.trim();
+      const lessonHtml = quill.root.innerHTML.trim();
+
+      if (!className || !lessonHtml || !link) {
+        alert('Please select class, enter meet link and lesson content before posting.');
+        return;
+      }
+
+      if (!editing) {
+        // create new
+        const newRef = db.ref('holiday_lessons/' + className).push();
+        await newRef.set({
+          lesson: lessonHtml,
+          link,
+          timestamp: new Date().toISOString()
+        });
+        alert('Lesson posted successfully!');
+      } else {
+        // updating existing lesson
+        // case 1: class unchanged -> update in place
+        if (className === currentEditClass) {
+          await db.ref('holiday_lessons/' + currentEditClass + '/' + currentEditKey).update({
+            lesson: lessonHtml,
+            link,
+            timestamp: new Date().toISOString()
+          });
+          alert('Lesson updated successfully!');
+        } else {
+          // class changed: create new under new class then remove old
+          const newRef = db.ref('holiday_lessons/' + className).push();
+          await newRef.set({
+            lesson: lessonHtml,
+            link,
+            timestamp: new Date().toISOString()
+          });
+          // remove old
+          await db.ref('holiday_lessons/' + currentEditClass + '/' + currentEditKey).remove();
+          alert('Lesson moved to "' + className + '" and updated successfully!');
+        }
+        // reset editing state after update
+        stopEditing();
+      }
+
+      // clear form for new posts
+      quill.root.innerHTML = '';
+      document.getElementById('meetLink').value = '';
+      // reload lessons for the currently selected class
+      loadLessons();
+    }
+
+    // Load lessons for selected class
+    function loadLessons() {
+      const container = document.getElementById('lessonContainer');
+      const className = document.getElementById('classSelect').value;
+      container.innerHTML = '';
+      if (!className) {
+        container.innerHTML = '<div class="small-muted">Select a class to view posted lessons.</div>';
+        return;
+      }
+
+      const ref = db.ref('holiday_lessons/' + className);
+      ref.off(); // remove previous listener first
+      ref.on('value', snapshot => {
+        const data = snapshot.val();
+        if (!data) {
+          container.innerHTML = '<div class="small-muted">No lessons posted yet for ' + className + '.</div>';
+          return;
+        }
+
+        container.innerHTML = '';
+        // build list sorted by timestamp (newest first)
+        const items = Object.entries(data).map(([k,v]) => ({ key:k, val:v }));
+        items.sort((a,b) => (b.val.timestamp || 0) > (a.val.timestamp || 0) ? 1 : -1);
+
+        for (const item of items) {
+          const key = item.key;
+          const val = item.val;
+          const div = document.createElement('div');
+          div.className = 'lesson-item';
+          div.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+              <div style="flex:1">
+                <div style="margin-bottom:8px;">${val.lesson}</div>
+                <div class="lesson-meta">
+                  <div><strong>Meet Link:</strong> <a href="${val.link}" target="_blank">${val.link}</a></div>
+                  <div><strong>Posted:</strong> ${new Date(val.timestamp).toLocaleString()}</div>
+                </div>
+              </div>
+              <div style="margin-left:12px; display:flex; flex-direction:column; gap:8px;">
+                <div class="lesson-actions">
+                  <button class="edit" onclick="startEdit('${className}','${key}')">Edit</button>
+                  <button class="open" onclick="openLink('${val.link}')">Open</button>
+                  <button class="delete" onclick="deleteLesson('${className}','${key}')">Delete</button>
+                </div>
+              </div>
+            </div>
+          `;
+          container.appendChild(div);
+        }
+      });
+    }
+
+    // Start editing: fetch from firebase and load into main editor
+    async function startEdit(className, key) {
+      try {
+        const snap = await db.ref('holiday_lessons/' + className + '/' + key).once('value');
+        const data = snap.val();
+        if (!data) return alert('Could not load lesson for editing.');
+
+        // set editor form fields
+        document.getElementById('classSelect').value = className;
+        quill.root.innerHTML = data.lesson;
+        document.getElementById('meetLink').value = data.link || '';
+
+        // set editing state
+        editing = true;
+        currentEditClass = className;
+        currentEditKey = key;
+
+        // update UI
+        document.getElementById('saveBtn').textContent = '💾 Update Lesson';
+        document.getElementById('cancelEditBtn').style.display = 'inline-block';
+        document.getElementById('editingIndicator').style.display = 'inline-block';
+        // scroll to top so teacher sees editor
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (err) {
+        console.error(err);
+        alert('Error fetching lesson for edit.');
+      }
+    }
+
+    // Stop editing / reset UI
+    function stopEditing() {
+      editing = false;
+      currentEditClass = '';
+      currentEditKey = '';
+      document.getElementById('saveBtn').textContent = '📤 Post Lesson';
+      document.getElementById('cancelEditBtn').style.display = 'none';
+      document.getElementById('editingIndicator').style.display = 'none';
+    }
+
+    function cancelEdit() {
+      if (!editing) return;
+      if (!confirm('Cancel editing? Unsaved changes will be lost.')) return;
+      quill.root.innerHTML = '';
+      document.getElementById('meetLink').value = '';
+      stopEditing();
+    }
+
+    // Delete
+    function deleteLesson(className, key) {
+      if (!confirm('Are you sure you want to delete this lesson?')) return;
+      db.ref('holiday_lessons/' + className + '/' + key).remove()
+        .then(() => {
+          alert('Lesson deleted.');
+          loadLessons();
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Could not delete lesson.');
+        });
+    }
+
+    function openLink(link) {
+      window.open(link, '_blank');
+    }
+
+    // ensure when class select changes we reload lessons for that class
+    document.getElementById('classSelect').addEventListener('change', () => {
+      loadLessons();
+      // if teacher changes class while editing, keep editing state: we allow class change on save
+    });
+
+    // initial load state
+    loadLessons();
+  </script>
+</body>
+</html>

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ORLI International Academy | Holiday Learning Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #f0f6ff, #e4ebff);
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(135deg, #002b80, #0044cc);
+      color: white;
+      text-align: center;
+      padding: 25px 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    }
+
+    .header-text {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .header-text img {
+      width: 70px;
+      height: 70px;
+      border-radius: 14px;
+      background: white;
+    }
+
+    header h1 {
+      font-size: 1.8em;
+      font-weight: 700;
+    }
+
+    header p {
+      font-size: 1em;
+      color: #e0e0e0;
+      margin-top: 5px;
+      font-style: italic;
+    }
+
+    main {
+      flex: 1;
+      padding: 25px;
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .intro {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      padding: 25px;
+      margin-bottom: 30px;
+      animation: fadeIn 1s ease;
+    }
+
+    .intro h2 {
+      color: #003366;
+      font-size: 1.5em;
+      margin-bottom: 10px;
+    }
+
+    .intro p {
+      font-size: 1em;
+      line-height: 1.6;
+      color: #555;
+    }
+
+    .login-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      padding: 25px;
+      margin-bottom: 25px;
+      animation: fadeIn 1.2s ease;
+    }
+
+    .login-card input {
+      padding: 12px 15px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      width: 80%;
+      max-width: 300px;
+      font-size: 1em;
+      margin-bottom: 15px;
+      outline: none;
+    }
+
+    .login-card button {
+      padding: 12px 25px;
+      background: linear-gradient(145deg, #0044cc, #0066ff);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+    }
+
+    .login-card button:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(145deg, #0055ff, #0077ff);
+    }
+
+    .lesson-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 25px rgba(0,0,0,0.15);
+      padding: 25px;
+      text-align: left;
+      display: none;
+      animation: fadeIn 0.8s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .lesson-card h3 {
+      color: #003366;
+      font-size: 1.4em;
+      border-left: 4px solid #003366;
+      padding-left: 10px;
+      margin-bottom: 15px;
+    }
+
+    /* ✅ Allow Quill formatting (images, bold, lists, etc.) */
+    .lesson-card #lessonText {
+      font-size: 1em;
+      line-height: 1.7;
+      color: #444;
+      white-space: normal;
+    }
+    .lesson-card img {
+      max-width: 100%;
+      border-radius: 8px;
+      margin: 10px 0;
+    }
+    .lesson-card ul, .lesson-card ol {
+      padding-left: 20px;
+    }
+
+    .meet-btn {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 14px 28px;
+      background: linear-gradient(145deg, #00a8ff, #0077ff);
+      color: white;
+      text-decoration: none;
+      font-weight: 700;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+      transition: all 0.3s ease;
+    }
+
+    .meet-btn:hover {
+      transform: translateY(-4px);
+      background: linear-gradient(145deg, #0090ff, #0060ff);
+      box-shadow: 0 10px 28px rgba(0,0,0,0.3);
+    }
+
+    .read-btn {
+      margin-top: 15px;
+      background: #008037;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      transition: 0.3s;
+    }
+
+    .read-btn:hover {
+      background: #00a74a;
+      transform: translateY(-2px);
+    }
+
+    footer {
+      background: #002b80;
+      color: white;
+      text-align: center;
+      padding: 15px;
+      font-size: 0.9em;
+      margin-top: auto;
+    }
+
+    @media (max-width: 600px) {
+      header h1 { font-size: 1.3em; }
+      .login-card input { width: 90%; }
+      .lesson-card { padding: 20px; }
+      .meet-btn, .read-btn { width: 100%; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-text">
+      <img src="https://orli-international-academy.vercel.app/logo.png" alt="ORLI Logo">
+      <div>
+        <h1>ORLI International Academy</h1>
+        <p>"To Raise a Well-Informed Student"</p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="intro" id="intro">
+      <h2>Welcome to ORLI Holiday Learning Portal</h2>
+      <p>Students can access their class lessons and Google Meet link by entering their class passcode below. <br><br>
+      🌟 <em>"Learning never stops — even during holidays!"</em> 🌟<br><br>
+      Click the green <b>Read Aloud</b> button anytime to have this page read to you aloud!</p>
+      <br>
+      <button class="read-btn" onclick="readIntro()">🔊 Read Aloud</button>
+    </div>
+
+    <div class="login-card" id="loginCard">
+      <h3>Enter Your Class Passcode</h3>
+      <input type="password" id="passcodeInput" placeholder="Enter passcode e.g. Orli-Y002" />
+      <br>
+      <button onclick="verifyPasscode()">Access Class</button>
+      <p id="errorText" style="color:red; margin-top:10px;"></p>
+    </div>
+
+    <div class="lesson-card" id="lessonCard">
+      <h3 id="classTitle"></h3>
+      <div id="lessonText"></div>
+      <a id="meetLink" href="#" target="_blank" class="meet-btn">🎥 Join Google Meet</a>
+      <br>
+      <button class="read-btn" onclick="readAloud()">🔊 Read Lesson</button>
+    </div>
+  </main>
+
+  <footer>
+    © 2025 ORLI International Academy. All Rights Reserved.
+  </footer>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyB4DMYZJHWgbRUZV-uamOy7TpxLM1sGYPY",
+      authDomain: "chats-afcff.firebaseapp.com",
+      databaseURL: "https://chats-afcff-default-rtdb.firebaseio.com",
+      projectId: "chats-afcff",
+      storageBucket: "chats-afcff.appspot.com",
+      messagingSenderId: "764250889947",
+      appId: "1:764250889947:web:2c843497ce389edf5876fe"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const passcodes = {
+      "Orli-N001": "Nursery 1",
+      "Orli-N002": "Nursery 2",
+      "Orli-Y001": "Year 1",
+      "Orli-Y002": "Year 2",
+      "Orli-Y003": "Year 3",
+      "Orli-Y004": "Year 4",
+      "Orli-Y005": "Year 5",
+      "Orli-Y006": "Year 6"
+    };
+
+    function verifyPasscode() {
+      const code = document.getElementById('passcodeInput').value.trim();
+      const errorText = document.getElementById('errorText');
+      if (!passcodes[code]) {
+        errorText.textContent = "❌ Invalid passcode. Please check and try again.";
+        return;
+      }
+      errorText.textContent = "";
+      const className = passcodes[code];
+      document.getElementById('loginCard').style.display = 'none';
+      document.getElementById('intro').style.display = 'none';
+      loadLesson(className);
+    }
+
+    function loadLesson(className) {
+      const lessonCard = document.getElementById('lessonCard');
+      const title = document.getElementById('classTitle');
+      const lessonText = document.getElementById('lessonText');
+      const meetLink = document.getElementById('meetLink');
+
+      title.textContent = "Welcome to " + className;
+      lessonCard.style.display = 'block';
+      lessonText.innerHTML = "<p>Loading lesson, please wait...</p>";
+
+      db.ref('holiday_lessons/' + className).on('value', snapshot => {
+        const data = snapshot.val();
+        if (!data) {
+          lessonText.innerHTML = "<p>No lesson has been posted for this class yet.</p>";
+          meetLink.style.display = 'none';
+          return;
+        }
+
+        const first = Object.values(data)[0];
+        // ✅ Render Quill HTML properly
+        lessonText.innerHTML = first.lesson || "<p>No lesson content found.</p>";
+        meetLink.href = first.link || "#";
+        meetLink.style.display = first.link ? 'inline-block' : 'none';
+      });
+    }
+
+    function readIntro() {
+      const text = document.getElementById('intro').innerText;
+      speakText(text);
+    }
+
+    function readAloud() {
+      const text = document.getElementById('lessonText').innerText;
+      speakText(text);
+    }
+
+    function speakText(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'en-GB';
+        utter.rate = 1;
+        utter.pitch = 1;
+        window.speechSynthesis.speak(utter);
+      } else {
+        alert('Read Aloud not supported in this browser.');
+      }
+    }
+  </script>
+</body>
+</html>
