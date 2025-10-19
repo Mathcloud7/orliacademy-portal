@@ -115,16 +115,29 @@
       font-size: 1.3em;
       font-weight: 600;
       cursor: pointer;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       border-left: 4px solid #003366;
       padding-left: 10px;
+    }
+
+    .lesson-quote {
+      font-style: italic;
+      color: #666;
+      font-size: 0.9em;
+      margin-bottom: 10px;
+      border-left: 3px solid #ccc;
+      padding-left: 8px;
     }
 
     .lesson-content {
       display: none;
       margin-top: 10px;
-      line-height: 1.6;
+      line-height: 1.7;
       color: #444;
+      padding: 15px;
+      border-radius: 12px;
+      background: #f9faff;
+      margin-left: 10px;
     }
 
     .lesson-content.active { display: block; }
@@ -265,6 +278,7 @@
           card.className = 'lesson-card';
           card.innerHTML = `
             <div class="lesson-title" onclick="toggleLesson('${id}')">${data.title || 'Untitled Lesson'}</div>
+            <div class="lesson-quote">“Education is the most powerful weapon which you can use to change the world.”</div>
             <div class="lesson-content" id="content-${id}">
               <div>${data.lesson || ''}</div>
               <div class="btn-group">
@@ -279,8 +293,9 @@
     }
 
     function toggleLesson(id) {
+      document.querySelectorAll('.lesson-content').forEach(c => c.classList.remove('active'));
       const content = document.getElementById('content-' + id);
-      content.classList.toggle('active');
+      content.classList.add('active');
     }
 
     function readIntro() {
@@ -299,7 +314,7 @@
         window.speechSynthesis.cancel();
         const utter = new SpeechSynthesisUtterance(text);
         utter.lang = 'en-GB';
-        utter.rate = 1;
+        utter.rate = 0.85; // 👈 Slower and clear voice
         utter.pitch = 1;
         window.speechSynthesis.speak(utter);
       } else alert('Read Aloud not supported on this browser.');
