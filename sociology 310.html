@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SOC 310 | Introduction to Social Work</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #fff8f0;
+      color: #333;
+    }
+
+    header {
+      background: #ff6f61;
+      color: white;
+      padding: 25px;
+      text-align: center;
+      font-size: 1.6rem;
+      font-weight: 600;
+      box-shadow: 0 5px 8px rgba(0,0,0,0.2);
+    }
+
+    .container {
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    h2 {
+      margin-top: 30px;
+      font-size: 1.5rem;
+      color: #ff6f61;
+    }
+
+    p {
+      line-height: 1.7;
+      margin-bottom: 15px;
+    }
+
+    ul {
+      margin-left: 20px;
+      margin-bottom: 15px;
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    .topic-button {
+      display: block;
+      width: 100%;
+      background: linear-gradient(145deg, #ff9a76, #ff6f61);
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 600;
+      padding: 15px;
+      margin: 12px 0;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 6px #cc5548;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .topic-button:hover {
+      background: linear-gradient(145deg, #ffb299, #ff856e);
+    }
+
+    .topic-button:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px #cc5548;
+    }
+
+    .topic-content {
+      background: #fff3e6;
+      padding: 20px;
+      margin-top: 10px;
+      border-radius: 12px;
+      display: none;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      border-left: 6px solid #ff6f61;
+    }
+
+    .topic-content strong {
+      color: #ff6f61;
+    }
+
+    .read-buttons {
+      margin-top: 15px;
+    }
+
+    .read-buttons button {
+      padding: 10px 15px;
+      margin-right: 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+
+    .read-btn {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .read-btn:hover {
+      background-color: #45c06b;
+    }
+
+    .stop-btn {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    .stop-btn:hover {
+      background-color: #e85a5a;
+    }
+
+    @media (max-width: 600px) {
+      header {
+        font-size: 1.3rem;
+      }
+      .topic-button {
+        font-size: 1rem;
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  SOC 310 - Introduction to Social Work
+</header>
+
+<div class="container">
+
+  <h2>Course Outline</h2>
+
+  <!-- Topic 1 -->
+  <button class="topic-button" onclick="toggleTopic('topic1')">1. Introduction to Social Work</button>
+  <div id="topic1" class="topic-content">
+    <p><strong>Definition:</strong> Social work is a professional field that focuses on improving the quality of life and well-being of individuals, families, groups, and communities. It involves helping people cope with challenges, empowering them to make positive changes, and advocating for social justice.</p>
+
+    <p><strong>Objectives of Social Work:</strong></p>
+    <ul>
+      <li>To help individuals and families solve personal and social problems.</li>
+      <li>To strengthen community support systems.</li>
+      <li>To promote social justice and equality.</li>
+      <li>To provide professional guidance and counseling services.</li>
+    </ul>
+
+    <p><strong>Areas of Practice:</strong> Social work covers a wide range of areas including healthcare, mental health, child welfare, education, community development, and human rights advocacy.</p>
+
+    <p><strong>Real-life Example:</strong> A social worker may help a homeless family find temporary housing, assist a child in foster care, or guide someone with substance abuse challenges towards rehabilitation programs.</p>
+
+    <p><strong>Importance:</strong> Social work is vital in society because it promotes social cohesion, reduces inequality, and provides essential support to vulnerable populations.</p>
+
+    <div class="read-buttons">
+      <button class="read-btn" onclick="readText('topic1')">🔊 Read Aloud</button>
+      <button class="stop-btn" onclick="stopReading()">⏹ Stop</button>
+    </div>
+  </div>
+
+  <!-- Topic 2 -->
+  <button class="topic-button" onclick="toggleTopic('topic2')">2. Historical Development of Social Work</button>
+  <div id="topic2" class="topic-content">
+    <p><strong>Origin:</strong> Social work emerged in the 19th century as a response to widespread poverty, industrialization, and social inequality. Early social workers focused on charitable aid and community assistance to vulnerable groups.</p>
+
+    <p><strong>Professionalization:</strong> In Europe and the USA, social work evolved into a recognized profession with formal education programs, ethical codes, and professional organizations. This helped standardize practice and ensure accountability.</p>
+
+    <p><strong>Development in Africa and Nigeria:</strong> Social work was introduced during the colonial era. Today, it includes government programs, NGOs, and community-based organizations that address social welfare, child protection, education, and health services.</p>
+
+    <p><strong>Significant Milestones:</strong></p>
+    <ul>
+      <li>Founding of social work schools and training programs.</li>
+      <li>Formation of professional associations and licensing bodies.</li>
+      <li>Introduction of social welfare policies and state programs.</li>
+    </ul>
+
+    <p><strong>Example:</strong> NGOs in Nigeria provide educational scholarships, health programs, and advocacy for vulnerable children, helping to bridge the gap between government support and community needs.</p>
+
+    <div class="read-buttons">
+      <button class="read-btn" onclick="readText('topic2')">🔊 Read Aloud</button>
+      <button class="stop-btn" onclick="stopReading()">⏹ Stop</button>
+    </div>
+  </div>
+
+  <!-- Topic 3 -->
+  <button class="topic-button" onclick="toggleTopic('topic3')">3. Values and Ethics in Social Work</button>
+  <div id="topic3" class="topic-content">
+    <p><strong>Core Values:</strong> Social workers uphold values such as respect for human dignity, social justice, integrity, honesty, compassion, and empathy. These values guide how they interact with clients and the community.</p>
+
+    <p><strong>Ethical Principles:</strong></p>
+    <ul>
+      <li>Maintaining confidentiality and privacy.</li>
+      <li>Promoting fairness and equality.</li>
+      <li>Advocating for vulnerable and marginalized populations.</li>
+      <li>Providing competent and professional services.</li>
+      <li>Respecting clients’ rights and autonomy.</li>
+    </ul>
+
+    <p><strong>Application in Practice:</strong> Ethics guide decisions, such as how to intervene in domestic violence cases, manage conflicts of interest, or ensure informed consent for services.</p>
+
+    <p><strong>Example:</strong> A social worker may assist survivors of domestic violence by helping them access shelters, counseling services, and legal support, all while keeping their information confidential and respecting their choices.</p>
+
+    <div class="read-buttons">
+      <button class="read-btn" onclick="readText('topic3')">🔊 Read Aloud</button>
+      <button class="stop-btn" onclick="stopReading()">⏹ Stop</button>
+    </div>
+  </div>
+
+  <!-- Topic 4 -->
+<button class="topic-button" onclick="toggleTopic('topic4')">4. Fields and Settings of Social Work Practice</button>
+<div id="topic4" class="topic-content">
+  <p><strong>Areas of Practice:</strong> Social workers can work in a variety of fields including healthcare, schools, mental health centers, correctional facilities, industries, military, and community-based organizations. Each setting requires specific skills and approaches depending on the population being served.</p>
+
+  <p><strong>Social Welfare Agencies:</strong> Government and non-governmental agencies provide services such as counseling, food aid, housing support, child protection, and healthcare access.</p>
+
+  <p><strong>Roles of Social Workers:</strong></p>
+  <ul>
+    <li>Helping individuals and families solve personal and social problems.</li>
+    <li>Advocating for clients’ rights and needs.</li>
+    <li>Connecting clients to resources and support services.</li>
+    <li>Promoting social change and community development.</li>
+  </ul>
+
+  <p><strong>Example:</strong> A school social worker may help students cope with emotional challenges, while linking their families to community health programs or financial support services.</p>
+
+  <div class="read-buttons">
+    <button class="read-btn" onclick="readText('topic4')">🔊 Read Aloud</button>
+    <button class="stop-btn" onclick="stopReading()">⏹ Stop</button>
+  </div>
+</div>
+
+<!-- Topic 5 -->
+<button class="topic-button" onclick="toggleTopic('topic5')">5. Methods of Social Work</button>
+<div id="topic5" class="topic-content">
+  <p><strong>Casework (Individual):</strong> One-on-one support to help clients address personal, family, or social challenges. Social workers assess needs, develop intervention plans, and monitor progress.</p>
+
+  <p><strong>Group Work:</strong> Working with groups who share similar challenges, such as support groups for addiction recovery, bereavement, or parenting skills.</p>
+
+  <p><strong>Community Organization:</strong> Organizing and leading community projects that improve living conditions, promote social cohesion, and address common social problems.</p>
+
+  <p><strong>Social Welfare Administration:</strong> Managing programs and services that assist vulnerable populations. Includes planning, budgeting, staffing, and evaluating the impact of services.</p>
+
+  <p><strong>Social Work Research:</strong> Conducting studies to understand social issues, evaluate programs, and develop evidence-based interventions for effective social change.</p>
+
+  <p><strong>Example:</strong> Running a youth mentorship program, conducting research on poverty in urban areas, or managing a community literacy initiative.</p>
+
+  <div class="read-buttons">
+    <button class="read-btn" onclick="readText('topic5')">🔊 Read Aloud</button>
+    <button class="stop-btn" onclick="stopReading()">⏹ Stop</button>
+  </div>
+</div>
+
+<!-- Topic 6 -->
+<button class="topic-button" onclick="toggleTopic('topic6')">6. The Helping Process in Social Work</button>
+<div id="topic6" class="topic-content">
+  <p><strong>Steps in the Helping Process:</strong></p>
+  <ul>
+    <li><strong>Engagement:</strong> Building trust and rapport with clients.</li>
+    <li><strong>Assessment:</strong> Understanding the client’s needs, challenges, and strengths.</li>
+    <li><strong>Planning:</strong> Developing a clear plan of action with goals and interventions.</li>
+    <li><strong>Intervention:</strong> Implementing strategies to support the client.</li>
+    <li><strong>Evaluation:</strong> Reviewing progress and adjusting plans as necessary.</li>
+    <li><strong>Termination:</strong> Ending direct involvement once goals are achieved and the client is empowered.</li>
+  </ul>
+
+  <p><strong>Skills Required:</strong> Active listening, empathy, problem-solving, communication, and cultural competence.</p>
+
+  <p><strong>Example:</strong> A social worker helps a low-income family budget their resources, connects them with community programs, monitors their progress, and gradually reduces direct support once the family can manage independently.</p>
+
+  <div class="read-buttons">
+    <button class="read-btn" onclick="readText('topic6')">🔊 Read Aloud</button>
+    <button class="stop-btn" onclick="stopReading()">⏹ Stop</button>
+  </div>
+</div>
+
+<!-- Topic 7 -->
+<button class="topic-button" onclick="toggleTopic('topic7')">7. Social Problems and Social Work Responses</button>
+<div id="topic7" class="topic-content">
+  <p><strong>Common Social Problems:</strong> Poverty, unemployment, family breakdown, child abuse, gender-based violence, substance abuse, and crime.</p>
+
+  <p><strong>Role of Social Work:</strong> Social workers identify, prevent, and respond to these problems by providing counseling, advocacy, community programs, and connecting clients with necessary resources.</p>
+
+  <p><strong>Examples:</strong></p>
+  <ul>
+    <li>Helping unemployed youth access job training programs.</li>
+    <li>Counseling children who have experienced abuse.</li>
+    <li>Organizing neighborhood crime-prevention initiatives.</li>
+  </ul>
+
+  <div class="read-buttons">
+    <button class="read-btn" onclick="readText('topic7')">🔊 Read Aloud</button>
+    <button class="stop-btn" onclick="stopReading()">⏹ Stop</button>
+  </div>
+</div>
+
+<!-- Topic 8 -->
+<button class="topic-button" onclick="toggleTopic('topic8')">8. Contemporary Issues in Social Work</button>
+<div id="topic8" class="topic-content">
+  <p><strong>Globalization:</strong> Social workers now address challenges such as migration, cultural diversity, international crises, and global inequalities.</p>
+
+  <p><strong>Human Rights & Advocacy:</strong> Ensuring equality, protecting vulnerable populations, and speaking out against injustices.</p>
+
+  <p><strong>Sustainable Development Goals (SDGs):</strong> Social workers contribute to education, health, gender equality, poverty reduction, and environmental sustainability programs.</p>
+
+  <p><strong>Example:</strong> Advocating for refugee rights, supporting girls’ education initiatives, or running programs that provide healthcare access in underserved communities.</p>
+
+  <div class="read-buttons">
+    <button class="read-btn" onclick="readText('topic8')">🔊 Read Aloud</button>
+    <button class="stop-btn" onclick="stopReading()">⏹ Stop</button>
+  </div>
+</div>
+
+<!-- Topic 9 -->
+<button class="topic-button" onclick="toggleTopic('topic9')">9. The Future of Social Work in Nigeria</button>
+<div id="topic9" class="topic-content">
+  <p><strong>Challenges:</strong> Limited resources, inadequate recognition of the profession, insufficient training opportunities, and persistent social inequalities.</p>
+
+  <p><strong>Professionalization & Regulation:</strong> Efforts are ongoing to establish licensing standards, professional associations, and ethical codes to improve the quality of social work practice in Nigeria.</p>
+
+  <p><strong>Opportunities:</strong> Growth in specialized areas such as child protection, mental health services, community development, and policy advocacy. Young social workers are innovating through NGOs and social enterprises.</p>
+
+  <p><strong>Example:</strong> Creating programs to combat youth unemployment, establishing mental health awareness campaigns, or developing community-led poverty reduction initiatives.</p>
+
+  <div class="read-buttons">
+    <button class="read-btn" onclick="readText('topic9')">🔊 Read Aloud</button>
+    <button class="stop-btn" onclick="stopReading()">⏹ Stop</button>
+  </div>
+</div>
+  
+</div>
+
+<script>
+  function toggleTopic(id) {
+    const content = document.getElementById(id);
+    content.style.display = content.style.display === 'block' ? 'none' : 'block';
+  }
+
+  let synth = window.speechSynthesis;
+  let currentUtterance;
+
+  function readText(id) {
+    stopReading();
+    const content = document.getElementById(id).innerText;
+    currentUtterance = new SpeechSynthesisUtterance(content);
+    currentUtterance.rate = 0.85;
+    currentUtterance.pitch = 1;
+    synth.speak(currentUtterance);
+  }
+
+  function stopReading() {
+    if (synth.speaking) synth.cancel();
+  }
+</script>
+
+</body>
+</html>
