@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin - Manage SOC310 Users</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body { font-family:'Poppins',sans-serif; margin:0; padding:20px; background:#f6f7fb; color:#222; }
+    header { background:#222; color:#fff; padding:18px; border-radius:8px; text-align:center; margin-bottom:20px; }
+    .card { background:#fff; padding:16px; border-radius:10px; box-shadow:0 6px 18px rgba(20,30,60,0.06); margin-bottom:14px; }
+    label{display:block;margin-top:8px;font-weight:600;font-size:0.95rem;}
+    input[type="text"], input[type="email"], input[type="password"]{width:100%;padding:10px;margin-top:6px;border:1px solid #ddd;border-radius:8px;}
+    button{padding:10px 12px;border-radius:8px;border:none;cursor:pointer;font-weight:600;}
+    .primary{background:#0b79d0;color:#fff;}
+    .danger{background:#dc3545;color:#fff;}
+    .muted{background:#eee;color:#333;}
+    table{width:100%;border-collapse:collapse;margin-top:10px;}
+    th,td{padding:8px;border-bottom:1px solid #f0f0f0;text-align:left;font-size:0.95rem;}
+    .actions button{margin-right:6px;}
+    .small{font-size:0.85rem;color:#666;}
+    .history{font-size:0.85rem;color:#444;margin-top:8px;}
+  </style>
+</head>
+<body>
+  <header><h2 style="margin:0;font-size:1.2rem;">Admin - Manage Users (SOC 310)</h2></header>
+
+  <div class="card">
+    <h3 style="margin:0 0 8px 0;">Create User</h3>
+    <div>
+      <label>Email</label>
+      <input id="new-email" type="email" placeholder="user@example.com" />
+      <label>Password</label>
+      <input id="new-password" type="password" placeholder="password (will be hashed)" />
+      <label>Initial Device ID (optional)</label>
+      <input id="new-device" type="text" placeholder="leave blank to let user bind on first login" />
+      <div style="margin-top:10px;">
+        <button class="primary" id="create-btn">Create User</button>
+      </div>
+      <p class="small">When you create a user here, the user record is saved to the Firebase Realtime Database as: <code>/users/&lt;uid&gt; → { email, passwordHash, deviceId }</code>. If deviceId is left empty the user will bind to first device on login. <strong>Passwords are hashed client-side (SHA-256).</strong></p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin:0 0 8px 0;">Users</h3>
+    <div id="users-list">
+      <p class="small">Loading users...</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin:0 0 8px 0;">Device History (select a user to view)</h3>
+    <div id="history-area"><p class="small">No user selected.</p></div>
+  </div>
+
+  <!-- Firebase (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+  <script>
+    // Config (same as provided)
+    const firebaseConfig = {
+      apiKey: "AIzaSyDz1suJpOPHC6N7cEZS0pBqVY-z7U4FEwU",
+      authDomain: "upload-34aa5.firebaseapp.com",
+      databaseURL: "https://upload-34aa5-default-rtdb.firebaseio.com",
+      projectId: "upload-34aa5",
+      storageBucket: "upload-34aa5.firebasestorage.app",
+      messagingSenderId: "680131375536",
+      appId: "1:680131375536:web:081ef6db97ffe9fe816675",
+      measurementId: "G-CGS8GJZQL3"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // sha256 helper (same as index)
+    async function sha256Hex(str) {
+      const enc = new TextEncoder();
+      const data = enc.encode(str);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2,'0')).join('');
+    }
+
+    // Create user
+    document.getElementById('create-btn').addEventListener('click', async () => {
+      const email = document.getElementById('new-email').value.trim().toLowerCase();
+      const password = document.getElementById('new-password').value;
+      const device = document.getElementById('new-device').value.trim() || null;
+
+      if (!email || !password) { alert('Email and password required'); return; }
+
+      try {
+        const phash = await sha256Hex(password);
+        // generate uid client-side: using push key
+        const newRef = db.ref('users').push();
+        const uid = newRef.key;
+        await newRef.set({
+          email,
+          passwordHash: phash,
+          deviceId: device || null,
+          createdAt: Date.now()
+        });
+        // record initial device bind in history if provided
+        if (device) {
+          await db.ref('deviceHistory/' + uid).push({ action:'admin-bind', deviceId: device, at: Date.now() });
+        }
+        document.getElementById('new-email').value = '';
+        document.getElementById('new-password').value = '';
+        document.getElementById('new-device').value = '';
+        loadUsers();
+        alert('User created (UID: ' + uid + ').');
+      } catch (err) {
+        console.error(err);
+        alert('Error: ' + (err.message || err));
+      }
+    });
+
+    // Load users
+    async function loadUsers() {
+      const listEl = document.getElementById('users-list');
+      listEl.innerHTML = '<p class="small">Loading users...</p>';
+      const snap = await db.ref('users').once('value');
+      const val = snap.val();
+      if (!val) { listEl.innerHTML = '<p class="small">No users found.</p>'; return; }
+
+      const rows = Object.entries(val).map(([uid, u]) => {
+        const email = u.email || '';
+        const device = u.deviceId || '';
+        return { uid, email, device, raw: u };
+      });
+
+      // build table
+      let html = '<table><thead><tr><th>Email</th><th>Device ID</th><th>Actions</th></tr></thead><tbody>';
+      rows.forEach(r => {
+        html += `<tr>
+          <td>${escapeHtml(r.email)}</td>
+          <td><code style="font-size:0.9rem;">${escapeHtml(r.device||'')}</code></td>
+          <td class="actions">
+            <button class="muted" onclick="viewHistory('${r.uid}')">History</button>
+            <button class="primary" onclick="editUserPrompt('${r.uid}')">Edit</button>
+            <button class="muted" onclick="changeDevicePrompt('${r.uid}')">Change Device</button>
+            <button class="danger" onclick="deleteUser('${r.uid}')">Delete</button>
+          </td>
+        </tr>`;
+      });
+      html += '</tbody></table>';
+      listEl.innerHTML = html;
+    }
+
+    // escape helper
+    function escapeHtml(s){ if(!s) return ''; return s.toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
+
+    // view history
+    async function viewHistory(uid) {
+      const histEl = document.getElementById('history-area');
+      histEl.innerHTML = '<p class="small">Loading history...</p>';
+      const snap = await db.ref('deviceHistory/' + uid).once('value');
+      const val = snap.val();
+      if (!val) { histEl.innerHTML = '<p class="small">No device history for this user.</p>'; return; }
+      let html = '<div class="history"><ul>';
+      Object.entries(val).forEach(([k,v]) => {
+        const t = new Date(v.at || Date.now()).toLocaleString();
+        html += `<li><strong>${escapeHtml(v.action||'')}</strong> — ${escapeHtml(v.deviceId||'')} <span class="small">(${t})</span></li>`;
+      });
+      html += '</ul></div>';
+      histEl.innerHTML = html;
+    }
+
+    // prompt edit user (email or password)
+    function editUserPrompt(uid) {
+      // fetch user
+      db.ref('users/' + uid).once('value').then(async snap => {
+        const u = snap.val();
+        if (!u) { alert('User not found'); return; }
+        const newEmail = prompt('Edit email for user (leave blank to keep):', u.email || '');
+        const newPassword = prompt('Set a new password (leave blank to keep):', '');
+        if ((newEmail === null) && (newPassword === null)) return; // cancelled
+        const updates = {};
+        if (newEmail !== null && newEmail.trim() !== '' && newEmail.trim() !== u.email) updates.email = newEmail.trim().toLowerCase();
+        if (newPassword !== null && newPassword !== '') {
+          const ph = await sha256Hex(newPassword);
+          updates.passwordHash = ph;
+        }
+        if (Object.keys(updates).length === 0) { alert('No changes made.'); return; }
+        await db.ref('users/' + uid).update(updates);
+        alert('User updated.');
+        loadUsers();
+      }).catch(err => { console.error(err); alert('Error: ' + (err.message||err)); });
+    }
+
+    // change device prompt (admin action)
+    function changeDevicePrompt(uid) {
+      const newDevice = prompt('Enter new deviceId to assign (leave blank to clear binding):', '');
+      // push history and update
+      db.ref('users/' + uid).once('value').then(async snap => {
+        const u = snap.val() || {};
+        const old = u.deviceId || null;
+        const updated = (newDevice && newDevice.trim() !== '') ? newDevice.trim() : null;
+        await db.ref('users/' + uid).update({ deviceId: updated });
+        await db.ref('deviceHistory/' + uid).push({ action:'admin-change', oldDevice: old, deviceId: updated, at: Date.now() });
+        alert('Device updated.');
+        loadUsers();
+      }).catch(err => { console.error(err); alert('Error: ' + (err.message||err)); });
+    }
+
+    // delete user
+    function deleteUser(uid) {
+      if (!confirm('Delete user and all history? This cannot be undone.')) return;
+      db.ref('users/' + uid).remove().then(() => {
+        db.ref('deviceHistory/' + uid).remove().catch(()=>{});
+        alert('User deleted.');
+        loadUsers();
+        document.getElementById('history-area').innerHTML = '<p class="small">No user selected.</p>';
+      }).catch(err => { console.error(err); alert('Error: ' + (err.message||err)); });
+    }
+
+    // initial load
+    loadUsers();
+
+    // expose some functions to global for action buttons
+    window.loadUsers = loadUsers;
+    window.viewHistory = viewHistory;
+    window.editUserPrompt = editUserPrompt;
+    window.changeDevicePrompt = changeDevicePrompt;
+    window.deleteUser = deleteUser;
+  </script>
+</body>
+</html>
