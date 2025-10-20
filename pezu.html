@@ -1,39 +1,735 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pezu Smith Consulting</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Pezu Smith Consulting — Learning Platform</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
-  * {margin:0; padding:0; box-sizing:border-box;}
-  body {font-family:'Poppins', sans-serif; background:#f9fafc; color:#333; line-height:1.6;}
-  header {background:#023e8a; color:white; padding:1.2rem 2rem; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:100;}
-  header h1 {font-size:1.6rem; font-weight:700;}
-  nav a {color:white; text-decoration:none; margin:0 1rem; font-weight:500;}
-  nav a:hover {color:#ffd60a;}
-  
-  .hero {background:linear-gradient(135deg, #0077b6, #00b4d8); color:white; text-align:center; padding:5rem 2rem;}
-  .hero h2 {font-size:2.6rem; font-weight:700; margin-bottom:1rem;}
-  .hero p {font-size:1.2rem; margin-bottom:2rem;}
-  .btn {background:#ffd60a; color:#000; border:none; padding:0.8rem 1.8rem; border-radius:30px; font-weight:600; cursor:pointer; transition:0.3s;}
-  .btn:hover {background:#ffcd00;}
-  
-  .section {padding:4rem 2rem; text-align:center;}
-  .about {max-width:900px; margin:auto;}
-  .about h3 {color:#023e8a; margin-bottom:1rem;}
-  .about p {color:#555; margin-bottom:1rem;}
-  
-  .courses-grid {display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:1.5rem; margin-top:2rem;}
-  .course-card {background:white; border-radius:10px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.1); transition:0.3s;}
-  .course-card:hover {transform:translateY(-6px);}
-  .course-card img {width:100%; height:160px; object-fit:cover;}
-  .course-card h3 {margin:1rem;}
-  .course-card p {padding:0 1rem 1rem; font-size:0.95rem; color:#555;}
-  
-  .course-details {display:none; max-width:950px; background:white; padding:2rem; margin:auto; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.1);}
-  .module {margin:1.5rem 0;}
-  .module h4 {color:#023e8a; margin-bottom:0.5rem;}
+  :root{
+    --purple:#6f2dbd;
+    --blue:#2b6ff7;
+    --gold:#ffd24d;
+    --white:#ffffff;
+    --bg:#f3f6fb;
+    --card:#ffffff;
+    --muted:#6b7280;
+    --glass: rgba(255,255,255,0.6);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:'Poppins',sans-serif;
+    background: linear-gradient(180deg,#eef4ff 0%, #f9f9ff 100%);
+    color:#111827;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+
+  /* header */
+  header{
+    position:sticky;
+    top:0;
+    z-index:50;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:18px 28px;
+    background:linear-gradient(90deg,var(--purple),var(--blue));
+    color:var(--white);
+    box-shadow:0 6px 20px rgba(20,20,60,0.12);
+  }
+  header .brand{
+    display:flex;gap:12px;align-items:center;
+  }
+  header .logo{
+    width:44px;height:44px;border-radius:10px;
+    background:linear-gradient(135deg,var(--gold),#fff3bf);
+    display:flex;align-items:center;justify-content:center;color:#1a1a2e;font-weight:700;
+    box-shadow:0 4px 12px rgba(0,0,0,0.12);
+  }
+  header h1{font-size:18px;margin:0}
+  header nav{display:flex;gap:18px;align-items:center}
+  header nav a{color:rgba(255,255,255,0.92);text-decoration:none;font-weight:600}
+  header .cta{background:var(--gold);color:#111;padding:10px 14px;border-radius:22px;border:none;font-weight:700;cursor:pointer}
+  header .mini{font-size:13px;color:rgba(255,255,255,0.9)}
+
+  /* page wrappers (each full screen) */
+  .page{display:none;min-height:calc(100vh - 76px);padding:36px 48px}
+  .page.active{display:block}
+
+  /* hero */
+  .hero{
+    display:flex;gap:36px;align-items:center;justify-content:space-between;
+    padding:48px;border-radius:14px;background:
+    linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    box-shadow:0 8px 30px rgba(38,20,90,0.06);
+  }
+  .hero-info{max-width:680px}
+  .hero h2{font-size:34px;color:var(--white);margin:0 0 8px}
+  .hero p{color:rgba(255,255,255,0.95);margin:0 0 18px;font-weight:500}
+  .hero-actions{display:flex;gap:12px;align-items:center}
+  .sub-counter{background:rgba(255,255,255,0.12);padding:10px 14px;border-radius:10px;color:var(--white);font-weight:600}
+
+  /* courses grid */
+  .courses-grid{
+    margin-top:30px;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:22px;
+  }
+  .card{
+    perspective:1200px;
+  }
+  .course-card{
+    height:100%;
+    background:linear-gradient(180deg,var(--card),#fbfbff);
+    border-radius:16px;
+    padding:14px;
+    box-shadow:0 18px 40px rgba(31,23,59,0.08);
+    transform-style:preserve-3d;
+    transition:transform 400ms cubic-bezier(.2,.9,.3,1), box-shadow 400ms ease;
+    display:flex;flex-direction:column;gap:12px;
+    position:relative;overflow:hidden;
+  }
+  .course-card:hover{transform:translateY(-10px) rotateX(4deg);box-shadow:0 28px 50px rgba(31,23,59,0.12)}
+  .course-media{height:150px;border-radius:12px;overflow:hidden;background:#eef2ff}
+  .course-media img{width:100%;height:100%;object-fit:cover;display:block}
+  .course-title{font-weight:700;color:var(--purple);font-size:16px;margin-top:6px}
+  .course-desc{font-size:13px;color:var(--muted);flex:1}
+  .price-row{display:flex;align-items:center;justify-content:space-between;padding-top:8px}
+  .price{color:var(--blue);font-weight:800}
+  .card-actions{display:flex;gap:10px}
+  .btn-outline{background:transparent;border:1px solid rgba(15,15,30,0.06);padding:8px 12px;border-radius:10px;cursor:pointer}
+  .btn-primary{background:linear-gradient(90deg,var(--gold),#ffd87d);color:#111;padding:9px 12px;border-radius:12px;border:none;cursor:pointer;font-weight:700}
+
+  /* cart / mini-checkout */
+  .cart-bar{
+    position:fixed;right:24px;bottom:28px;background:linear-gradient(180deg,#fff,#fbfbff);
+    padding:12px 14px;border-radius:12px;box-shadow:0 10px 30px rgba(20,20,60,0.12);
+    display:flex;align-items:center;gap:12px;z-index:60;
+  }
+  .cart-count{background:var(--purple);color:#fff;padding:6px 10px;border-radius:10px;font-weight:700}
+
+  /* checkout (full page modal style) */
+  .checkout{
+    max-width:840px;margin:40px auto;background:var(--card);padding:30px;border-radius:14px;
+    box-shadow:0 30px 60px rgba(20,20,60,0.08);
+  }
+  .checkout .row{display:flex;gap:18px}
+  .checkout .left{flex:1}
+  .checkout .right{width:320px;background:linear-gradient(180deg,#fff,#fafafa);padding:18px;border-radius:12px}
+  .line-item{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px dashed rgba(0,0,0,0.05)}
+  .total{font-weight:800;font-size:18px;color:var(--blue);padding-top:8px}
+
+  input[type="text"], input[type="email"]{
+    width:100%;padding:12px;border-radius:10px;border:1px solid #e6e9ef;margin-top:8px;font-size:14px;
+  }
+
+  /* dashboard full page */
+  .dashboard{
+    min-height:calc(100vh - 76px);
+    padding:28px 34px;
+    background:linear-gradient(180deg,#fff,#fbfdff);
+  }
+  .dash-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .welcome{font-size:22px;font-weight:700;color:var(--blue)}
+  .dash-courses{margin-top:26px;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+
+  .dash-course{
+    background:linear-gradient(180deg,#fbfbff,#fff);padding:18px;border-radius:14px;box-shadow:0 18px 40px rgba(20,20,60,0.04);
+  }
+  .modules-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+  .module-pill{background:linear-gradient(90deg,var(--purple),var(--blue));color:white;padding:12px;border-radius:10px;cursor:pointer;text-align:center;font-weight:700}
+  .module-pill.alt{background:linear-gradient(90deg,#ffd24d,#ffefbf);color:#111}
+  .lesson-list{margin-top:12px;display:none}
+  .lesson-item{background:#f4f7ff;padding:8px;border-radius:8px;margin:6px 0;cursor:pointer;color:var(--blue);font-weight:600}
+
+  /* full lesson page */
+  .lesson-page{
+    min-height:calc(100vh - 76px);
+    padding:28px 48px;background:linear-gradient(180deg,#fff,#f9fbff);
+  }
+  .lesson-player{max-width:1100px;margin:18px auto;background:#fff;padding:18px;border-radius:12px;box-shadow:0 20px 60px rgba(20,20,60,0.06)}
+  .video-wrap{background:#000;border-radius:10px;overflow:hidden}
+  video{width:100%;height:auto;display:block}
+  .lesson-meta{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+  .lesson-meta h3{margin:0;color:var(--purple)}
+  .lesson-controls{display:flex;gap:12px;align-items:center}
+
+  /* small helpers */
+  .muted{color:var(--muted);font-size:13px}
+  .hidden{display:none}
+  @media (max-width:900px){
+    .checkout .row{flex-direction:column}
+    .modules-grid{grid-template-columns:repeat(2,1fr)}
+    .module-pill{padding:10px}
+  }
+  @media (max-width:600px){
+    header{padding:12px 16px}
+    .hero{flex-direction:column;align-items:flex-start;padding:18px}
+    .hero h2{font-size:22px}
+    .modules-grid{grid-template-columns:repeat(1,1fr)}
+    .course-media{height:140px}
+  }
+</style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="logo">PS</div>
+      <div>
+        <h1>Pezu Smith Consulting</h1>
+        <div class="mini">School Consulting & Professional Learning</div>
+      </div>
+    </div>
+
+    <nav>
+      <a href="#" onclick="navigateTo('home')">Home</a>
+      <a href="#" onclick="navigateTo('catalog')">Courses</a>
+      <a href="#" id="navDashboard" onclick="openDashboard()" class="hidden">Dashboard</a>
+      <button class="cta" id="ctaAction" onclick="navigateTo('catalog')">Get Started</button>
+    </nav>
+  </header>
+
+  <!-- HOME / CATALOG combined page -->
+  <main id="home" class="page active">
+    <!-- Hero -->
+    <div class="hero" style="border-radius:14px; margin-bottom:22px">
+      <div class="hero-info">
+        <h2>Transform schools • Empower educators</h2>
+        <p>Professional courses, leadership training and school improvement strategies — designed to deliver measurable results.</p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" onclick="navigateTo('catalog')">Browse Courses</button>
+          <div class="sub-counter" id="subscribersBadge">🌍 2,850 learners</div>
+        </div>
+      </div>
+      <div style="width:420px">
+        <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=1f2e0b6b0b1b3f4b8f0c3f7a5d5e6d7d" style="width:100%;border-radius:12px;box-shadow:0 18px 36px rgba(30,20,80,0.06)" alt="hero">
+      </div>
+    </div>
+
+    <!-- Featured / Catalog -->
+    <section id="catalog" class="page active" style="padding:0">
+      <h2 style="margin:6px 0 10px;color:var(--dark)">Course Catalog</h2>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div class="muted">Choose courses and add to your cart. Checkout to access the full dashboard.</div>
+        <div class="muted">Theme • <strong style="color:var(--purple)">Purple</strong> / <strong style="color:var(--blue)">Blue</strong> / <strong style="color:var(--gold)">Gold</strong></div>
+      </div>
+
+      <div class="courses-grid" id="coursesGrid"></div>
+    </section>
+  </main>
+
+  <!-- Checkout full page -->
+  <section id="checkout" class="page">
+    <div class="checkout">
+      <h2>Checkout</h2>
+      <div class="row" style="margin-top:14px">
+        <div class="left">
+          <p class="muted">Complete your purchase. This is a simulated payment — no real charges will occur.</p>
+
+          <div id="cartItemsContainer" style="margin-top:16px"></div>
+
+          <div style="margin-top:16px">
+            <label>Full name</label>
+            <input type="text" id="inputName" placeholder="Jane Doe">
+            <label style="margin-top:8px">Email</label>
+            <input type="email" id="inputEmail" placeholder="you@example.com">
+          </div>
+
+          <div style="margin-top:18px">
+            <label>Card (simulated)</label>
+            <input type="text" placeholder="4242 4242 4242 4242">
+            <div class="muted" style="margin-top:8px">Enter any card details — this is a fake checkout for demo purposes.</div>
+          </div>
+
+          <div style="margin-top:18px">
+            <button class="btn btn-primary" onclick="simulatePayment()">Pay & Enroll</button>
+            <button class="btn btn-outline" style="margin-left:10px" onclick="cancelCheckout()">Cancel</button>
+          </div>
+        </div>
+        <div class="right">
+          <h4>Order Summary</h4>
+          <div id="summaryList" style="margin-top:12px"></div>
+          <div class="total" id="summaryTotal">Total: $0</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dashboard full page -->
+  <section id="dashboardPage" class="page">
+    <div class="dashboard">
+      <div class="dash-top">
+        <div>
+          <div class="welcome" id="welcomeUser">Welcome!</div>
+          <div class="muted" id="welcomeSub">Your enrolled courses are listed below.</div>
+        </div>
+        <div>
+          <button class="btn-outline" onclick="logout()">Logout</button>
+          <button class="btn btn-primary" onclick="navigateTo('catalog'); location.reload()">Browse More</button>
+        </div>
+      </div>
+
+      <div class="dash-courses" id="dashCourses"></div>
+    </div>
+  </section>
+
+  <!-- Lesson full page -->
+  <section id="lessonPage" class="page">
+    <div class="lesson-page">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div class="muted" id="crumbs">Dashboard › Course › Module › Lesson</div>
+          <h2 id="lessonTitle" style="margin-top:6px;color:var(--purple)">Lesson Title</h2>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <button class="btn-outline" onclick="backToDashboard()">Back to Dashboard</button>
+          <button class="btn btn-primary" id="nextLessonBtn">Next Lesson</button>
+        </div>
+      </div>
+
+      <div class="lesson-player">
+        <div class="video-wrap">
+          <video id="lessonVideo" controls playsinline>
+            <source src="https://samplelib.com/lib/preview/mp4/sample-5s.mp4" type="video/mp4">
+            Your browser does not support video.
+          </video>
+        </div>
+
+        <div class="lesson-meta">
+          <div>
+            <h3 id="lessonHeader">Module x — Lesson y</h3>
+            <div class="muted" id="lessonNotes">Lesson brief and objectives will appear here.</div>
+          </div>
+          <div class="lesson-controls">
+            <button class="btn-outline" onclick="prevLesson()">Prev</button>
+            <button class="btn-primary" onclick="nextLesson()">Next</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer style="padding:22px 40px;background:linear-gradient(90deg,var(--purple),var(--blue));color:#fff">
+    <div style="display:flex;justify-content:space-between;align-items:center;max-width:1200px;margin:0 auto">
+      <div>© 2025 Pezu Smith Consulting</div>
+      <div class="muted">Designed with care • Professional Development for Schools</div>
+    </div>
+  </footer>
+
+  <!-- Floating cart -->
+  <div class="cart-bar" id="cartBar" style="display:none">
+    <div style="display:flex;flex-direction:column;align-items:flex-start">
+      <div class="muted">Cart</div>
+      <strong id="cartSummary">0 courses</strong>
+    </div>
+    <div class="cart-count" id="cartCount">0</div>
+    <button class="btn btn-primary" onclick="openCheckout()" style="margin-left:8px">Checkout</button>
+  </div>
+
+<script>
+/* -------------------------
+   Data and initial setup
+   ------------------------- */
+const SAMPLE_VIDEO = "https://samplelib.com/lib/preview/mp4/sample-20s.mp4"; // sample
+const subscribersBadge = document.getElementById('subscribersBadge');
+
+let subscribers = Number(localStorage.getItem('psc_subscribers') || 2850);
+function setSubscribers(n){ subscribers = n; localStorage.setItem('psc_subscribers', n); subscribersBadge.innerText = `🌍 ${n.toLocaleString()} learners`;}
+setSubscribers(subscribers);
+
+// course data
+const COURSES = [
+  { id:'c01', title:"School Leadership & Strategy", desc:"Leadership frameworks for effective school improvement.", image:"https://images.unsplash.com/photo-1521790797524-b2497295b8a2?q=80&w=1200&auto=format&fit=crop", price:140 },
+  { id:'c02', title:"Digital Teaching & eLearning", desc:"Design interactive online lessons and blended learning models.", image:"https://images.unsplash.com/photo-1584697964195-5135d6d2f7d7?q=80&w=1200&auto=format&fit=crop", price:120 },
+  { id:'c03', title:"Curriculum Design & Assessment", desc:"Constructive alignment and modern assessment design.", image:"https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1200&auto=format&fit=crop", price:150 },
+  { id:'c04', title:"Counselling & Student Support", desc:"Holistic strategies for student wellbeing and mentorship.", image:"https://images.unsplash.com/photo-1554774853-b1b2f0d1f3a5?q=80&w=1200&auto=format&fit=crop", price:110 },
+  { id:'c05', title:"Financial Management for Schools", desc:"Budgeting, audits and sustainable funding models.", image:"https://images.unsplash.com/photo-1556741533-f6acd647d2fb?q=80&w=1200&auto=format&fit=crop", price:130 },
+  { id:'c06', title:"Teacher Professional Development", desc:"Continuous teacher improvement and peer coaching.", image:"https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1200&auto=format&fit=crop", price:100 }
+];
+
+// cart & user state
+let CART = JSON.parse(localStorage.getItem('psc_cart') || '[]'); // array of course ids
+let USER = JSON.parse(localStorage.getItem('psc_user') || 'null'); // {name,email}
+let ENROLLED = JSON.parse(localStorage.getItem('psc_enrolled') || '{}'); // { courseId: { enrolledAt, modulesSeen... } }
+
+/* -------------------------
+   Render catalog cards
+   ------------------------- */
+const grid = document.getElementById('coursesGrid');
+function renderCatalog(){
+  grid.innerHTML = '';
+  COURSES.forEach((c, idx) => {
+    const cardWrap = document.createElement('div'); cardWrap.className='card';
+    const card = document.createElement('div'); card.className='course-card';
+    card.innerHTML = `
+      <div class="course-media"><img src="${c.image}" alt="${c.title}"></div>
+      <div class="course-title">${c.title}</div>
+      <div class="course-desc">${c.desc}</div>
+      <div class="price-row">
+        <div class="price">$${c.price}</div>
+        <div class="card-actions">
+          <button class="btn-outline" onclick="viewCourse('${c.id}')">Details</button>
+          <button class="btn-primary" onclick="addToCart('${c.id}')">Add to Cart</button>
+        </div>
+      </div>`;
+    cardWrap.appendChild(card); grid.appendChild(cardWrap);
+  });
+}
+renderCatalog();
+
+/* -------------------------
+   Cart handling & UI
+   ------------------------- */
+const cartBar = document.getElementById('cartBar');
+const cartCount = document.getElementById('cartCount');
+const cartSummary = document.getElementById('cartSummary');
+
+function updateCartUI(){
+  const count = CART.length;
+  cartSummary.innerText = `${count} course${count!==1?'s':''}`;
+  cartCount.innerText = count;
+  cartBar.style.display = count>0 ? 'flex' : 'none';
+  localStorage.setItem('psc_cart', JSON.stringify(CART));
+}
+updateCartUI();
+
+function addToCart(courseId){
+  if(CART.includes(courseId)){
+    alert('Course already in cart.');
+    return;
+  }
+  CART.push(courseId);
+  updateCartUI();
+  alert('Added course to cart.');
+}
+
+/* -------------------------
+   View course (full-page details)
+   ------------------------- */
+function viewCourse(courseId){
+  const course = COURSES.find(c=>c.id===courseId);
+  // show a full page details view (reuse checkout-ish view) — we'll open checkout with prefilled single course
+  openCheckout([courseId]);
+}
+
+/* -------------------------
+   Navigation helpers (single page)
+   ------------------------- */
+function hideAllPages(){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('header nav a').forEach(a=>a.classList.remove('active'));
+}
+function navigateTo(section){
+  hideAllPages();
+  const el = document.getElementById(section);
+  if(el) el.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* -------------------------
+   Checkout page logic (full page)
+   ------------------------- */
+const cartItemsContainer = document.getElementById('cartItemsContainer');
+const summaryList = document.getElementById('summaryList');
+const summaryTotal = document.getElementById('summaryTotal');
+
+let checkoutQueue = []; // course ids being checked out
+
+function openCheckout(preselect){
+  // if preselect provided, checkout that single course (view details), else checkout CART
+  checkoutQueue = preselect && preselect.length ? preselect.slice() : CART.slice();
+  if(checkoutQueue.length===0){
+    alert('Cart is empty. Add courses first.');
+    return;
+  }
+  populateCheckout();
+  navigateTo('checkout');
+}
+
+function populateCheckout(){
+  cartItemsContainer.innerHTML = '';
+  summaryList.innerHTML = '';
+  let total = 0;
+  checkoutQueue.forEach(id=>{
+    const c = COURSES.find(x=>x.id===id);
+    total += c.price;
+    const div = document.createElement('div');
+    div.innerHTML = `<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+      <img src="${c.image}" style="width:70px;height:50px;object-fit:cover;border-radius:8px">
+      <div style="flex:1"><strong>${c.title}</strong><div class="muted">$${c.price}</div></div>
+    </div>`;
+    cartItemsContainer.appendChild(div);
+
+    const summaryLine = document.createElement('div');
+    summaryLine.className='line-item';
+    summaryLine.innerHTML = `<div>${c.title}</div><div>$${c.price}</div>`;
+    summaryList.appendChild(summaryLine);
+  });
+  summaryTotal.innerText = `Total: $${total}`;
+  document.getElementById('summaryTotal').innerText = `Total: $${total}`;
+}
+
+/* on cancel */
+function cancelCheckout(){
+  if(confirm('Cancel checkout and return to catalog?')) {
+    navigateTo('catalog');
+  }
+}
+
+/* -------------------------
+   Simulate payment and enroll
+   ------------------------- */
+function simulatePayment(){
+  const name = document.getElementById('inputName').value.trim();
+  const email = document.getElementById('inputEmail').value.trim();
+  if(!name || !email){
+    alert('Please enter your name and email to continue.');
+    return;
+  }
+  // simulate payment processing
+  document.getElementById('summaryTotal').innerText = 'Processing payment...';
+  setTimeout(()=>{
+    // enroll user
+    USER = {name:name,email:email};
+    localStorage.setItem('psc_user', JSON.stringify(USER));
+    checkoutQueue.forEach(cid => {
+      ENROLLED[cid] = ENROLLED[cid] || { enrolledAt: new Date().toISOString(), progress: {}, modulesAccess: 7 };
+      // prepare module & lesson state
+      ENROLLED[cid].modules = ENROLLED[cid].modules || {};
+      for(let m=1;m<=7;m++){
+        if(!ENROLLED[cid].modules[m]){ ENROLLED[cid].modules[m] = { lessonsSeen: [] }; }
+      }
+    });
+    // clear cart (remove enrolled courses)
+    CART = CART.filter(c=>!checkoutQueue.includes(c));
+    localStorage.setItem('psc_cart', JSON.stringify(CART));
+    localStorage.setItem('psc_enrolled', JSON.stringify(ENROLLED));
+    setSubscribers(subscribers + checkoutQueue.length);
+    // update UI and go to dashboard
+    updateCartUI();
+    alert('Payment simulated. You are now enrolled. Opening your dashboard...');
+    openDashboard();
+  }, 1100);
+}
+
+/* -------------------------
+   Dashboard
+   ------------------------- */
+const dashCoursesEl = document.getElementById('dashCourses');
+const navDashboard = document.getElementById('navDashboard');
+function openDashboard(){
+  // ensure user exists
+  const storedUser = JSON.parse(localStorage.getItem('psc_user') || 'null');
+  if(!storedUser){
+    alert('Please complete checkout to create your dashboard.');
+    navigateTo('catalog');
+    return;
+  }
+  USER = storedUser;
+  ENROLLED = JSON.parse(localStorage.getItem('psc_enrolled') || '{}');
+  // show dashboard link
+  navDashboard.classList.remove('hidden');
+  document.getElementById('ctaAction').innerText = 'My Dashboard';
+  // render dashboard courses
+  renderDashboard();
+  navigateTo('dashboardPage');
+}
+
+function renderDashboard(){
+  document.getElementById('welcomeUser').innerText = `Welcome, ${USER.name}`;
+  dashCoursesEl.innerHTML = '';
+  const enrolledIds = Object.keys(ENROLLED);
+  if(enrolledIds.length===0){
+    dashCoursesEl.innerHTML = `<div class="muted">You have no enrolled courses. Browse the catalog to enroll.</div>`;
+    return;
+  }
+  enrolledIds.forEach(cid=>{
+    const courseDef = COURSES.find(c=>c.id===cid);
+    const box = document.createElement('div'); box.className='dash-course';
+    box.innerHTML = `<div style="display:flex;align-items:center;gap:12px">
+      <img src="${courseDef.image}" style="width:78px;height:60px;border-radius:8px;object-fit:cover">
+      <div><strong style="font-size:16px">${courseDef.title}</strong><div class="muted">$${courseDef.price} • Enrolled ${new Date(ENROLLED[cid].enrolledAt).toLocaleDateString()}</div></div>
+    </div>
+    <div class="modules-grid" id="modules_${cid}"></div>
+    <div style="margin-top:8px" id="lessonsContainer_${cid}"></div>`;
+    dashCoursesEl.appendChild(box);
+
+    // render modules (7)
+    const modulesGrid = box.querySelector(`#modules_${cid}`);
+    for(let m=1;m<=7;m++){
+      const pill = document.createElement('div');
+      pill.className='module-pill'; pill.innerText = `Module ${m}`;
+      pill.onclick = ()=>openModule(cid, m);
+      modulesGrid.appendChild(pill);
+    }
+  });
+}
+
+/* -------------------------
+   Module open -> show module page (but requirement asked module opens on same dashboard full page; we'll show lessons list in the dashboard area, still full page visible)
+   ------------------------- */
+function openModule(courseId, moduleNumber){
+  // hide other pages, remain in dashboardPage
+  // show lessons area for that course
+  const lessonsContainer = document.getElementById(`lessonsContainer_${courseId}`);
+  // clear others
+  document.querySelectorAll('[id^="lessonsContainer_"]').forEach(el=>el.innerHTML='');
+  const wrapper = document.createElement('div');
+  wrapper.innerHTML = `<h4 style="margin-top:12px;color:var(--purple)">Module ${moduleNumber} — Lessons</h4>
+    <div style="margin-top:10px" id="lessonList_${courseId}_${moduleNumber}"></div>`;
+  lessonsContainer.appendChild(wrapper);
+
+  const lessonList = document.getElementById(`lessonList_${courseId}_${moduleNumber}`);
+  // render 8 lessons
+  for(let l=1;l<=8;l++){
+    const item = document.createElement('div');
+    item.className='lesson-item';
+    item.innerText = `Lesson ${l} — Topic overview`;
+    item.onclick = ()=>openLesson(courseId, moduleNumber, l);
+    lessonList.appendChild(item);
+  }
+}
+
+/* -------------------------
+   Lesson full-page player
+   ------------------------- */
+let CURRENT = { courseId:null, module:1, lesson:1 };
+function openLesson(courseId, moduleNum, lessonNum){
+  CURRENT = { courseId, module: moduleNum, lesson: lessonNum };
+  // hide all other pages and show lesson page
+  hideAllPages();
+  document.getElementById('lessonPage').classList.add('active');
+
+  // set breadcrumb & title
+  const course = COURSES.find(c=>c.id===courseId);
+  document.getElementById('crumbs').innerText = `Dashboard › ${course.title} › Module ${moduleNum} › Lesson ${lessonNum}`;
+  document.getElementById('lessonTitle').innerText = `${course.title} — Module ${moduleNum} • Lesson ${lessonNum}`;
+  document.getElementById('lessonHeader').innerText = `Module ${moduleNum} — Lesson ${lessonNum}`;
+  document.getElementById('lessonNotes').innerText = `Objectives: Understand key ideas for ${course.title}. This lesson is a demonstration and includes a sample video.`;
+
+  // set video src (could be dynamic per lesson)
+  const v = document.getElementById('lessonVideo');
+  v.pause();
+  v.src = SAMPLE_VIDEO + '#t=' + ((lessonNum-1)*5); // slight offset so each lesson seems different
+  v.load();
+  // mark lesson as seen
+  markLessonSeen(courseId, moduleNum, lessonNum);
+  // update next button
+  document.getElementById('nextLessonBtn').onclick = ()=> nextLesson();
+}
+
+/* mark lesson seen */
+function markLessonSeen(cid, mod, les){
+  ENROLLED = JSON.parse(localStorage.getItem('psc_enrolled') || '{}');
+  if(!ENROLLED[cid]) ENROLLED[cid] = { enrolledAt: new Date().toISOString(), modules: {} };
+  if(!ENROLLED[cid].modules) ENROLLED[cid].modules = {};
+  if(!ENROLLED[cid].modules[mod]) ENROLLED[cid].modules[mod] = { lessonsSeen: [] };
+  const arr = ENROLLED[cid].modules[mod].lessonsSeen;
+  if(!arr.includes(les)) arr.push(les);
+  localStorage.setItem('psc_enrolled', JSON.stringify(ENROLLED));
+}
+
+/* next / prev navigation (lesson-level) */
+function nextLesson(){
+  const course = COURSES.find(c=>c.id===CURRENT.courseId);
+  let m = CURRENT.module, l = CURRENT.lesson;
+  if(l < 8){
+    l++;
+  } else if(m < 7){
+    m++; l = 1;
+  } else {
+    // last lesson of last module -> back to dashboard
+    alert('You completed the last lesson in this course module set. Returning to dashboard.');
+    backToDashboard();
+    return;
+  }
+  openLesson(CURRENT.courseId, m, l);
+}
+
+function prevLesson(){
+  let m = CURRENT.module, l = CURRENT.lesson;
+  if(l > 1){ l--; }
+  else if(m > 1){ m--; l = 8; }
+  else {
+    // first lesson -> go back to module view
+    openDashboard(); // keep dashboard open and show module
+    openModule(CURRENT.courseId, 1);
+    return;
+  }
+  openLesson(CURRENT.courseId, m, l);
+}
+
+function backToDashboard(){
+  // show dashboard full page and re-render modules so the user can continue
+  hideAllPages();
+  document.getElementById('dashboardPage').classList.add('active');
+  renderDashboard();
+}
+
+/* -------------------------
+   simple logout (clear user and reload to catalog)
+   ------------------------- */
+function logout(){
+  if(confirm('Log out and clear your dashboard? (your enrollments remain saved)')){
+    localStorage.removeItem('psc_user');
+    // hide dashboard link
+    document.getElementById('navDashboard').classList.add('hidden');
+    document.getElementById('ctaAction').innerText = 'Get Started';
+    navigateTo('catalog');
+  }
+}
+
+/* -------------------------
+   Utilities / Hooks
+   ------------------------- */
+// show catalog or home when loaded
+(function init(){
+  // restore CART and ENROLLED from localStorage already done
+  updateCartUI();
+  // if user exists, show dashboard link
+  if(localStorage.getItem('psc_user')){
+    document.getElementById('navDashboard').classList.remove('hidden');
+    document.getElementById('ctaAction').innerText = 'My Dashboard';
+  }
+  // attach simple keyboard shortcuts for convenience
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape'){ backToDashboard(); }
+  });
+})();
+
+/* function to open dashboard after simulated payment (redirect) */
+function openDashboardFromCheckout(){
+  // used internally
+  openDashboard();
+}
+
+/* helper to open dashboard from header */
+function openDashboard(){
+  // load from storage
+  const storedUser = JSON.parse(localStorage.getItem('psc_user') || 'null');
+  if(!storedUser){
+    alert('No user found. Please purchase and enroll first.');
+    navigateTo('catalog');
+    return;
+  }
+  USER = storedUser;
+  ENROLLED = JSON.parse(localStorage.getItem('psc_enrolled') || '{}');
+  renderDashboard();
+  hideAllPages();
+  document.getElementById('dashboardPage').classList.add('active');
+}
+
+/* On page load, ensure home/catalog visible */
+navigateTo('home');
+</script>
+</body>
+</html>
   .lesson video {width:100%; border-radius:10px; margin:0.5rem 0;}
   
   .subscribe-box {margin-top:2rem; background:#e8f5ff; padding:2rem; border-radius:10px;}
@@ -177,3 +873,4 @@
   </script>
 </body>
 </html>
+
