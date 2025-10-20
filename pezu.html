@@ -1,222 +1,655 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pezu Smith Consulting</title>
-  <style>
-    /* GENERAL THEME */
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
-    body { background: #fdfdfd; color: #2d006b; overflow-x: hidden; transition: 0.6s; }
-    header {
-      position: fixed; top: 0; left: 0; width: 100%; padding: 20px 50px;
-      background: linear-gradient(90deg, #4b0082, #6a0dad);
-      display: flex; justify-content: space-between; align-items: center;
-      z-index: 100; color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    }
-    header h1 { color: gold; font-weight: 700; font-size: 1.8rem; }
-    nav a {
-      color: white; margin: 0 15px; text-decoration: none; font-weight: 500; transition: 0.3s;
-    }
-    nav a:hover { color: gold; }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Pezu Smith Consulting — School Consulting & Professional Learning</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ---------- THEME COLORS ---------- */
+  :root{
+    --purple:#5a189a;
+    --indigo:#3d0f7a;
+    --gold:#f7c948;
+    --white:#ffffff;
+    --muted:#6b6b7a;
+    --bg:#fbf9ff;
+    --card:#fff;
+    --glass: rgba(255,255,255,0.7);
+  }
 
-    /* SECTIONS */
-    section { min-height: 100vh; padding-top: 120px; display: none; text-align: center; transition: 0.6s; }
-    section.active { display: block; animation: fadeIn 1s ease; }
-    @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+  /* ---------- RESET / BASE ---------- */
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:"Poppins",sans-serif;
+    background:var(--bg);
+    color:var(--indigo);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    line-height:1.45;
+  }
+  a{color:inherit;text-decoration:none}
 
-    /* HERO */
-    #home {
-      background: linear-gradient(135deg, #4b0082, #7a42f4);
-      color: white; display: flex; flex-direction: column; justify-content: center; align-items: center;
-      text-align: center; padding: 150px 20px;
-    }
-    #home h2 { font-size: 2.8rem; color: gold; margin-bottom: 15px; }
-    #home p { font-size: 1.3rem; margin-bottom: 30px; }
-    .btn {
-      background: gold; color: #4b0082; padding: 12px 30px; border: none;
-      border-radius: 25px; font-weight: 600; cursor: pointer; transition: 0.4s;
-    }
-    .btn:hover { background: white; color: #4b0082; }
+  /* ---------- HEADER ---------- */
+  header{
+    position:fixed; top:0; left:0; right:0; height:72px;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 28px; gap:12px;
+    background:linear-gradient(90deg,var(--purple),var(--indigo));
+    color:var(--white); z-index:120;
+    box-shadow:0 6px 18px rgba(36,11,77,0.12);
+  }
+  .brand{display:flex; align-items:center; gap:12px}
+  .logo{
+    width:52px;height:52px;border-radius:10px;
+    background:linear-gradient(135deg,var(--gold),#ffe9a3);
+    display:flex;align-items:center;justify-content:center;
+    color:#2b0e4c;font-weight:800;font-size:18px;box-shadow:0 6px 18px rgba(0,0,0,0.12)
+  }
+  .brand h1{font-size:16px;margin:0;line-height:1}
+  .brand p{margin:0;font-size:12px;opacity:0.95}
+  nav{display:flex;align-items:center;gap:18px}
+  nav a{color:var(--white);font-weight:600;padding:8px 12px;border-radius:8px}
+  nav a:hover{background:rgba(255,255,255,0.06);color:var(--gold)}
+  .cta{background:var(--gold); color:var(--indigo); padding:8px 14px;border-radius:18px;border:none;font-weight:700;cursor:pointer}
 
-    /* COURSES */
-    #courses { background: white; color: #2d006b; }
-    .course-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 25px; margin-top: 40px; }
-    .course-card {
-      background: white; border-radius: 20px; box-shadow: 0 8px 25px rgba(75,0,130,0.2);
-      width: 280px; perspective: 1000px; transform-style: preserve-3d; transition: transform 0.4s;
-    }
-    .course-card:hover { transform: scale(1.05) rotateY(8deg); }
-    .course-card img {
-      width: 100%; height: 180px; border-radius: 20px 20px 0 0; object-fit: cover;
-    }
-    .course-card h3 { color: #4b0082; margin: 10px 0; }
-    .course-card p { font-size: 0.9rem; padding: 0 15px; color: #333; }
-    .course-card button {
-      margin: 15px 0 25px; background: #4b0082; color: gold; border: none;
-      padding: 10px 25px; border-radius: 20px; cursor: pointer; font-weight: 600;
-      transition: 0.3s;
-    }
-    .course-card button:hover { background: gold; color: #4b0082; }
+  /* ---------- PAGE SLOTS (only one visible) ---------- */
+  .page{display:none; min-height:calc(100vh - 72px); padding:110px 36px 60px;}
+  .page.active{display:block; animation:fadeIn .35s ease both}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
-    /* DASHBOARD */
-    #dashboard {
-      background: #f9f6ff; color: #2d006b; padding: 80px 20px;
-    }
-    #dashboard h2 { color: #4b0082; margin-bottom: 20px; }
-    .subscribed-list {
-      display: flex; flex-wrap: wrap; justify-content: center; gap: 25px;
-    }
-    .subscribed-course {
-      background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      padding: 20px; width: 250px;
-    }
-    .subscribed-course h3 { color: #4b0082; margin-bottom: 10px; }
-    .module {
-      background: #4b0082; color: gold; margin: 8px 0; padding: 10px; border-radius: 8px;
-      cursor: pointer; transition: 0.3s;
-    }
-    .module:hover { background: gold; color: #4b0082; }
+  /* ---------- HERO ---------- */
+  .hero{
+    display:flex; gap:32px; align-items:center; justify-content:space-between;
+    background:linear-gradient(135deg,var(--purple),var(--indigo));
+    color:var(--white); padding:36px; border-radius:14px; box-shadow:0 18px 60px rgba(40,10,60,0.12);
+  }
+  .hero-left{max-width:720px}
+  .hero h2{font-size:32px;margin:0 0 8px;color:var(--gold);letter-spacing:0.2px}
+  .hero p{margin:0 0 18px;font-weight:500;opacity:0.95}
+  .hero .actions{display:flex;gap:12px;align-items:center}
+  .btn-primary{background:var(--gold);color:var(--indigo);padding:10px 20px;border-radius:22px;border:none;font-weight:700;cursor:pointer}
+  .sub-counter{background:rgba(255,255,255,0.08);padding:8px 12px;border-radius:12px;color:var(--white);font-weight:600}
 
-    /* LESSON PAGE */
-    #lessons {
-      background: white; color: #4b0082; padding: 80px 20px;
-    }
-    #lessons h3 { margin-bottom: 25px; }
-    .lesson-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;
-    }
-    .lesson {
-      background: #4b0082; color: gold; padding: 15px; border-radius: 10px; cursor: pointer;
-      transition: 0.3s;
-    }
-    .lesson:hover { background: gold; color: #4b0082; }
+  .hero-right img{width:380px;border-radius:12px;box-shadow:0 18px 40px rgba(40,10,60,0.08);display:block}
 
-    /* FOOTER */
-    footer {
-      background: #4b0082; color: white; text-align: center; padding: 20px;
-    }
+  /* ---------- COURSES GRID ---------- */
+  .section-title{font-size:20px;color:var(--indigo);margin-bottom:6px}
+  .muted{color:var(--muted);font-size:14px}
+  .courses-grid{
+    display:grid;gap:22px;margin-top:18px;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  }
 
-    .counter { font-size: 1.1rem; margin-top: 20px; color: #4b0082; }
-  </style>
+  .course-card{
+    background:var(--card);border-radius:14px;padding:12px;
+    box-shadow:0 12px 36px rgba(60,12,98,0.06);
+    transition:transform .35s cubic-bezier(.2,.9,.3,1), box-shadow .35s;
+    transform-origin:center;
+    display:flex;flex-direction:column;height:100%;
+  }
+  .course-card:hover{transform:translateY(-8px) rotateX(4deg); box-shadow:0 30px 60px rgba(40,10,60,0.12)}
+  .course-media{height:150px;border-radius:10px;overflow:hidden}
+  .course-media img{width:100%;height:100%;object-fit:cover;display:block}
+  .course-title{font-weight:700;color:var(--indigo);margin-top:10px}
+  .course-desc{font-size:13px;color:var(--muted);margin-top:8px;flex:1}
+  .course-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px}
+  .price{font-weight:800;color:var(--indigo)}
+  .btn-add{background:var(--indigo);color:var(--gold);padding:8px 12px;border-radius:12px;border:none;cursor:pointer;font-weight:700}
+  .btn-details{background:transparent;border:1px solid rgba(45,0,107,0.06);padding:8px 10px;border-radius:10px;color:var(--indigo);cursor:pointer}
+
+  /* ---------- CART BAR (floating) ---------- */
+  .cart-floating{
+    position:fixed;right:26px;bottom:26px;background:var(--card);color:var(--indigo);
+    padding:12px 14px;border-radius:12px;box-shadow:0 18px 40px rgba(40,10,60,0.12);display:flex;gap:12px;align-items:center;z-index:140;
+  }
+  .cart-count{background:var(--purple);color:var(--white);padding:6px 10px;border-radius:8px;font-weight:700}
+
+  /* ---------- CHECKOUT (full) ---------- */
+  .checkout-wrap{max-width:980px;margin:22px auto;background:var(--card);border-radius:12px;padding:18px;box-shadow:0 24px 60px rgba(40,10,60,0.08)}
+  .checkout-grid{display:grid;grid-template-columns:1fr 320px;gap:22px}
+  .line-item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed rgba(0,0,0,0.06)}
+  .total{font-weight:900;font-size:18px;color:var(--indigo);padding-top:10px}
+
+  input[type="text"],input[type="email"]{width:100%;padding:12px;border-radius:10px;border:1px solid #eee;margin-top:8px}
+
+  /* ---------- DASHBOARD ---------- */
+  .dashboard-wrap{max-width:1200px;margin:10px auto;padding:14px}
+  .dash-top{display:flex;justify-content:space-between;align-items:center;gap:14px}
+  .welcome{font-weight:800;color:var(--indigo);font-size:20px}
+  .dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px;margin-top:18px}
+
+  .dash-course{background:var(--card);padding:14px;border-radius:12px;box-shadow:0 12px 36px rgba(40,10,60,0.06)}
+  .modules-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+  .module-pill{background:linear-gradient(90deg,var(--purple),var(--indigo));color:var(--gold);padding:10px;border-radius:10px;text-align:center;font-weight:700;cursor:pointer}
+  .module-pill.alt{background:linear-gradient(90deg,var(--gold),#ffeab7);color:var(--indigo)}
+
+  /* ---------- LESSON PAGE ---------- */
+  .lesson-wrap{max-width:1100px;margin:18px auto;background:var(--card);padding:18px;border-radius:12px;box-shadow:0 20px 60px rgba(40,10,60,0.06)}
+  .video-container{background:#000;border-radius:10px;overflow:hidden}
+  video{width:100%;height:auto;display:block}
+  .lesson-meta{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+  .lesson-meta h3{margin:0;color:var(--purple)}
+  .controls{display:flex;gap:12px}
+
+  /* ---------- TESTIMONIALS / SUBSCRIBE BOX ---------- */
+  .subscribe-box{margin-top:18px;background:#fff9e6;padding:16px;border-radius:12px}
+  .subscribe-box input{padding:12px;border-radius:25px;border:1px solid #eee;width:calc(100% - 120px);max-width:360px}
+  .subscribe-box button{background:var(--indigo);color:var(--gold);border:none;padding:10px 14px;border-radius:20px;cursor:pointer}
+  .sub-count{margin-top:10px;font-weight:700;color:var(--indigo)}
+
+  .testimonials{margin-top:26px}
+  .testimonial{background:var(--card);padding:14px;border-radius:12px;box-shadow:0 10px 30px rgba(40,10,60,0.04);margin-bottom:12px}
+  .testimonial p{font-style:italic;color:var(--muted)}
+  .testimonial span{display:block;margin-top:8px;font-weight:700;color:var(--indigo)}
+
+  /* ---------- FOOTER ---------- */
+  footer{padding:18px;text-align:center;background:linear-gradient(90deg,var(--purple),var(--indigo));color:var(--white);margin-top:24px}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:900px){
+    .checkout-grid{grid-template-columns:1fr}
+    .modules-grid{grid-template-columns:repeat(2,1fr)}
+    .hero-right img{width:260px}
+  }
+  @media(max-width:640px){
+    header{padding:10px 14px}
+    .hero{flex-direction:column;gap:18px;padding:18px}
+    .hero-right img{width:100%}
+    .modules-grid{grid-template-columns:repeat(1,1fr)}
+  }
+</style>
 </head>
 <body>
 
+  <!-- HEADER -->
   <header>
-    <h1>Pezu Smith Consulting</h1>
+    <div class="brand">
+      <div class="logo">PS</div>
+      <div>
+        <h1>Pezu Smith Consulting</h1>
+        <p style="font-size:12px;margin-top:4px;opacity:0.95">School Consulting & Professional Learning</p>
+      </div>
+    </div>
+
     <nav>
       <a href="#" onclick="showPage('home')">Home</a>
-      <a href="#" onclick="showPage('courses')">Courses</a>
-      <a href="#" onclick="showPage('dashboard')">Dashboard</a>
+      <a href="#" onclick="showPage('catalog')">Courses</a>
+      <a href="#" id="navDashboard" onclick="openDashboard()" style="display:none">Dashboard</a>
+      <button class="cta" id="ctaBtn" onclick="showPage('catalog')">Get Started</button>
     </nav>
   </header>
 
-  <!-- HOME -->
-  <section id="home" class="active">
-    <h2>Empower Your Future with Pezu Smith Consulting</h2>
-    <p>Professional training in Business, Technology, and Leadership. Learn and grow at your pace.</p>
-    <button class="btn" onclick="showPage('courses')">Explore Courses</button>
-    <p class="counter" id="subCount">Active Subscribers: 0</p>
+  <!-- HOME (hero + intro) -->
+  <main id="home" class="page active">
+    <div class="hero">
+      <div class="hero-left">
+        <h2>Transform schools • Empower educators</h2>
+        <p>Professional courses, leadership training and school improvement strategies — designed to deliver measurable results.</p>
+        <div class="hero-actions">
+          <button class="btn-primary" onclick="showPage('catalog')">Browse Courses</button>
+          <div class="sub-counter" id="subsBadge">🌍 2,850 learners</div>
+        </div>
+
+        <div class="subscribe-box" style="margin-top:18px">
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px">
+            <input type="email" id="heroEmail" placeholder="Enter your email">
+            <button onclick="heroSubscribe()">Join Now</button>
+          </div>
+          <div class="sub-count" id="heroSubMsg"></div>
+        </div>
+      </div>
+
+      <div class="hero-right">
+        <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=1200&auto=format&fit=crop" alt="Hero image">
+      </div>
+    </div>
+
+    <!-- About + testimonials snippet -->
+    <section style="margin-top:22px; text-align:left; max-width:1100px; margin-left:auto; margin-right:auto;">
+      <h3 class="section-title">About Pezu Smith Consulting</h3>
+      <p class="muted">At Pezu Smith Consulting, we believe in the power of continuous learning and effective leadership. Our consulting firm provides modern educational solutions to schools and educators across Africa and beyond.</p>
+      <p class="muted">We offer online and in-person courses in school management, digital teaching, curriculum design, and teacher mentoring, all aimed at improving learning outcomes.</p>
+
+      <div class="testimonials">
+        <div class="testimonial">
+          <p>“Pezu Smith’s training reshaped how we manage our school operations. The leadership course was transformative.”</p>
+          <span>- Mrs. Grace, School Principal</span>
+        </div>
+        <div class="testimonial">
+          <p>“The digital teaching tools I learned here helped me engage students better in my virtual classroom.”</p>
+          <span>- Mr. Kola, Teacher</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- CATALOG (courses grid) -->
+  <section id="catalog" class="page">
+    <div style="max-width:1200px;margin:0 auto">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <h3 class="section-title">Explore Our Courses</h3>
+          <div class="muted">Select one or more courses. Checkout to enroll and access your dashboard.</div>
+        </div>
+        <div class="muted">Theme: <strong style="color:var(--purple)">Purple</strong> / <strong style="color:var(--gold)">Gold</strong></div>
+      </div>
+
+      <div class="courses-grid" id="coursesGrid"></div>
+    </div>
   </section>
 
-  <!-- COURSES -->
-  <section id="courses">
-    <h2>Our Premium Courses</h2>
-    <div class="course-container" id="courseList"></div>
+  <!-- CHECKOUT (full page) -->
+  <section id="checkout" class="page">
+    <div class="checkout-wrap">
+      <h3 style="margin:0 0 8px">Checkout — Simulated Payment</h3>
+      <div class="muted">Fill details below to complete subscription (demo only — no real payment).</div>
+      <div class="checkout-grid" style="margin-top:14px">
+        <div class="left">
+          <div id="cartItemsContainer"></div>
+
+          <div style="margin-top:12px">
+            <label style="font-weight:700">Full name</label>
+            <input type="text" id="inputName" placeholder="Jane Doe">
+            <label style="font-weight:700;margin-top:10px;display:block">Email</label>
+            <input type="email" id="inputEmail" placeholder="you@example.com">
+          </div>
+
+          <div style="margin-top:16px">
+            <label style="font-weight:700">Card (simulated)</label>
+            <input type="text" placeholder="4242 4242 4242 4242">
+            <div class="muted" style="margin-top:8px">This is a simulated checkout for demo only—no real money is processed.</div>
+          </div>
+
+          <div style="margin-top:16px;display:flex;gap:10px">
+            <button class="btn-primary" onclick="simulatePayment()">Pay & Enroll</button>
+            <button class="btn-details" onclick="cancelCheckout()">Cancel</button>
+          </div>
+        </div>
+
+        <div class="right">
+          <h4 style="margin:0 0 8px">Order Summary</h4>
+          <div id="summaryList"></div>
+          <div class="total" id="summaryTotal">Total: $0</div>
+        </div>
+      </div>
+    </div>
   </section>
 
-  <!-- DASHBOARD -->
-  <section id="dashboard">
-    <h2>Your Dashboard</h2>
-    <p>Track your enrolled courses and explore modules.</p>
-    <div class="subscribed-list" id="subscribedCourses"></div>
+  <!-- DASHBOARD (full page) -->
+  <section id="dashboard" class="page">
+    <div class="dashboard-wrap">
+      <div class="dash-top">
+        <div>
+          <div class="welcome" id="welcomeUser">Welcome!</div>
+          <div class="muted" id="dashboardNote">Your enrolled courses appear below. Click a module to open lessons (each module has 8 lessons).</div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn-details" onclick="logout()">Logout</button>
+          <button class="btn-primary" onclick="showPage('catalog')">Browse More</button>
+        </div>
+      </div>
+
+      <div class="dash-grid" id="dashGrid" style="margin-top:16px"></div>
+    </div>
   </section>
 
-  <!-- LESSONS -->
-  <section id="lessons">
-    <h2 id="lessonTitle">Course Lessons</h2>
-    <div class="lesson-grid" id="lessonGrid"></div>
-    <button class="btn" style="margin-top:30px" onclick="showPage('dashboard')">Back to Dashboard</button>
+  <!-- LESSON (full page) -->
+  <section id="lesson" class="page">
+    <div class="lesson-wrap">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div class="muted" id="crumbs">Dashboard › Course › Module › Lesson</div>
+          <h3 id="lessonTitle" style="margin-top:6px;color:var(--purple)">Lesson Title</h3>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn-details" onclick="backToDashboard()">Back to Dashboard</button>
+          <button class="btn-primary" id="nextBtn" onclick="nextLesson()">Next</button>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <div class="video-container">
+          <video id="lessonVideo" controls playsinline>
+            <source src="https://samplelib.com/lib/preview/mp4/sample-5s.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+
+        <div class="lesson-meta">
+          <div>
+            <h3 id="lessonHeader">Module x — Lesson y</h3>
+            <div class="muted" id="lessonNotes">Lesson brief: key objectives and notes appear here.</div>
+          </div>
+          <div class="controls">
+            <button class="btn-details" onclick="prevLesson()">Prev</button>
+            <button class="btn-primary" onclick="nextLesson()">Next</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 
+  <!-- FOOTER -->
   <footer>
-    © 2025 Pezu Smith Consulting. All rights reserved.
+    <div style="max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:10px">
+      <div>© 2025 Pezu Smith Consulting</div>
+      <div class="muted">Designed with care • Professional Development for Schools</div>
+    </div>
   </footer>
 
-  <script>
-    const pages = ['home','courses','dashboard','lessons'];
-    const subs = [];
-    let subscriberCount = 0;
+  <!-- FLOATING CART -->
+  <div id="cartFloating" class="cart-floating" style="display:none">
+    <div style="display:flex;flex-direction:column;align-items:flex-start">
+      <div class="muted">Cart</div>
+      <strong id="cartSummary">0 courses</strong>
+    </div>
+    <div class="cart-count" id="cartCount">0</div>
+    <button class="btn-primary" onclick="openCheckout()">Checkout</button>
+  </div>
 
-    const courseData = [
-      { title: 'Business Strategy Mastery', img: 'https://source.unsplash.com/300x200/?business,office', price: 120 },
-      { title: 'Leadership & Team Building', img: 'https://source.unsplash.com/300x200/?leadership', price: 100 },
-      { title: 'Digital Marketing Pro', img: 'https://source.unsplash.com/300x200/?marketing', price: 90 },
-      { title: 'Entrepreneurship 101', img: 'https://source.unsplash.com/300x200/?entrepreneur', price: 110 },
-      { title: 'Financial Management', img: 'https://source.unsplash.com/300x200/?finance', price: 95 },
-      { title: 'Project Management', img: 'https://source.unsplash.com/300x200/?project,planning', price: 105 },
-    ];
+<script>
+/* ------------------ Data & state ------------------ */
+const SAMPLE_VIDEO = "https://samplelib.com/lib/preview/mp4/sample-20s.mp4";
+const COURSES = [
+  { id:'c01', title:'School Leadership Essentials', desc:'Leadership frameworks for effective school improvement.', image:'https://images.unsplash.com/photo-1521790797524-b2497295b8a2?q=80&w=1200&auto=format&fit=crop', price:140 },
+  { id:'c02', title:'Digital Teaching & eLearning', desc:'Design interactive online lessons and blended learning models.', image:'https://images.unsplash.com/photo-1584697964195-5135d6d2f7d7?q=80&w=1200&auto=format&fit=crop', price:120 },
+  { id:'c03', title:'Curriculum Design & Assessment', desc:'Constructive alignment and modern assessment design.', image:'https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1200&auto=format&fit=crop', price:150 },
+  { id:'c04', title:'Counselling & Student Support', desc:'Holistic strategies for student wellbeing and mentorship.', image:'https://images.unsplash.com/photo-1554774853-b1b2f0d1f3a5?q=80&w=1200&auto=format&fit=crop', price:110 },
+  { id:'c05', title:'Financial Management for Schools', desc:'Budgeting, audits and sustainable funding models.', image:'https://images.unsplash.com/photo-1556741533-f6acd647d2fb?q=80&w=1200&auto=format&fit=crop', price:130 },
+  { id:'c06', title:'Teacher Professional Development', desc:'Continuous teacher improvement and peer coaching.', image:'https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1200&auto=format&fit=crop', price:100 }
+];
 
-    function showPage(page) {
-      pages.forEach(p => document.getElementById(p).classList.remove('active'));
-      document.getElementById(page).classList.add('active');
-      window.scrollTo(0,0);
+// persisted state
+let CART = JSON.parse(localStorage.getItem('psc_cart') || '[]'); // array of course ids
+let USER = JSON.parse(localStorage.getItem('psc_user') || 'null'); // {name,email}
+let ENROLLED = JSON.parse(localStorage.getItem('psc_enrolled') || '{}'); // { cid: {...} }
+let SUBSCRIBERS = Number(localStorage.getItem('psc_subs') || 2850);
+
+/* ------------------ DOM refs ------------------ */
+const coursesGrid = document.getElementById('coursesGrid');
+const cartFloating = document.getElementById('cartFloating');
+const cartCount = document.getElementById('cartCount');
+const cartSummary = document.getElementById('cartSummary');
+const summaryList = document.getElementById('summaryList');
+const summaryTotal = document.getElementById('summaryTotal');
+const cartItemsContainer = document.getElementById('cartItemsContainer');
+const subsBadge = document.getElementById('subsBadge');
+const heroSubMsg = document.getElementById('heroSubMsg');
+const dashGrid = document.getElementById('dashGrid');
+const navDashboard = document.getElementById('navDashboard');
+const ctaBtn = document.getElementById('ctaBtn');
+
+/* ------------------ Helpers: pages ------------------ */
+function hideAllPages(){ document.querySelectorAll('.page').forEach(p => p.classList.remove('active')) }
+function showPage(id){
+  hideAllPages();
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ------------------ Init UI ------------------ */
+function setSubscribers(n){
+  SUBSCRIBERS = n;
+  localStorage.setItem('psc_subs', n);
+  subsBadge.innerText = `🌍 ${n.toLocaleString()} learners`;
+}
+setSubscribers(SUBSCRIBERS);
+
+/* ------------------ Render catalog ------------------ */
+function renderCatalog(){
+  coursesGrid.innerHTML = '';
+  COURSES.forEach(c=>{
+    const card = document.createElement('div');
+    card.className = 'course-card';
+    card.innerHTML = `
+      <div class="course-media"><img src="${c.image}" alt=""></div>
+      <div class="course-title">${c.title}</div>
+      <div class="course-desc">${c.desc}</div>
+      <div class="course-footer">
+        <div class="price">$${c.price}</div>
+        <div>
+          <button class="btn-details" onclick="viewDetails('${c.id}')">Details</button>
+          <button class="btn-add" onclick="addToCart('${c.id}')">Add to Cart</button>
+        </div>
+      </div>`;
+    coursesGrid.appendChild(card);
+  });
+}
+renderCatalog();
+
+/* ------------------ Cart UI ------------------ */
+function updateCartUI(){
+  cartCount.innerText = CART.length;
+  cartSummary.innerText = `${CART.length} course${CART.length!==1?'s':''}`;
+  cartFloating.style.display = CART.length>0 ? 'flex' : 'none';
+  localStorage.setItem('psc_cart', JSON.stringify(CART));
+}
+updateCartUI();
+
+function addToCart(cid){
+  if(CART.includes(cid)){ alert('Already added'); return; }
+  CART.push(cid);
+  updateCartUI();
+  alert('Added to cart');
+}
+
+/* ------------------ View details -> open checkout with single preselect ------------------ */
+function viewDetails(cid){
+  openCheckout([cid]);
+}
+
+/* ------------------ Checkout page ------------------ */
+let checkoutQueue = [];
+function openCheckout(preselect){
+  checkoutQueue = (preselect && preselect.length) ? preselect.slice() : CART.slice();
+  if(checkoutQueue.length === 0){ alert('Cart is empty — add courses first'); return; }
+  populateCheckout();
+  showPage('checkout');
+}
+function populateCheckout(){
+  cartItemsContainer.innerHTML = '';
+  summaryList.innerHTML = '';
+  let total = 0;
+  checkoutQueue.forEach(cid=>{
+    const c = COURSES.find(x=>x.id===cid);
+    total += c.price;
+    const node = document.createElement('div');
+    node.innerHTML = `<div style="display:flex;gap:10px;align-items:center;margin-bottom:10px">
+      <img src="${c.image}" style="width:86px;height:60px;object-fit:cover;border-radius:8px">
+      <div style="flex:1"><strong>${c.title}</strong><div class="muted">$${c.price}</div></div>
+    </div>`;
+    cartItemsContainer.appendChild(node);
+
+    const line = document.createElement('div');
+    line.className = 'line-item';
+    line.innerHTML = `<div>${c.title}</div><div>$${c.price}</div>`;
+    summaryList.appendChild(line);
+  });
+  summaryTotal.innerText = `Total: $${total}`;
+}
+
+/* cancel checkout */
+function cancelCheckout(){ if(confirm('Cancel checkout?')) showPage('catalog') }
+
+/* simulate payment & enroll */
+function simulatePayment(){
+  const name = document.getElementById('inputName').value.trim();
+  const email = document.getElementById('inputEmail').value.trim();
+  if(!name || !email){ alert('Enter name & email'); return; }
+
+  summaryTotal.innerText = 'Processing...';
+  setTimeout(()=>{
+    // create user and enroll
+    USER = { name, email };
+    localStorage.setItem('psc_user', JSON.stringify(USER));
+    if(!ENROLLED) ENROLLED = {};
+    checkoutQueue.forEach(cid=>{
+      if(!ENROLLED[cid]) ENROLLED[cid] = { enrolledAt: new Date().toISOString(), modules: {} };
+      for(let m=1;m<=7;m++){ ENROLLED[cid].modules[m] = ENROLLED[cid].modules[m] || { lessonsSeen: [] }; }
+    });
+    localStorage.setItem('psc_enrolled', JSON.stringify(ENROLLED));
+    // remove from CART those enrolled
+    CART = CART.filter(x => !checkoutQueue.includes(x));
+    localStorage.setItem('psc_cart', JSON.stringify(CART));
+    updateCartUI();
+    // update subs
+    setSubscribers(SUBSCRIBERS + checkoutQueue.length);
+    alert('Enrollment successful — opening your dashboard');
+    openDashboard();
+  }, 900);
+}
+
+/* ------------------ hero quick subscribe ------------------ */
+function heroSubscribe(){
+  const email = document.getElementById('heroEmail').value.trim();
+  if(!email){ heroSubMsg.innerText = 'Please enter your email'; heroSubMsg.style.color='crimson'; return; }
+  heroSubMsg.innerText = '🎉 Thanks — you have been added to our mailing list!';
+  heroSubMsg.style.color = 'var(--indigo)';
+  setTimeout(()=>heroSubMsg.innerText='',3000);
+}
+
+/* ------------------ Dashboard ------------------ */
+function openDashboard(){
+  USER = JSON.parse(localStorage.getItem('psc_user') || 'null');
+  ENROLLED = JSON.parse(localStorage.getItem('psc_enrolled') || '{}');
+  if(!USER){
+    alert('Please enroll via checkout first to create your dashboard.');
+    showPage('catalog'); return;
+  }
+  // show dashboard nav
+  navDashboard.style.display = 'inline-block';
+  ctaBtn.innerText = 'My Dashboard';
+  renderDashboard();
+  showPage('dashboard');
+}
+function renderDashboard(){
+  dashGrid.innerHTML = '';
+  document.getElementById('welcomeUser').innerText = `Welcome, ${USER.name}`;
+  const enrolledIds = Object.keys(ENROLLED);
+  if(enrolledIds.length === 0){
+    dashGrid.innerHTML = `<div class="muted">No enrolled courses yet. Browse the catalog to enroll.</div>`;
+    return;
+  }
+  enrolledIds.forEach(cid=>{
+    const c = COURSES.find(x=>x.id===cid);
+    const box = document.createElement('div'); box.className='dash-course';
+    box.innerHTML = `<div style="display:flex;gap:12px;align-items:center">
+      <img src="${c.image}" style="width:82px;height:60px;border-radius:8px;object-fit:cover">
+      <div><strong>${c.title}</strong><div class="muted">$${c.price} • Enrolled ${new Date(ENROLLED[cid].enrolledAt).toLocaleDateString()}</div></div>
+    </div>
+    <div class="modules-grid" id="modules_${cid}"></div>
+    <div id="lessons_${cid}"></div>`;
+    dashGrid.appendChild(box);
+
+    // add module pills
+    const modGrid = box.querySelector(`#modules_${cid}`);
+    for(let m=1;m<=7;m++){
+      const pill = document.createElement('div');
+      pill.className = 'module-pill'; pill.innerText = `Module ${m}`;
+      pill.onclick = ()=>openModule(cid,m);
+      modGrid.appendChild(pill);
     }
+  });
+}
 
-    function renderCourses() {
-      const container = document.getElementById('courseList');
-      container.innerHTML = '';
-      courseData.forEach((c, i) => {
-        container.innerHTML += `
-          <div class="course-card">
-            <img src="${c.img}" alt="${c.title}">
-            <h3>${c.title}</h3>
-            <p>Comprehensive ${c.title} course with 5 modules and 15 video lessons.</p>
-            <p><strong>Price: $${c.price}</strong></p>
-            <button onclick="subscribe(${i})">Subscribe</button>
-          </div>`;
-      });
-    }
+/* open module (render lessons list inside dashboard for that course) */
+function openModule(courseId, moduleNumber){
+  // clear all lessons sections
+  document.querySelectorAll('[id^="lessons_"]').forEach(el=>el.innerHTML='');
+  const target = document.getElementById(`lessons_${courseId}`);
+  const wrapper = document.createElement('div');
+  wrapper.innerHTML = `<h4 style="margin-top:12px;color:var(--purple)">Module ${moduleNumber} — Lessons</h4>
+    <div style="margin-top:10px" id="lessonList_${courseId}_${moduleNumber}"></div>`;
+  target.appendChild(wrapper);
 
-    function subscribe(i) {
-      const course = courseData[i];
-      if (!subs.includes(course)) {
-        subs.push(course);
-        subscriberCount++;
-        document.getElementById('subCount').innerText = "Active Subscribers: " + subscriberCount;
-        alert(`Subscribed to ${course.title}`);
-        updateDashboard();
-        showPage('dashboard');
-      } else alert('Already subscribed!');
-    }
+  const list = document.getElementById(`lessonList_${courseId}_${moduleNumber}`);
+  for(let l=1;l<=8;l++){
+    const item = document.createElement('div');
+    item.className = 'module-pill alt';
+    item.style.margin='6px 6px 6px 0';
+    item.style.display='inline-block';
+    item.style.minWidth='160px';
+    item.style.cursor='pointer';
+    item.innerText = `Lesson ${l}`;
+    item.onclick = ()=>openLesson(courseId,moduleNumber,l);
+    list.appendChild(item);
+  }
+}
 
-    function updateDashboard() {
-      const dash = document.getElementById('subscribedCourses');
-      dash.innerHTML = '';
-      subs.forEach((s, i) => {
-        let modules = '';
-        for (let m = 1; m <= 7; m++)
-          modules += `<div class='module' onclick='openLessons("${s.title}", ${m})'>Module ${m}</div>`;
-        dash.innerHTML += `
-          <div class="subscribed-course">
-            <h3>${s.title}</h3>
-            ${modules}
-          </div>`;
-      });
-    }
+/* ------------------ Lesson page ------------------ */
+let CURRENT = {cid: null, module:1, lesson:1};
+function openLesson(cid, mod, les){
+  CURRENT = {cid, module:mod, lesson:les};
+  const course = COURSES.find(c=>c.id===cid);
+  // set crumbs & headings
+  document.getElementById('crumbs').innerText = `Dashboard › ${course.title} › Module ${mod} › Lesson ${les}`;
+  document.getElementById('lessonTitle').innerText = `${course.title} — Module ${mod} • Lesson ${les}`;
+  document.getElementById('lessonHeader').innerText = `Module ${mod} — Lesson ${les}`;
+  document.getElementById('lessonNotes').innerText = `Objectives: Understand core concepts for ${course.title}. This is a demo video.`;
 
-    function openLessons(courseName, moduleNum) {
-      showPage('lessons');
-      document.getElementById('lessonTitle').innerText = `${courseName} - Module ${moduleNum}`;
-      const grid = document.getElementById('lessonGrid');
-      grid.innerHTML = '';
-      for (let l = 1; l <= 8; l++) {
-        grid.innerHTML += `<div class='lesson' onclick='alert("Playing Lesson ${l}")'>Lesson ${l}</div>`;
-      }
-    }
+  // update video src (offset to simulate variety)
+  const v = document.getElementById('lessonVideo');
+  v.pause();
+  v.src = SAMPLE_VIDEO + '#t=' + ((mod-1)*8 + (les-1))*3;
+  v.load();
 
-    renderCourses();
-  </script>
+  // mark as seen in ENROLLED
+  ENROLLED = JSON.parse(localStorage.getItem('psc_enrolled') || '{}');
+  ENROLLED[cid] = ENROLLED[cid] || { enrolledAt: new Date().toISOString(), modules:{} };
+  ENROLLED[cid].modules = ENROLLED[cid].modules || {};
+  ENROLLED[cid].modules[mod] = ENROLLED[cid].modules[mod] || { lessonsSeen: [] };
+  if(!ENROLLED[cid].modules[mod].lessonsSeen.includes(les)) ENROLLED[cid].modules[mod].lessonsSeen.push(les);
+  localStorage.setItem('psc_enrolled', JSON.stringify(ENROLLED));
 
+  // hide others, show lesson
+  showPage('lesson');
+}
+
+/* next / prev lesson navigation */
+function nextLesson(){
+  let {cid, module, lesson} = CURRENT;
+  if(lesson < 8){ lesson++; }
+  else if(module < 7){ module++; lesson = 1; }
+  else { alert('End of course lessons. Returning to dashboard.'); backToDashboard(); return; }
+  openLesson(cid,module,lesson);
+}
+function prevLesson(){
+  let {cid, module, lesson} = CURRENT;
+  if(lesson > 1) lesson--;
+  else if(module > 1){ module--; lesson = 8; }
+  else { backToDashboard(); return; }
+  openLesson(cid,module,lesson);
+}
+
+/* back to dashboard */
+function backToDashboard(){ openDashboard(); }
+
+/* ------------------ simple logout ------------------ */
+function logout(){
+  if(confirm('Log out? (your enrollments will remain)')){
+    localStorage.removeItem('psc_user');
+    document.getElementById('navDashboard').style.display='none';
+    ctaBtn.innerText = 'Get Started';
+    showPage('catalog');
+  }
+}
+
+/* ------------------ startup tasks ------------------ */
+(function init(){
+  // ensure persisted state loaded
+  CART = JSON.parse(localStorage.getItem('psc_cart') || '[]');
+  ENROLLED = JSON.parse(localStorage.getItem('psc_enrolled') || '{}');
+  USER = JSON.parse(localStorage.getItem('psc_user') || 'null');
+  if(USER){
+    document.getElementById('navDashboard').style.display='inline-block';
+    ctaBtn.innerText = 'My Dashboard';
+  }
+  updateCartUI();
+  setSubscribers(SUBSCRIBERS);
+})();
+</script>
 </body>
 </html>
