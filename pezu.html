@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pezu Smith Consulting</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  * {margin:0; padding:0; box-sizing:border-box;}
+  body {font-family:'Poppins', sans-serif; background:#f9fafc; color:#333; line-height:1.6;}
+  header {background:#023e8a; color:white; padding:1.2rem 2rem; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:100;}
+  header h1 {font-size:1.6rem; font-weight:700;}
+  nav a {color:white; text-decoration:none; margin:0 1rem; font-weight:500;}
+  nav a:hover {color:#ffd60a;}
+  
+  .hero {background:linear-gradient(135deg, #0077b6, #00b4d8); color:white; text-align:center; padding:5rem 2rem;}
+  .hero h2 {font-size:2.6rem; font-weight:700; margin-bottom:1rem;}
+  .hero p {font-size:1.2rem; margin-bottom:2rem;}
+  .btn {background:#ffd60a; color:#000; border:none; padding:0.8rem 1.8rem; border-radius:30px; font-weight:600; cursor:pointer; transition:0.3s;}
+  .btn:hover {background:#ffcd00;}
+  
+  .section {padding:4rem 2rem; text-align:center;}
+  .about {max-width:900px; margin:auto;}
+  .about h3 {color:#023e8a; margin-bottom:1rem;}
+  .about p {color:#555; margin-bottom:1rem;}
+  
+  .courses-grid {display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:1.5rem; margin-top:2rem;}
+  .course-card {background:white; border-radius:10px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.1); transition:0.3s;}
+  .course-card:hover {transform:translateY(-6px);}
+  .course-card img {width:100%; height:160px; object-fit:cover;}
+  .course-card h3 {margin:1rem;}
+  .course-card p {padding:0 1rem 1rem; font-size:0.95rem; color:#555;}
+  
+  .course-details {display:none; max-width:950px; background:white; padding:2rem; margin:auto; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.1);}
+  .module {margin:1.5rem 0;}
+  .module h4 {color:#023e8a; margin-bottom:0.5rem;}
+  .lesson video {width:100%; border-radius:10px; margin:0.5rem 0;}
+  
+  .subscribe-box {margin-top:2rem; background:#e8f5ff; padding:2rem; border-radius:10px;}
+  .subscribe-box input {padding:0.8rem; border:1px solid #ccc; border-radius:25px; width:70%; max-width:300px; margin-right:0.5rem;}
+  .subscribe-box button {background:#023e8a; color:white; border:none; padding:0.8rem 1.4rem; border-radius:25px; cursor:pointer;}
+  .subscribe-box button:hover {background:#012a57;}
+  .sub-count {margin-top:1rem; font-weight:600; color:#023e8a;}
+  
+  .testimonials {background:#caf0f8; padding:4rem 2rem;}
+  .testimonial {max-width:650px; margin:1rem auto; background:white; padding:1.5rem; border-radius:10px; box-shadow:0 3px 8px rgba(0,0,0,0.05);}
+  .testimonial p {font-style:italic;}
+  .testimonial span {display:block; margin-top:1rem; font-weight:600; color:#0077b6;}
+  
+  footer {background:#03045e; color:white; text-align:center; padding:2rem;}
+  footer p {font-size:0.9rem;}
+  
+  @media(max-width:768px){
+    header{flex-direction:column;}
+    nav{margin-top:0.5rem;}
+    .hero h2{font-size:2rem;}
+    .subscribe-box input{width:100%; margin-bottom:1rem;}
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Pezu Smith Consulting</h1>
+    <nav>
+      <a href="#home" onclick="showSection('home')">Home</a>
+      <a href="#courses" onclick="showSection('courses')">Courses</a>
+      <a href="#about" onclick="showSection('about')">About</a>
+      <a href="#contact" onclick="showSection('contact')">Contact</a>
+    </nav>
+  </header>
+
+  <section id="home" class="hero">
+    <h2>Transforming Schools, Empowering Educators</h2>
+    <p>Professional courses, leadership training, and digital resources for teachers, school leaders, and education consultants.</p>
+    <button class="btn" onclick="showSection('courses')">Explore Courses</button>
+    <div class="sub-count" id="subscriberCount">🌍 2,580 Active Subscribers</div>
+  </section>
+
+  <section id="about" class="section about">
+    <h3>About Pezu Smith Consulting</h3>
+    <p>At Pezu Smith Consulting, we believe in the power of continuous learning and effective leadership. Our consulting firm provides modern educational solutions to schools and educators across Africa and beyond.</p>
+    <p>We offer online and in-person courses in school management, digital teaching, curriculum design, and teacher mentoring, all aimed at improving learning outcomes.</p>
+  </section>
+
+  <section id="courses" class="section">
+    <h2>Explore Our Courses</h2>
+    <div class="courses-grid" id="coursesGrid"></div>
+  </section>
+
+  <section id="courseDetails" class="section">
+    <div class="course-details" id="detailsBox">
+      <h2 id="courseTitle"></h2>
+      <p id="courseDesc"></p>
+      <div id="modulesList"></div>
+      <div class="subscribe-box">
+        <h3>Subscribe to Access Full Lessons</h3>
+        <input type="email" id="emailInput" placeholder="Enter your email">
+        <button onclick="subscribe()">Join Now</button>
+        <div id="subscribeMessage" style="margin-top:1rem; font-weight:600;"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="testimonials" id="testimonials">
+    <h2>What Our Clients Say</h2>
+    <div class="testimonial"><p>“Pezu Smith’s training reshaped how we manage our school operations. The leadership course was transformative.”</p><span>- Mrs. Grace, School Principal</span></div>
+    <div class="testimonial"><p>“The digital teaching tools I learned here helped me engage students better in my virtual classroom.”</p><span>- Mr. Kola, Teacher</span></div>
+  </section>
+
+  <footer id="contact">
+    <p>Contact: info@pezusmithconsulting.com | © 2025 Pezu Smith Consulting</p>
+  </footer>
+
+  <script>
+    const courses = [
+      {title:"School Leadership & Management", desc:"Master strategic leadership, resource management, and effective communication in schools.", img:"https://images.unsplash.com/photo-1581091012184-7b6a59f78b54"},
+      {title:"Digital Teaching & E-Learning", desc:"Leverage technology to improve student engagement and classroom efficiency.", img:"https://images.unsplash.com/photo-1581093588401-22e9e3f65b90"},
+      {title:"Curriculum Planning & Evaluation", desc:"Design dynamic curriculums and assessments that meet modern educational standards.", img:"https://images.unsplash.com/photo-1503676260728-1c00da094a0b"},
+      {title:"Counseling and Student Mentorship", desc:"Support student development with guidance, empathy, and data-driven counseling methods.", img:"https://images.unsplash.com/photo-1596495577886-d920f1fb7238"},
+      {title:"Inclusive Education Strategies", desc:"Learn to build inclusive learning environments that accommodate all learners.", img:"https://images.unsplash.com/photo-1571260899304-425eee4c7efc"},
+      {title:"Financial Management for Schools", desc:"Understand budgeting, audits, and financial sustainability for educational institutions.", img:"https://images.unsplash.com/photo-1563986768494-4dee2763ff3f"},
+      {title:"Data-Driven School Improvement", desc:"Use data analytics to enhance decision-making and monitor academic progress.", img:"https://images.unsplash.com/photo-1531297484001-80022131f5a1"},
+      {title:"Effective Parent-Teacher Communication", desc:"Bridge the gap between educators and parents with structured engagement strategies.", img:"https://images.unsplash.com/photo-1519389950473-47ba0277781c"},
+      {title:"Teacher Professional Development", desc:"Empower teachers with continuous improvement, reflective practice, and collaboration.", img:"https://images.unsplash.com/photo-1603575448367-4a9bde6e4c49"},
+      {title:"Educational Leadership Certification", desc:"Comprehensive certification program for aspiring school heads and educational leaders.", img:"https://images.unsplash.com/photo-1573496799515-eebbb63814f2"}
+    ];
+    
+    const lessons = ["Introduction", "Core Concepts", "Practical Workshop"];
+    const coursesGrid = document.getElementById("coursesGrid");
+    const modulesList = document.getElementById("modulesList");
+
+    courses.forEach((c, idx)=>{
+      const div=document.createElement("div");
+      div.className="course-card";
+      div.innerHTML=`<img src="${c.img}" alt="${c.title}">
+      <h3>${c.title}</h3>
+      <p>${c.desc}</p>
+      <button class='btn' onclick='showCourse(${idx})'>View Details</button>`;
+      coursesGrid.appendChild(div);
+    });
+
+    function showCourse(index){
+      const c=courses[index];
+      document.getElementById("courseTitle").innerText=c.title;
+      document.getElementById("courseDesc").innerText=c.desc;
+      modulesList.innerHTML="";
+      for(let i=1;i<=5;i++){
+        let mod=document.createElement("div");
+        mod.className="module";
+        mod.innerHTML=`<h4>Module ${i}: ${c.title} — Part ${i}</h4>`;
+        lessons.forEach((l,j)=>{
+          mod.innerHTML+=`<div class="lesson"><p>Lesson ${j+1}: ${l}</p><video controls src="https://samplelib.com/lib/preview/mp4/sample-5s.mp4"></video></div>`;
+        });
+        modulesList.appendChild(mod);
+      }
+      showSection("courseDetails");
+    }
+
+    let subscribers=2580;
+    function subscribe(){
+      const email=document.getElementById("emailInput").value;
+      const msg=document.getElementById("subscribeMessage");
+      if(email===""){msg.style.color="red"; msg.innerText="Please enter a valid email."; return;}
+      subscribers++;
+      document.getElementById("subscriberCount").innerText=`🌍 ${subscribers.toLocaleString()} Active Subscribers`;
+      msg.style.color="#023e8a";
+      msg.innerText="🎉 Subscription successful! Welcome to Pezu Smith Consulting.";
+      document.getElementById("emailInput").value="";
+    }
+
+    function showSection(id){
+      document.querySelectorAll("section").forEach(sec=>sec.style.display="none");
+      document.getElementById(id).style.display="block";
+      window.scrollTo({top:0,behavior:"smooth"});
+    }
+    showSection("home");
+  </script>
+</body>
+</html>
