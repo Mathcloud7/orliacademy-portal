@@ -1,0 +1,649 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CBT Assessment Portal</title>
+
+  <style>
+    /* ======= GLOBAL ======= */
+    body {
+      font-family: "Poppins", "Segoe UI", Arial, sans-serif;
+      background-color: #eef3f7;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    /* ======= HEADER ======= */
+    header {
+      background: linear-gradient(90deg, #2c7a7b, #38b2ac);
+      color: white;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    header img {
+      height: 55px;
+      width: 55px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid white;
+    }
+
+    header .school-info {
+      text-align: center;
+    }
+
+    header .school-info h1 {
+      margin: 0;
+      font-size: 26px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    header .school-info p {
+      margin: 0;
+      font-size: 15px;
+      opacity: 0.9;
+    }
+
+    /* ======= MAIN LAYOUT ======= */
+    .main-layout {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      width: 90%;
+      max-width: 1200px;
+      margin: 40px auto;
+    }
+
+    .container {
+      flex: 1 1 700px;
+      background-color: #fff;
+      padding: 25px 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      min-width: 300px;
+      animation: fadeIn 0.6s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(10px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    /* ======= SIDEBAR (Question Navigation) ======= */
+    .sidebar {
+      flex: 0 0 220px;
+      background-color: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      padding: 20px;
+      height: fit-content;
+      position: sticky;
+      top: 100px;
+    }
+
+    .sidebar h3 {
+      color: #2c7a7b;
+      margin-top: 0;
+      font-size: 18px;
+      text-align: center;
+    }
+
+    .question-nav {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 15px;
+    }
+
+    .question-nav button {
+      background-color: #e2e8f0;
+      border: none;
+      border-radius: 6px;
+      padding: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .question-nav button:hover {
+      background-color: #bee3f8;
+    }
+
+    .question-nav button.active {
+      background-color: #38b2ac;
+      color: white;
+      font-weight: bold;
+    }
+
+    /* ======= TIMER ======= */
+    .timer-bar {
+      background-color: #edf2f7;
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 16px;
+      margin-bottom: 25px;
+      color: #2c7a7b;
+      border: 2px solid #cbd5e0;
+    }
+
+    /* ======= FILTER SECTION ======= */
+    .filter-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 25px;
+    }
+
+    .filter-container select {
+      padding: 10px 14px;
+      font-size: 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .filter-container select:focus {
+      border-color: #38b2ac;
+      box-shadow: 0 0 6px rgba(56, 178, 172, 0.4);
+      outline: none;
+    }
+
+    /* ======= TABLE ======= */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 14px 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+      font-size: 15px;
+    }
+
+    th {
+      background-color: #2c7a7b;
+      color: white;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    tr:hover {
+      background-color: #f1f9f9;
+    }
+
+    /* ======= BUTTONS ======= */
+    button {
+      background-color: #38b2ac;
+      color: white;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 15px;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    button:hover {
+      background-color: #2c7a7b;
+      transform: translateY(-2px);
+    }
+
+    /* ======= ASSESSMENT HEADER ======= */
+    .assessment-header {
+      background-color: #2c7a7b;
+      color: white;
+      padding: 25px 15px;
+      border-radius: 10px;
+      margin-bottom: 25px;
+      text-align: center;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .assessment-header h3 {
+      font-size: 30px;
+      margin-bottom: 8px;
+    }
+
+    .assessment-header p {
+      font-size: 17px;
+      margin: 3px 0;
+    }
+
+    #studentName {
+      font-size: 17px;
+      padding: 10px 14px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 280px;
+      margin-top: 10px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+
+    #studentName:focus {
+      border-color: #38b2ac;
+      box-shadow: 0 0 10px rgba(56, 178, 172, 0.3);
+      outline: none;
+    }
+
+    /* ======= QUESTIONS ======= */
+    .question-frame {
+      border: 1px solid #ddd;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      background-color: #f9fafc;
+      transition: box-shadow 0.3s ease-in-out;
+    }
+
+    .question-frame:hover {
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .question-frame p {
+      font-weight: 600;
+      font-size: 17px;
+    }
+
+    label {
+      display: block;
+      padding: 6px 0;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    input[type="radio"] {
+      accent-color: #38b2ac;
+      margin-right: 8px;
+      transform: scale(1.2);
+    }
+
+    /* ======= RESPONSIVE ======= */
+    @media (max-width: 768px) {
+      .main-layout { flex-direction: column; }
+      .sidebar { order: -1; width: 100%; }
+      .container { padding: 20px; }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <img src="https://www.orliacademy.online/logo.png" alt="School Logo" />
+    <div class="school-info">
+      <h1>Orli International Academy</h1>
+      <p>Raising a Well-Informed Child</p>
+    </div>
+  </header>
+
+    <!-- Main Content -->
+
+      <div class="filter-container">
+        <select id="subjectFilter" onchange="filterAssessments()">
+          <option value="">Select Subject</option>
+        </select>
+        <select id="assessmentNameFilter" onchange="filterAssessments()">
+          <option value="">Select Assessment Name</option>
+        </select>
+      </div>
+
+      <div id="publishedAssessments">
+        <h2 style="margin-bottom: 15px; color: #2c7a7b;">Published Assessments</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Assessment</th>
+              <th>Class</th>
+              <th>Subject</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="publishedAssessmentsBody">
+            <!-- Published assessments appear here -->
+          </tbody>
+        </table>
+      </div>
+
+      <div id="assessmentContainer">
+        <div id="assessmentForm" style="display:none;"></div>
+      </div>
+    </div>
+  </div>
+
+<!-- ✅ MathJax Setup -->
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<!-- ✅ Firebase + Assessment Logic -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
+import { getDatabase, ref, get, push, set } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-database.js";
+import * as XLSX from 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js';
+
+// 🔹 Your Firebase Configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyDnWsufpurqfxpDjkFKInhhxew3uMvMegE",
+  authDomain: "year3f-e04f1.firebaseapp.com",
+  projectId: "year3f-e04f1",
+  storageBucket: "year3f-e04f1.firebasestorage.app",
+  messagingSenderId: "698572946974",
+  appId: "1:698572946974:web:8e40a1f7c852639022780f"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+let currentAssessmentId = null;
+let currentAssessmentName = null;
+let currentAssessmentClass = null;
+let currentAssessmentSubject = null;
+let allAssessments = [];
+
+window.loadAssessment = loadAssessment;
+window.displayPublishedAssessments = displayPublishedAssessments;
+window.submitAnswers = submitAnswers;
+window.addAssessment = addAssessment;
+window.uploadAssessmentFile = uploadAssessmentFile;
+window.filterAssessments = filterAssessments;
+
+function sanitizeKey(key) {
+  return key.replace(/[$#[\]]+/g, '_');
+}
+
+// ✅ Display all published assessments
+function displayPublishedAssessments() {
+  const assessmentsRef = ref(db, 'assessments');
+  get(assessmentsRef).then((snapshot) => {
+    const tableBody = document.getElementById('publishedAssessmentsBody');
+    tableBody.innerHTML = '';
+    allAssessments = [];
+    const subjects = new Set();
+    const assessmentNames = new Set();
+
+    if (snapshot.exists()) {
+      snapshot.forEach(assessmentSnapshot => {
+        const assessmentData = assessmentSnapshot.val();
+        if (assessmentData.published) {
+          allAssessments.push({
+            id: assessmentSnapshot.key,
+            name: assessmentData.name,
+            class: assessmentData.class,
+            subject: assessmentData.subject
+          });
+          subjects.add(assessmentData.subject);
+          assessmentNames.add(assessmentData.name);
+          tableBody.innerHTML += `
+            <tr>
+              <td>${assessmentData.name}</td>
+              <td>${assessmentData.class}</td>
+              <td>${assessmentData.subject}</td>
+              <td><button onclick="loadAssessment('${assessmentSnapshot.key}', '${assessmentData.name}', '${assessmentData.class}', '${assessmentData.subject}')">Start</button></td>
+            </tr>
+          `;
+        }
+      });
+
+      const subjectFilter = document.getElementById('subjectFilter');
+      subjectFilter.innerHTML = '<option value="">Select Subject</option>';
+      subjects.forEach(subject => {
+        subjectFilter.innerHTML += `<option value="${subject}">${subject}</option>`;
+      });
+
+      const assessmentNameFilter = document.getElementById('assessmentNameFilter');
+      assessmentNameFilter.innerHTML = '<option value="">Select Assessment Name</option>';
+      assessmentNames.forEach(name => {
+        assessmentNameFilter.innerHTML += `<option value="${name}">${name}</option>`;
+      });
+    } else {
+      tableBody.innerHTML = '<tr><td colspan="4">No published assessments found.</td></tr>';
+    }
+  }).catch((error) => {
+    console.error("Error retrieving assessments:", error);
+    alert("Error retrieving assessments. Please check your connection.");
+  });
+
+  document.getElementById('publishedAssessments').style.display = 'block';
+}
+
+// ✅ Filter Assessments
+function filterAssessments() {
+  const subjectFilter = document.getElementById('subjectFilter').value;
+  const assessmentNameFilter = document.getElementById('assessmentNameFilter').value;
+  const filteredAssessments = allAssessments.filter(assessment => {
+    return (subjectFilter ? assessment.subject === subjectFilter : true) &&
+           (assessmentNameFilter ? assessment.name === assessmentNameFilter : true);
+  });
+
+  const tableBody = document.getElementById('publishedAssessmentsBody');
+  tableBody.innerHTML = '';
+
+  if (filteredAssessments.length > 0) {
+    filteredAssessments.forEach(assessment => {
+      tableBody.innerHTML += `
+        <tr>
+          <td>${assessment.name}</td>
+          <td>${assessment.class}</td>
+          <td>${assessment.subject}</td>
+          <td><button onclick="loadAssessment('${assessment.id}', '${assessment.name}', '${assessment.class}', '${assessment.subject}')">Start</button></td>
+        </tr>
+      `;
+    });
+  } else {
+    tableBody.innerHTML = '<tr><td colspan="4">No assessments found matching the filters.</td></tr>';
+  }
+}
+
+// ✅ Load selected assessment
+function loadAssessment(assessmentId, assessmentName, assessmentClass, assessmentSubject) {
+  currentAssessmentId = sanitizeKey(assessmentId);
+  currentAssessmentName = assessmentName;
+  currentAssessmentClass = assessmentClass;
+  currentAssessmentSubject = assessmentSubject;
+
+  document.getElementById('publishedAssessments').style.display = 'none';
+
+  const assessmentRef = ref(db, 'assessments/' + currentAssessmentId);
+  get(assessmentRef).then((snapshot) => {
+    if (snapshot.exists()) {
+      const assessment = snapshot.val();
+      displayAssessmentQuestions(assessment, currentAssessmentId, assessmentName);
+    } else {
+      alert("Assessment not found");
+    }
+  }).catch((error) => {
+    console.error("Error loading assessment:", error);
+    alert("Error loading assessment");
+  });
+}
+
+// ✅ Display questions properly (plain + math symbols)
+function displayAssessmentQuestions(assessment, assessmentId, assessmentName) {
+  const form = document.getElementById('assessmentForm');
+  form.style.display = 'block';
+  
+  form.innerHTML = `
+    <div class="assessment-header">
+      <h3>Assessment: ${assessmentName}</h3>
+      <p><strong>Class:</strong> ${currentAssessmentClass}</p>
+      <p><strong>Subject:</strong> ${currentAssessmentSubject}</p>
+      <input type="text" id="studentName" placeholder="Enter your name" required />
+    </div>
+    <div id="questionsContainer"></div>
+    <button onclick="submitAnswers()">Submit</button>
+  `;
+
+  const questionsContainer = document.getElementById('questionsContainer');
+
+  // ✅ Detect if text contains any math symbols before wrapping in MathJax
+  const maybeRenderMath = (text) => {
+    if (!text) return '';
+    const hasMath = /\\frac|\\sqrt|\\times|\\div|\^|_|=|[0-9]+\/[0-9]+/.test(text);
+    if (!hasMath) {
+      // Return plain text if there are no math symbols
+      return text;
+    } else {
+      // Wrap real math expressions in MathJax delimiters
+      let formatted = text
+        .replace(/(\d+)\s*\/\s*(\d+)/g, '\\($1\\over $2\\)') // convert 1/2 to fraction
+        .replace(/\\times/g, '\\(\\times\\)')
+        .replace(/\\div/g, '\\(\\div\\)')
+        .replace(/\\sqrt/g, '\\(\\sqrt\\)')
+        .replace(/\^/g, '\\(^\\)')
+        .replace(/_/g, '\\(_\\)');
+      return formatted;
+    }
+  };
+
+  assessment.questions.forEach((q, index) => {
+    const questionText = maybeRenderMath(q.Question);
+    const optA = maybeRenderMath(q['Option A']);
+    const optB = maybeRenderMath(q['Option B']);
+    const optC = maybeRenderMath(q['Option C']);
+    const optD = maybeRenderMath(q['Option D']);
+
+    questionsContainer.innerHTML += `
+      <div class="question-frame" data-correct-answer="${q['Correct Answer']}">
+        <p><strong>Q${index + 1}:</strong> ${questionText}</p>
+        <label><input type="radio" name="question${index}" value="A"> A. ${optA}</label><br>
+        <label><input type="radio" name="question${index}" value="B"> B. ${optB}</label><br>
+        <label><input type="radio" name="question${index}" value="C"> C. ${optC}</label><br>
+        <label><input type="radio" name="question${index}" value="D"> D. ${optD}</label><br>
+      </div>
+    `;
+  });
+
+  // ✅ Only call MathJax if there's math content in the entire set
+  if (assessment.questions.some(q => /\\frac|\\sqrt|\\times|\\div|\^|_|=|[0-9]+\/[0-9]+/.test(
+      q.Question + q['Option A'] + q['Option B'] + q['Option C'] + q['Option D']
+    ))) {
+    if (window.MathJax) MathJax.typesetPromise();
+  }
+}
+
+
+// ✅ Submit answers to Firebase
+function submitAnswers() {
+  if (!currentAssessmentId) return alert("No assessment selected.");
+  const studentName = document.getElementById('studentName').value.trim();
+  if (!studentName) return alert("Please enter your name.");
+
+  const answers = [];
+  const questions = document.querySelectorAll('.question-frame');
+  let allAnswered = true;
+
+  questions.forEach((question, index) => {
+    const selectedAnswer = question.querySelector(`input[name="question${index}"]:checked`);
+    if (selectedAnswer) {
+      answers.push({
+        question: question.querySelector("p").textContent,
+        selectedAnswer: selectedAnswer.value,
+        correctAnswer: question.dataset.correctAnswer
+      });
+    } else {
+      allAnswered = false;
+      question.classList.add('unanswered');
+    }
+  });
+
+  if (!allAnswered) return alert('Please answer all questions.');
+  if (!confirm("Are you sure you want to submit your answers?")) return;
+
+  const result = {
+    studentName,
+    assessmentId: currentAssessmentId,
+    assessmentName: currentAssessmentName,
+    assessmentClass: currentAssessmentClass,
+    assessmentSubject: currentAssessmentSubject,
+    answers,
+    dateSubmitted: new Date().toISOString()
+  };
+
+  const resultsRef = ref(db, 'results');
+  const newResultRef = push(resultsRef);
+  const sanitizedResultKey = sanitizeKey(newResultRef.key);
+
+  set(ref(db, 'results/' + sanitizedResultKey), result).then(() => {
+    alert('Your answers have been submitted successfully!');
+    form.style.display = 'none';
+    displayPublishedAssessments();
+  }).catch((error) => {
+    console.error('Error saving result:', error);
+    alert('Error saving result to Firebase.');
+  });
+}
+
+// ✅ Add a sample assessment (for testing)
+function addAssessment() {
+  const newAssessment = {
+    name: "Sample Math Test",
+    class: "Year 5",
+    subject: "Mathematics",
+    published: true,
+    questions: [
+      {
+        Question: "Simplify: \\frac{1}{2} + \\frac{1}{4}",
+        "Option A": "\\frac{1}{4}",
+        "Option B": "\\frac{3}{4}",
+        "Option C": "\\frac{1}{2}",
+        "Option D": "1",
+        "Correct Answer": "B"
+      }
+    ]
+  };
+
+  const assessmentsRef = ref(db, 'assessments');
+  const newAssessmentRef = push(assessmentsRef);
+  const sanitizedAssessmentId = sanitizeKey(newAssessmentRef.key);
+
+  set(ref(db, 'assessments/' + sanitizedAssessmentId), newAssessment).then(() => {
+    alert('Assessment added successfully!');
+  }).catch((error) => {
+    console.error("Error adding assessment:", error);
+    alert("Error adding assessment.");
+  });
+}
+
+// ✅ Excel upload placeholder
+function uploadAssessmentFile(event) {
+  const file = event.target.files[0];
+  if (file && file.name.endsWith('.xlsx')) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const data = e.target.result;
+      const workbook = XLSX.read(data, { type: 'binary' });
+      console.log(workbook);
+    };
+    reader.readAsBinaryString(file);
+  }
+}
+
+// ✅ Auto load on startup
+window.onload = function() {
+  displayPublishedAssessments();
+};
+</script>
+</body>
+</html>
