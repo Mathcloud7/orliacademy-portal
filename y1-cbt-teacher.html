@@ -312,10 +312,6 @@
       }
     }
   </style>
-<script type="module">
-import { protectPage } from "/scripts/role-guard.js";
-protectPage(["teacher"]); // only teachers can open this page
-</script>
 
 </head>
 
@@ -431,7 +427,6 @@ protectPage(["teacher"]); // only teachers can open this page
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
-    <script type="module" src="auth.js"></script>
 
 <script>
 const firebaseConfig = {
@@ -723,5 +718,6 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
 
