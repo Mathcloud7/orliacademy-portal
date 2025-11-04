@@ -312,6 +312,11 @@
       }
     }
   </style>
+<script type="module">
+import { protectPage } from "/scripts/role-guard.js";
+protectPage(["teacher"]); // only teachers can open this page
+</script>
+
 </head>
 
 <body>
@@ -718,4 +723,5 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
