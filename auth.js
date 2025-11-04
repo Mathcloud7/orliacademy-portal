@@ -1,8 +1,8 @@
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js";
 import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js";
 
-// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyBXqFTnZqi1Uzo_4k1s-cZrm__eSrUQuV8",
   authDomain: "home-1e252.firebaseapp.com",
@@ -12,37 +12,25 @@ const firebaseConfig = {
   appId: "1:702969034430:web:47ff6e815f2017fc8f10ef"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Handle login
-window.loginUser = async function loginUser() {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
-
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-
-    const usersCollection = collection(db, "users");
-    const q = query(usersCollection, where("uid", "==", user.uid));
-    const querySnapshot = await getDocs(q);
-
-    if (!querySnapshot.empty) {
-      const userDoc = querySnapshot.docs[0].data();
-      const role = userDoc.role;
-
-      if (role === "admin") window.location.href = "admin-dashboard.html";
-      else if (role === "teacher") window.location.href = "teacher-dashboard.html";
-      else if (role === "student") window.location.href = "student-dashboard.html";
-      else alert("Unauthorized role detected.");
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = "index.html"; // Not logged in
+  } else {
+    const q = query(collection(db, "users"), where("uid", "==", user.uid));
+    const snapshot = await getDocs(q);
+    if (!snapshot.empty) {
+      const data = snapshot.docs[0].data();
+      if (data.role !== "teacher") {
+        alert("Access denied: Only teachers can view this page.");
+        window.location.href = "index.html";
+      }
     } else {
-      alert("No matching user record found in Firestore.");
+      alert("User record not found.");
+      window.location.href = "index.html";
     }
-  } catch (error) {
-    console.error("Login error:", error);
-    alert("Login failed: " + error.message);
   }
-};
+});
