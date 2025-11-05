@@ -1,10 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CBT Assessment Portal</title>
-
+  <title>CBT Assessment Portal — Student</title>
   <style>
     /* ======= GLOBAL ======= */
     body {
@@ -15,7 +14,6 @@
       color: #333;
     }
 
-    /* ======= HEADER ======= */
     header {
       background: linear-gradient(90deg, #2c7a7b, #38b2ac);
       color: white;
@@ -55,7 +53,6 @@
       opacity: 0.9;
     }
 
-    /* ======= MAIN LAYOUT ======= */
     .main-layout {
       display: flex;
       flex-wrap: wrap;
@@ -75,12 +72,6 @@
       animation: fadeIn 0.6s ease-in-out;
     }
 
-    @keyframes fadeIn {
-      from {opacity: 0; transform: translateY(10px);}
-      to {opacity: 1; transform: translateY(0);}
-    }
-
-    /* ======= SIDEBAR (Question Navigation) ======= */
     .sidebar {
       flex: 0 0 220px;
       background-color: #ffffff;
@@ -126,7 +117,6 @@
       font-weight: bold;
     }
 
-    /* ======= TIMER ======= */
     .timer-bar {
       background-color: #edf2f7;
       border-radius: 8px;
@@ -139,7 +129,6 @@
       border: 2px solid #cbd5e0;
     }
 
-    /* ======= FILTER SECTION ======= */
     .filter-container {
       display: flex;
       flex-wrap: wrap;
@@ -161,7 +150,6 @@
       outline: none;
     }
 
-    /* ======= TABLE ======= */
     table {
       width: 100%;
       border-collapse: collapse;
@@ -187,7 +175,6 @@
       background-color: #f1f9f9;
     }
 
-    /* ======= BUTTONS ======= */
     button {
       background-color: #38b2ac;
       color: white;
@@ -204,7 +191,6 @@
       transform: translateY(-2px);
     }
 
-    /* ======= ASSESSMENT HEADER ======= */
     .assessment-header {
       background-color: #2c7a7b;
       color: white;
@@ -243,7 +229,6 @@
       outline: none;
     }
 
-    /* ======= QUESTIONS ======= */
     .question-frame {
       border: 1px solid #ddd;
       padding: 20px;
@@ -275,7 +260,6 @@
       transform: scale(1.2);
     }
 
-    /* ======= RESPONSIVE ======= */
     @media (max-width: 768px) {
       .main-layout { flex-direction: column; }
       .sidebar { order: -1; width: 100%; }
@@ -293,8 +277,8 @@
     </div>
   </header>
 
-    <!-- Main Content -->
-
+  <div class="main-layout">
+    <div class="container">
       <div class="filter-container">
         <select id="subjectFilter" onchange="filterAssessments()">
           <option value="">Select Subject</option>
@@ -327,7 +311,7 @@
     </div>
   </div>
 
-<!-- ✅ MathJax Setup -->
+<!-- MathJax Setup -->
 <script>
 window.MathJax = {
   tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
@@ -337,13 +321,13 @@ window.MathJax = {
 <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
-<!-- ✅ Firebase + Assessment Logic -->
+<!-- Firebase + Assessment Logic -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
 import { getDatabase, ref, get, push, set } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-database.js";
 import * as XLSX from 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js';
 
-// 🔹 Your Firebase Configuration
+// Firebase Configuration
 const firebaseConfig = {
   apiKey: "AIzaSyAqpsZNzNlcJSq3fLLYPA6Dcj_nbq_HpSM",
   authDomain: "year4f-7f5e4.firebaseapp.com",
@@ -370,10 +354,12 @@ window.uploadAssessmentFile = uploadAssessmentFile;
 window.filterAssessments = filterAssessments;
 
 function sanitizeKey(key) {
-  return key.replace(/[$#[\]]+/g, '_');
+  // Keep this available for cases where you need to sanitize user-provided keys,
+  // but DO NOT use this on Firebase push() keys (they are already safe).
+  return key ? key.replace(/[$#[\]]+/g, '_') : key;
 }
 
-// ✅ Display all published assessments
+// Display all published assessments
 function displayPublishedAssessments() {
   const assessmentsRef = ref(db, 'assessments');
   get(assessmentsRef).then((snapshot) => {
@@ -386,7 +372,8 @@ function displayPublishedAssessments() {
     if (snapshot.exists()) {
       snapshot.forEach(assessmentSnapshot => {
         const assessmentData = assessmentSnapshot.val();
-        if (assessmentData.published) {
+        if (assessmentData && assessmentData.published) {
+          // store raw key (don't sanitize push keys)
           allAssessments.push({
             id: assessmentSnapshot.key,
             name: assessmentData.name,
@@ -397,10 +384,10 @@ function displayPublishedAssessments() {
           assessmentNames.add(assessmentData.name);
           tableBody.innerHTML += `
             <tr>
-              <td>${assessmentData.name}</td>
-              <td>${assessmentData.class}</td>
-              <td>${assessmentData.subject}</td>
-              <td><button onclick="loadAssessment('${assessmentSnapshot.key}', '${assessmentData.name}', '${assessmentData.class}', '${assessmentData.subject}')">Start</button></td>
+              <td>${escapeHtml(assessmentData.name)}</td>
+              <td>${escapeHtml(assessmentData.class)}</td>
+              <td>${escapeHtml(assessmentData.subject)}</td>
+              <td><button onclick="loadAssessment('${assessmentSnapshot.key}', '${escapeForAttr(assessmentData.name)}', '${escapeForAttr(assessmentData.class)}', '${escapeForAttr(assessmentData.subject)}')">Start</button></td>
             </tr>
           `;
         }
@@ -409,14 +396,17 @@ function displayPublishedAssessments() {
       const subjectFilter = document.getElementById('subjectFilter');
       subjectFilter.innerHTML = '<option value="">Select Subject</option>';
       subjects.forEach(subject => {
-        subjectFilter.innerHTML += `<option value="${subject}">${subject}</option>`;
+        subjectFilter.innerHTML += `<option value="${escapeForAttr(subject)}">${escapeHtml(subject)}</option>`;
       });
 
       const assessmentNameFilter = document.getElementById('assessmentNameFilter');
       assessmentNameFilter.innerHTML = '<option value="">Select Assessment Name</option>';
       assessmentNames.forEach(name => {
-        assessmentNameFilter.innerHTML += `<option value="${name}">${name}</option>`;
+        assessmentNameFilter.innerHTML += `<option value="${escapeForAttr(name)}">${escapeHtml(name)}</option>`;
       });
+
+      // show all assessments initially
+      filterAssessments();
     } else {
       tableBody.innerHTML = '<tr><td colspan="4">No published assessments found.</td></tr>';
     }
@@ -428,7 +418,7 @@ function displayPublishedAssessments() {
   document.getElementById('publishedAssessments').style.display = 'block';
 }
 
-// ✅ Filter Assessments
+// Filter Assessments
 function filterAssessments() {
   const subjectFilter = document.getElementById('subjectFilter').value;
   const assessmentNameFilter = document.getElementById('assessmentNameFilter').value;
@@ -444,10 +434,10 @@ function filterAssessments() {
     filteredAssessments.forEach(assessment => {
       tableBody.innerHTML += `
         <tr>
-          <td>${assessment.name}</td>
-          <td>${assessment.class}</td>
-          <td>${assessment.subject}</td>
-          <td><button onclick="loadAssessment('${assessment.id}', '${assessment.name}', '${assessment.class}', '${assessment.subject}')">Start</button></td>
+          <td>${escapeHtml(assessment.name)}</td>
+          <td>${escapeHtml(assessment.class)}</td>
+          <td>${escapeHtml(assessment.subject)}</td>
+          <td><button onclick="loadAssessment('${assessment.id}', '${escapeForAttr(assessment.name)}', '${escapeForAttr(assessment.class)}', '${escapeForAttr(assessment.subject)}')">Start</button></td>
         </tr>
       `;
     });
@@ -456,9 +446,10 @@ function filterAssessments() {
   }
 }
 
-// ✅ Load selected assessment
+// Load selected assessment
 function loadAssessment(assessmentId, assessmentName, assessmentClass, assessmentSubject) {
-  currentAssessmentId = sanitizeKey(assessmentId);
+  // Use the raw push key — do not sanitize it here
+  currentAssessmentId = assessmentId;
   currentAssessmentName = assessmentName;
   currentAssessmentClass = assessmentClass;
   currentAssessmentSubject = assessmentSubject;
@@ -479,53 +470,82 @@ function loadAssessment(assessmentId, assessmentName, assessmentClass, assessmen
   });
 }
 
-// ✅ Display questions properly (plain + math symbols)
+// Utility: escape HTML for text contents
+function escapeHtml(str) {
+  if (str === undefined || str === null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// Utility: escape for attribute values (simple)
+function escapeForAttr(str) {
+  return escapeHtml(str).replace(/"/g, '&quot;');
+}
+
+// Display questions properly (plain + math symbols)
 function displayAssessmentQuestions(assessment, assessmentId, assessmentName) {
   const form = document.getElementById('assessmentForm');
   form.style.display = 'block';
   
   form.innerHTML = `
     <div class="assessment-header">
-      <h3>Assessment: ${assessmentName}</h3>
-      <p><strong>Class:</strong> ${currentAssessmentClass}</p>
-      <p><strong>Subject:</strong> ${currentAssessmentSubject}</p>
+      <h3>Assessment: ${escapeHtml(assessmentName)}</h3>
+      <p><strong>Class:</strong> ${escapeHtml(currentAssessmentClass)}</p>
+      <p><strong>Subject:</strong> ${escapeHtml(currentAssessmentSubject)}</p>
       <input type="text" id="studentName" placeholder="Enter your name" required />
     </div>
     <div id="questionsContainer"></div>
-    <button onclick="submitAnswers()">Submit</button>
+    <button id="submitBtn">Submit</button>
   `;
 
   const questionsContainer = document.getElementById('questionsContainer');
 
-  // ✅ Detect if text contains any math symbols before wrapping in MathJax
+  // Detect if text contains any math symbols before wrapping in MathJax
   const maybeRenderMath = (text) => {
     if (!text) return '';
     const hasMath = /\\frac|\\sqrt|\\times|\\div|\^|_|=|[0-9]+\/[0-9]+/.test(text);
     if (!hasMath) {
-      // Return plain text if there are no math symbols
-      return text;
+      return escapeHtml(text);
     } else {
-      // Wrap real math expressions in MathJax delimiters
+      // Do not escape math delimiters; wrap in MathJax delimiters
       let formatted = text
+        .replace(/&/g, '&amp;')  // minimal escaping for non-math characters
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
         .replace(/(\d+)\s*\/\s*(\d+)/g, '\\($1\\over $2\\)') // convert 1/2 to fraction
         .replace(/\\times/g, '\\(\\times\\)')
         .replace(/\\div/g, '\\(\\div\\)')
         .replace(/\\sqrt/g, '\\(\\sqrt\\)')
         .replace(/\^/g, '\\(^\\)')
         .replace(/_/g, '\\(_\\)');
-      return formatted;
+      // Wrap full expression (if it contains math) with \( ... \)
+      return `\\(${formatted}\\)`;
     }
   };
 
-  assessment.questions.forEach((q, index) => {
-    const questionText = maybeRenderMath(q.Question);
-    const optA = maybeRenderMath(q['Option A']);
-    const optB = maybeRenderMath(q['Option B']);
-    const optC = maybeRenderMath(q['Option C']);
-    const optD = maybeRenderMath(q['Option D']);
+  // Build question frames and also attach data-options in JSON for later saving
+  (assessment.questions || []).forEach((q, index) => {
+    const questionText = maybeRenderMath(q.Question || '');
+    const optA = maybeRenderMath(q['Option A'] || '');
+    const optB = maybeRenderMath(q['Option B'] || '');
+    const optC = maybeRenderMath(q['Option C'] || '');
+    const optD = maybeRenderMath(q['Option D'] || '');
+    const correct = q['Correct Answer'] || '';
+
+    // Store raw option text (unescaped) in data-options attribute for later saving
+    const rawOptions = {
+      A: q['Option A'] || '',
+      B: q['Option B'] || '',
+      C: q['Option C'] || '',
+      D: q['Option D'] || ''
+    };
 
     questionsContainer.innerHTML += `
-      <div class="question-frame" data-correct-answer="${q['Correct Answer']}">
+      <div class="question-frame" data-correct-answer="${escapeForAttr(correct)}" data-options='${JSON.stringify(rawOptions)}'>
         <p><strong>Q${index + 1}:</strong> ${questionText}</p>
         <label><input type="radio" name="question${index}" value="A"> A. ${optA}</label><br>
         <label><input type="radio" name="question${index}" value="B"> B. ${optB}</label><br>
@@ -535,19 +555,30 @@ function displayAssessmentQuestions(assessment, assessmentId, assessmentName) {
     `;
   });
 
-  // ✅ Only call MathJax if there's math content in the entire set
-  if (assessment.questions.some(q => /\\frac|\\sqrt|\\times|\\div|\^|_|=|[0-9]+\/[0-9]+/.test(
-      q.Question + q['Option A'] + q['Option B'] + q['Option C'] + q['Option D']
+  // Only call MathJax if there's math content in the entire set
+  if ((assessment.questions || []).some(q => /\\frac|\\sqrt|\\times|\\div|\^|_|=|[0-9]+\/[0-9]+/.test(
+      (q.Question || '') + (q['Option A'] || '') + (q['Option B'] || '') + (q['Option C'] || '') + (q['Option D'] || '')
     ))) {
     if (window.MathJax) MathJax.typesetPromise();
+  }
+
+  // Attach submit button handler (so it works even if user reloads assessment)
+  const submitBtn = document.getElementById('submitBtn');
+  if (submitBtn) {
+    submitBtn.onclick = function(e) {
+      e.preventDefault();
+      submitAnswers();
+    };
   }
 }
 
 
-// ✅ Submit answers to Firebase
+// Submit answers to Firebase
 function submitAnswers() {
   if (!currentAssessmentId) return alert("No assessment selected.");
-  const studentName = document.getElementById('studentName').value.trim();
+  const form = document.getElementById('assessmentForm');
+  const studentNameInput = document.getElementById('studentName');
+  const studentName = studentNameInput ? studentNameInput.value.trim() : '';
   if (!studentName) return alert("Please enter your name.");
 
   const answers = [];
@@ -556,11 +587,21 @@ function submitAnswers() {
 
   questions.forEach((question, index) => {
     const selectedAnswer = question.querySelector(`input[name="question${index}"]:checked`);
+    const qText = question.querySelector("p") ? question.querySelector("p").textContent : `Q${index+1}`;
+    const optionsData = question.getAttribute('data-options');
+    let optionsObj = { A: '', B: '', C: '', D: '' };
+    try {
+      if (optionsData) optionsObj = JSON.parse(optionsData);
+    } catch (e) {
+      console.warn('Could not parse options JSON for question', index, e);
+    }
+
     if (selectedAnswer) {
       answers.push({
-        question: question.querySelector("p").textContent,
+        question: qText,
+        options: optionsObj,
         selectedAnswer: selectedAnswer.value,
-        correctAnswer: question.dataset.correctAnswer
+        correctAnswer: question.dataset.correctAnswer || ''
       });
     } else {
       allAnswered = false;
@@ -583,11 +624,13 @@ function submitAnswers() {
 
   const resultsRef = ref(db, 'results');
   const newResultRef = push(resultsRef);
-  const sanitizedResultKey = sanitizeKey(newResultRef.key);
+  const newKey = newResultRef.key; // use raw key provided by push()
 
-  set(ref(db, 'results/' + sanitizedResultKey), result).then(() => {
+  // Save using the unmodified push key
+  set(ref(db, 'results/' + newKey), result).then(() => {
     alert('Your answers have been submitted successfully!');
-    form.style.display = 'none';
+    if (form) form.style.display = 'none';
+    // reload assessments listing
     displayPublishedAssessments();
   }).catch((error) => {
     console.error('Error saving result:', error);
@@ -595,7 +638,7 @@ function submitAnswers() {
   });
 }
 
-// ✅ Add a sample assessment (for testing)
+// Add a sample assessment (for testing)
 function addAssessment() {
   const newAssessment = {
     name: "Sample Math Test",
@@ -616,17 +659,19 @@ function addAssessment() {
 
   const assessmentsRef = ref(db, 'assessments');
   const newAssessmentRef = push(assessmentsRef);
-  const sanitizedAssessmentId = sanitizeKey(newAssessmentRef.key);
+  const newKey = newAssessmentRef.key;
 
-  set(ref(db, 'assessments/' + sanitizedAssessmentId), newAssessment).then(() => {
+  // Save using the unmodified push key
+  set(ref(db, 'assessments/' + newKey), newAssessment).then(() => {
     alert('Assessment added successfully!');
+    displayPublishedAssessments();
   }).catch((error) => {
     console.error("Error adding assessment:", error);
     alert("Error adding assessment.");
   });
 }
 
-// ✅ Excel upload placeholder
+// Excel upload placeholder
 function uploadAssessmentFile(event) {
   const file = event.target.files[0];
   if (file && file.name.endsWith('.xlsx')) {
@@ -640,7 +685,7 @@ function uploadAssessmentFile(event) {
   }
 }
 
-// ✅ Auto load on startup
+// Auto load on startup
 window.onload = function() {
   displayPublishedAssessments();
 };
