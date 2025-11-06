@@ -168,17 +168,28 @@ onAuthStateChanged(auth, async (user) => {
 // ACCESS VALIDATION
 // ==========================================
 function checkAccess(role, year, page) {
-  if (role === "admin") return; // unrestricted
+  // Admins can access everything
+  if (role === "admin") return;
 
   const key = `${role}-${year}`;
   const allowed = accessMap[key] || [];
 
+  // Get all pages listed in accessMap
+  const allListedPages = Object.values(accessMap).flat();
+
+  // Allow any unlisted page automatically
+  if (!allListedPages.includes(page)) return;
+
+  // Deny access only if the page is listed but not allowed for the user
   if (!allowed.includes(page)) {
     alert("Access denied. You are not allowed to open this page.");
     window.location.href = `${role}-dashboard.html`;
   }
 }
 
+// ==========================================
+// REDIRECT FUNCTION
+// ==========================================
 function redirectToLogin() {
   localStorage.removeItem("roleAuthUser");
   window.location.href = "login.html";
