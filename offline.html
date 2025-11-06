@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>You're Offline — Orli International Academy</title>
+  <link rel="icon" href="logo.png" type="image/png" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Poppins", Arial, sans-serif;
+      background: linear-gradient(135deg, #003366, #0073aa);
+      color: #fff;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    .offline-card {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 2rem 2.5rem;
+      max-width: 400px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+    img {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      margin-bottom: 1rem;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    }
+    h1 {
+      font-size: 1.8rem;
+      margin: 0 0 0.5rem;
+    }
+    p {
+      font-size: 1rem;
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+    }
+    button {
+      background-color: #ffcc00;
+      border: none;
+      color: #003366;
+      font-weight: bold;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background-color: #ffd633;
+    }
+    footer {
+      margin-top: 2rem;
+      font-size: 0.85rem;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <div class="offline-card">
+    <img src="logo.png" alt="Orli Academy Logo">
+    <h1>You're Offline</h1>
+    <p>It looks like your internet connection is unavailable.<br>
+       Please reconnect to continue using Orli International Academy's portal.</p>
+    <button onclick="window.location.reload()">🔄 Try Again</button>
+  </div>
+
+  <footer>© <span id="year"></span> Orli International Academy</footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
