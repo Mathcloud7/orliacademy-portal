@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -271,21 +272,40 @@
   </footer>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
-    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-database.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+  import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAKaQRmWm-3KF8kmJgbf1ENR45__p36e84",
-  authDomain: "year6f-43761.firebaseapp.com",
-  databaseURL: "https://year6f-43761-default-rtdb.firebaseio.com",
-  projectId: "year6f-43761",
-  storageBucket: "year6f-43761.firebasestorage.app",
-  messagingSenderId: "95725834235",
-  appId: "1:95725834235:web:e7b03541093dbcca88855e"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyAKaQRmWm-3KF8kmJgbf1ENR45__p36e84",
+    authDomain: "year6f-43761.firebaseapp.com",
+    databaseURL: "https://year6f-43761-default-rtdb.firebaseio.com",
+    projectId: "year6f-43761",
+    storageBucket: "year6f-43761.appspot.com",
+    messagingSenderId: "95725834235",
+    appId: "1:95725834235:web:e7b03541093dbcca88855e"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // Test Firebase connection when the page loads
+  window.onload = () => {
+    const resultsRef = ref(db, 'results');
+    get(resultsRef)
+      .then(snapshot => {
+        if (snapshot.exists()) {
+          console.log("✅ Connected to Year 6 Firebase successfully.");
+          console.log("📘 Results data:", snapshot.val());
+        } else {
+          alert("No results found in your Year 6 database.");
+        }
+      })
+      .catch(error => {
+        console.error("❌ Firebase connection error:", error);
+        alert("Error retrieving results. Please check Firebase rules or internet connection.");
+      });
+  };
 
     window.onload = displayResultsOverview;
     window.viewDetailedResult = viewDetailedResult;
