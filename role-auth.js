@@ -2,9 +2,7 @@
 // UNIVERSAL ROLE-BASED ACCESS CONTROL SYSTEM (CLASS VERSION)
 // ==========================================
 
-import {
-  initializeApp
-} from "https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js";
 import {
   getAuth,
   onAuthStateChanged,
@@ -63,6 +61,9 @@ class RoleAuth {
     this.initAuthListener();
   }
 
+  // ==========================================
+  // BUILD ACCESS MAP FOR EACH YEAR
+  // ==========================================
   buildAccessMap() {
     const map = { admin: "ALL" };
     const years = [1, 2, 3, 4, 5, 6];
@@ -84,7 +85,7 @@ class RoleAuth {
         `year${y}-third-term-theory-view.html`,
         `year${y}-s.html`,
         `y${y}-cbt-student.html`,
-        `student-dashboard.html` // ✅ explicitly allowed
+        `student-dashboard.html`
       ];
 
       // Teacher access
@@ -107,13 +108,16 @@ class RoleAuth {
         `year${y}-t.html`,
         `y${y}-cbt-teacher.html`,
         `y${y}-cbt-result.html`,
-        `teacher-dashboard.html` // ✅ explicitly allowed
+        `teacher-dashboard.html`
       ];
     });
 
     return map;
   }
 
+  // ==========================================
+  // INITIALIZE AUTH STATE LISTENER
+  // ==========================================
   initAuthListener() {
     onAuthStateChanged(auth, async (user) => {
       const currentPage = window.location.pathname.split("/").pop();
@@ -121,7 +125,7 @@ class RoleAuth {
       // Public page
       if (this.publicPages.includes(currentPage)) return;
 
-      // No user
+      // No user logged in
       if (!user) {
         this.redirectToLogin();
         return;
@@ -155,33 +159,44 @@ class RoleAuth {
     });
   }
 
+  // ==========================================
+  // ACCESS CHECK (STRICT YEAR + ROLE VALIDATION)
+  // ==========================================
   checkAccess(role, year, page) {
+    // Admin or public pages
     if (role === "admin" || this.publicPages.includes(page)) return;
 
-    // ✅ Always allow dashboards for logged-in users
-    if ((role === "student" && page === "student-dashboard.html") ||
-        (role === "teacher" && page === "teacher-dashboard.html")) {
+    // Always allow dashboards
+    if (
+      (role === "student" && page === "student-dashboard.html") ||
+      (role === "teacher" && page === "teacher-dashboard.html")
+    ) {
       return;
     }
 
     const key = `${role}-year${year}`;
     const allowed = this.accessMap[key] || [];
 
-    // ✅ Also allow generic matching patterns
-    const allowedByPattern =
-      (role === "student" && page.startsWith("student")) ||
-      (role === "teacher" && page.startsWith("teacher"));
+    // ✅ Strict year validation
+    const yearPattern = new RegExp(`year${year}|y${year}-`, "i");
+    const sameYear = yearPattern.test(page);
 
-    if (!allowed.includes(page) && !allowedByPattern) {
-      this.showAccessDeniedModal(role);
+    if (!sameYear && !allowed.includes(page)) {
+      this.showAccessDeniedModal(`${role} (Year ${year})`);
     }
   }
 
+  // ==========================================
+  // REDIRECT TO LOGIN
+  // ==========================================
   redirectToLogin() {
     localStorage.removeItem("roleAuthUser");
     window.location.href = "login.html";
   }
 
+  // ==========================================
+  // ACCESS DENIED MODAL POPUP
+  // ==========================================
   showAccessDeniedModal(role) {
     const modal = document.createElement("div");
     modal.innerHTML = `
