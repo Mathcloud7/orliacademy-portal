@@ -57,19 +57,21 @@ const studentPages = new Set([
 // ---------- Helpers ----------
 function normalizeClassString(s) {
   if (!s) return '';
-  return String(s).toLowerCase().replace(/\s+/g, '').replace(/year/,'year');
+  const str = String(s).toLowerCase().replace(/\s+/g, '');
+
+  // match numeric year like 1-6
+  const match = str.match(/(?:year|y|primary)?(\d)/i);
+  if (match) return `year${match[1]}`;
+
+  return str;
 }
 
-// From filename, try to extract required class (e.g. year5 or y5 => Year 5)
+// Extract class requirement from filename (like year5-s.html => year5)
 function getRequiredClassFromPath(pathname) {
-  // e.g. /year5-first-term-lesson.html or /y5-cbt.html
-  // find yearN or yN
-  const m1 = pathname.match(/year[-_]?(\d+)/i);
-  if (m1) return `Year ${m1[1]}`;
-  const m2 = pathname.match(/(^|[^a-zA-Z])y(\d+)/i);
-  if (m2) return `Year ${m2[2]}`;
-  return null; // not a class-specific page
+  const m = pathname.match(/(?:year|y)(\d)/i);
+  return m ? `year${m[1]}` : null;
 }
+
 
 function getFilenameFromPath(pathname) {
   const segs = pathname.split('/');
@@ -247,3 +249,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     redirectToLogin();
   }
 });
+
