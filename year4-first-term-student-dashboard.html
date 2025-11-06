@@ -191,6 +191,15 @@
     <div class="shape" style="top: 70%; left: 80%;"></div>
     <div class="shape" style="top: 90%; left: 10%;"></div>
   </div>
+<button onclick="logoutUser()" style="
+  background-color: #d9534f;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;">
+  Logout
+</button>
 
   <footer>
     &copy; 2024 Orli International Academy. All Rights Reserved.
@@ -217,28 +226,40 @@
   </script>
 
   <!-- ====== 🔐 FIREBASE AUTH PROTECTION ====== -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBXqFTnZqi1Uzo_4k1s-cZrm__eSrUQuV8",
-      authDomain: "home-1e252.firebaseapp.com",
-      projectId: "home-1e252",
-      storageBucket: "home-1e252.appspot.com",
-      messagingSenderId: "702969034430",
-      appId: "1:702969034430:web:47ff6e815f2017fc8f10ef"
-    };
+  // Firebase config (use the same one from your login page)
+  const firebaseConfig = {
+    apiKey: "AIzaSyBXqFTnZqi1Uzo_4k1s-cZrm__eSrUQuV8",
+    authDomain: "home-1e252.firebaseapp.com",
+    projectId: "home-1e252",
+    storageBucket: "home-1e252.firebasestorage.app",
+    messagingSenderId: "702969034430",
+    appId: "1:702969034430:web:47ff6e815f2017fc8f10ef"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
 
-    // Redirect unauthenticated users to login
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        window.location.href = "index.html";
-      }
+  // ✅ Check authentication state
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      // User not logged in — redirect to login page
+      window.location.href = "index.html";
+    }
+  });
+
+  // ✅ Optional: Add logout button anywhere in your page
+  window.logoutUser = function () {
+    signOut(auth).then(() => {
+      window.location.href = "index.html";
     });
-  </script>
+  };
+</script>
+
 </body>
 </html>
+
