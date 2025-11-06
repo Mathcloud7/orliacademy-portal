@@ -52,15 +52,24 @@ const studentPages = new Set([
   "year5-third-term-lesson-view.html"
 ]);
 
-// Make these specific student pages PUBLIC (no auth required)
-const explicitlyPublicPages = new Set([
-  "year1-s.html",
-  "year2-s.html",
-  "year3-s.html",
-  "year4-s.html",
-  "year5-s.html",
-  "year6-s.html"
-]);
+// ✅ Allow all "yearX-s.html" pages to load freely (public access)
+(function() {
+  const publicStudentPages = [
+    'year1-s.html',
+    'year2-s.html',
+    'year3-s.html',
+    'year4-s.html',
+    'year5-s.html',
+    'year6-s.html'
+  ];
+
+  const currentPage = window.location.pathname.split('/').pop().toLowerCase();
+  if (publicStudentPages.includes(currentPage)) {
+    console.log('✅ Public student page — bypassing role check for:', currentPage);
+    return; // stop here — don't run role checks below
+  }
+})();
+
 
 // ---------- HELPERS ----------
 function normalizeClassString(s) {
@@ -224,3 +233,4 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Default deny
   redirectToLogin();
 });
+
