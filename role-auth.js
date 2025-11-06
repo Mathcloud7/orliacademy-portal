@@ -95,6 +95,7 @@ class RoleAuth {
         `year${y}-second-term-results.html`,
         `year${y}-second-term-theory.html`,
         `year${y}-third-term-cbt.html`,
+        `year${y}-first-term-teacher-dashboard.html
         `year${y}-third-term-lesson-teacher.html`,
         `year${y}-third-term-lesson-upload.html`,
         `year${y}-third-term-results.html`,
@@ -276,3 +277,4 @@ class RoleAuth {
 
 // Initialize
 new RoleAuth();
+
