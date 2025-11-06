@@ -53,35 +53,26 @@ const studentPages = new Set([
 ]);
 
 // ✅ Allow all "yearX-s.html" pages to load freely (public access)
-(function() {
-  const publicStudentPages = [
-    'year1-s.html',
-    'year2-s.html',
-    'year3-s.html',
-    'year4-s.html',
-    'year5-s.html',
-    'year6-s.html'
-  ];
-
-  const currentPage = window.location.pathname.split('/').pop().toLowerCase();
-  if (publicStudentPages.includes(currentPage)) {
-    console.log('✅ Public student page — bypassing role check for:', currentPage);
-    return; // stop here — don't run role checks below
-  }
-})();
-
+const explicitlyPublicPages = new Set([
+  "year1-s.html",
+  "year2-s.html",
+  "year3-s.html",
+  "year4-s.html",
+  "year5-s.html",
+  "year6-s.html"
+]);
 
 // ---------- HELPERS ----------
 function normalizeClassString(s) {
-  if (!s) return '';
+  if (!s) return "";
   return String(s)
     .toLowerCase()
-    .replace(/\s+/g, '')        // remove spaces
-    .replace(/primary/, 'year') // "primary5" -> "year5"
-    .replace(/^p(\d)/, 'year$1')// "p5" -> "year5"
-    .replace(/^class(\d)/, 'year$1')
-    .replace(/^basic(\d)/, 'year$1')
-    .replace(/[^a-z0-9]/g, ''); // remove anything else
+    .replace(/\s+/g, "")
+    .replace(/primary/, "year")
+    .replace(/^p(\d)/, "year$1")
+    .replace(/^class(\d)/, "year$1")
+    .replace(/^basic(\d)/, "year$1")
+    .replace(/[^a-z0-9]/g, "");
 }
 
 function getRequiredClassFromPath(pathname) {
@@ -90,49 +81,54 @@ function getRequiredClassFromPath(pathname) {
 }
 
 function getFilenameFromPath(pathname) {
-  const segs = pathname.split('/');
-  let last = segs.pop() || segs.pop(); // handle trailing slash
-  if (!last) last = 'index.html';
+  const segs = pathname.split("/");
+  let last = segs.pop() || segs.pop();
+  if (!last) last = "index.html";
   return last.toLowerCase();
 }
 
 function redirectToLogin() {
-  window.location.href = '/login.html';
+  window.location.href = "/login.html";
 }
 
 function redirectToDashboardForRole(role) {
-  if (role === 'admin') return window.location.href = '/admin-dashboard.html';
-  if (role === 'teacher') return window.location.href = '/teacher-dashboard.html';
-  if (role === 'student') return window.location.href = '/student-dashboard.html';
-  return window.location.href = '/login.html';
+  if (role === "admin") return (window.location.href = "/admin-dashboard.html");
+  if (role === "teacher") return (window.location.href = "/teacher-dashboard.html");
+  if (role === "student") return (window.location.href = "/student-dashboard.html");
+  return (window.location.href = "/login.html");
 }
 
 // ---------- MAIN ENFORCEMENT ----------
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const pathname = window.location.pathname;
   const filename = getFilenameFromPath(pathname);
 
-  // If page is explicitly public, allow immediately
+  // ✅ If page is explicitly public, allow immediately
   if (explicitlyPublicPages.has(filename)) {
-    return; // public: no auth required
+    console.log("✅ Public student page — no login required:", filename);
+    return; // stop enforcement
   }
 
-  // Determine if page is restricted (teacher/student/class-specific)
+  // Determine if page is restricted
   const requiredClass = getRequiredClassFromPath(filename);
-  const isTeacherPage = teacherPages.has(filename) || /-t|teacher|cbt-teacher|lesson-teacher|result/i.test(filename);
-  const isStudentPage = studentPages.has(filename) || /-s|student|lesson-view|theory-view|cbt-student/i.test(filename);
+  const isTeacherPage =
+    teacherPages.has(filename) ||
+    /-t|teacher|cbt-teacher|lesson-teacher|result/i.test(filename);
+  const isStudentPage =
+    studentPages.has(filename) ||
+    /-s|student|lesson-view|theory-view|cbt-student/i.test(filename);
   const isRestricted = isTeacherPage || isStudentPage || Boolean(requiredClass);
 
   if (!isRestricted) {
-    // Not a restricted page — public
+    // Public page
     return;
   }
 
   // Try localStorage first
   let user = null;
   try {
-    user = JSON.parse(localStorage.getItem('roleAuthUser'));
-  } catch (e) { /* ignore parse errors */ }
+    user = JSON.parse(localStorage.getItem("roleAuthUser"));
+  } catch (e) {}
 
   let userRole = user?.role?.toLowerCase() || null;
   let userClass = normalizeClassString(user?.year || user?.userClass || user?.class);
@@ -143,11 +139,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       const [
         { initializeApp },
         { getAuth, onAuthStateChanged },
-        { getFirestore, collection, query, where, getDocs }
+        { getFirestore, collection, query, where, getDocs },
       ] = await Promise.all([
-        import('https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js'),
-        import('https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js'),
-        import('https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js')
+        import("https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js"),
+        import("https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js"),
+        import("https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js"),
       ]);
 
       const app = initializeApp(FIREBASE_CONFIG);
@@ -162,33 +158,33 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
 
       if (!currentUser) {
-        // Not authenticated
         redirectToLogin();
         return;
       }
 
-      const q = query(collection(db, 'users'), where('uid', '==', currentUser.uid));
+      const q = query(collection(db, "users"), where("uid", "==", currentUser.uid));
       const snap = await getDocs(q);
 
       if (!snap.empty) {
         const data = snap.docs[0].data();
-        userRole = (data.role || '').toLowerCase();
+        userRole = (data.role || "").toLowerCase();
         userClass = normalizeClassString(data.year || data.userClass || data.class);
-
-        // Update localStorage for faster checks next time
         try {
-          localStorage.setItem('roleAuthUser', JSON.stringify({
-            uid: currentUser.uid,
-            role: userRole,
-            year: data.year || data.userClass || data.class
-          }));
-        } catch (e) { /* ignore storage errors */ }
+          localStorage.setItem(
+            "roleAuthUser",
+            JSON.stringify({
+              uid: currentUser.uid,
+              role: userRole,
+              year: data.year || data.userClass || data.class,
+            })
+          );
+        } catch (e) {}
       } else {
         redirectToLogin();
         return;
       }
     } catch (err) {
-      console.error('role-auth: Firebase fetch failed', err);
+      console.error("role-auth: Firebase fetch failed", err);
       redirectToLogin();
       return;
     }
@@ -199,14 +195,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  // Admin has full access
-  if (userRole === 'admin') return;
+  if (userRole === "admin") return;
 
-  const requiredClassNorm = normalizeClassString(requiredClass || '');
+  const requiredClassNorm = normalizeClassString(requiredClass || "");
 
-  // Teacher pages enforcement
+  // Teacher pages
   if (isTeacherPage) {
-    if (userRole !== 'teacher') {
+    if (userRole !== "teacher") {
       redirectToDashboardForRole(userRole);
       return;
     }
@@ -214,12 +209,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       redirectToDashboardForRole(userRole);
       return;
     }
-    return; // allowed
+    return;
   }
 
-  // Student pages enforcement
+  // Student pages
   if (isStudentPage) {
-    if (userRole !== 'student') {
+    if (userRole !== "student") {
       redirectToDashboardForRole(userRole);
       return;
     }
@@ -227,10 +222,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       redirectToDashboardForRole(userRole);
       return;
     }
-    return; // allowed
+    return;
   }
 
-  // Default deny
   redirectToLogin();
 });
-
