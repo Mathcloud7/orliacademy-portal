@@ -24,7 +24,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 // ==========================================
-// PUBLIC PAGES — NO AUTH REQUIRED
+// PUBLIC PAGES â€” NO AUTH REQUIRED
 // ==========================================
 const publicPages = [
   "teachersassessment",
@@ -102,61 +102,65 @@ const accessMap = {
 
 const years = [1, 2, 3, 4, 5, 6];
 years.forEach((y) => {
+  // ===============================
   // STUDENT PAGES
+  // ===============================
   accessMap[`student-year${y}`] = [
+    // First Term
     `year${y}-first-term-assessment-student.html`,
     `year${y}-first-term-assessment.html`,
     `year${y}-first-term-lesson-view.html`,
-    `year${y}-first-term-student-dashboard.html`,
     `year${y}-first-term-theory-view.html`,
+
+    // Second Term
     `year${y}-second-term-assessment-student.html`,
     `year${y}-second-term-assessment.html`,
     `year${y}-second-term-lesson-view.html`,
-    `year${y}-second-term-student-dashboard.html`,
     `year${y}-second-term-theory-view.html`,
+
+    // Third Term
     `year${y}-third-term-assessment-student.html`,
     `year${y}-third-term-assessment.html`,
     `year${y}-third-term-lesson-view.html`,
-    `year${y}-third-term-student-dashboard.html`,
     `year${y}-third-term-theory-view.html`,
 
-    // y1–y6 variant
+    // Other related student pages
     `y${y}-cbt-student.html`,
+    `student-dashboard.html`,
   ];
 
+  // ===============================
   // TEACHER PAGES
+  // ===============================
   accessMap[`teacher-year${y}`] = [
-    `y${y}-cbt-result.html`,
-    `y${y}-cbt-student.html`,
-    `y${y}-cbt-teacher.html`,
+    // First Term
     `year${y}-first-term-cbt.html`,
     `year${y}-first-term-lesson-teacher.html`,
     `year${y}-first-term-lesson-upload.html`,
     `year${y}-first-term-results.html`,
-    `year${y}-first-term-teacher-dashboard.html`,
     `year${y}-first-term-theory.html`,
+
+    // Second Term
     `year${y}-second-term-cbt.html`,
     `year${y}-second-term-lesson-teacher.html`,
     `year${y}-second-term-lesson-upload.html`,
     `year${y}-second-term-results.html`,
-    `year${y}-second-term-teacher-dashboard.html`,
     `year${y}-second-term-theory.html`,
+
+    // Third Term
     `year${y}-third-term-cbt.html`,
     `year${y}-third-term-lesson-teacher.html`,
     `year${y}-third-term-lesson-upload.html`,
     `year${y}-third-term-results.html`,
-    `year${y}-third-term-teacher-dashboard.html`,
     `year${y}-third-term-theory.html`,
-    `year${y}.html`,
-    `year${y}enteranceupload.html`,
 
-    // y1–y6 variants
+    // Extra teacher files (non-year-prefixed)
     `y${y}-cbt-teacher.html`,
     `y${y}-cbt-result.html`,
-    `y${y}-cbt-student.html`,
-
+    `teacher-dashboard.html`,
   ];
 });
+
 
 // ==========================================
 // AUTH STATE HANDLER
