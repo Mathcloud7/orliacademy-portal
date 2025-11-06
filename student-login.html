@@ -37,11 +37,11 @@
       color: #333;
       width: 100%;
       max-width: 450px;
-      padding: 10px;
+      padding: 20px;
       border-radius: 10px;
       box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1), 0 4px 15px rgba(0, 0, 0, 0.2);
       text-align: center;
-      animation: fadeInUp 1.5s ease-out;
+      animation: fadeInUp 1.2s ease-out;
     }
 
     .login-container h2 {
@@ -136,47 +136,13 @@
     }
 
     @media (max-width: 768px) {
-      h1 {
-        font-size: 2em;
-      }
-
-      .login-container {
-        max-width: 380px;
-        padding: 20px;
-      }
-
-      .login-container h2 {
-        font-size: 1.5em;
-      }
-
-      .login-container input,
-      .login-container button {
-        padding: 10px;
-      }
-
-      .forgot-password-message {
-        font-size: 0.9em;
-      }
+      h1 { font-size: 2em; }
+      .login-container { max-width: 380px; padding: 20px; }
     }
 
     @media (max-width: 480px) {
-      h1 {
-        font-size: 1.8em;
-      }
-
-      .login-container {
-        max-width: 90%;
-        padding: 15px;
-      }
-
-      .login-container h2 {
-        font-size: 1.4em;
-      }
-
-      .login-container input,
-      .login-container button {
-        padding: 8px;
-      }
+      h1 { font-size: 1.8em; }
+      .login-container { max-width: 90%; padding: 15px; }
     }
   </style>
 </head>
@@ -204,6 +170,7 @@
     <a href="https://example.com">If you're a super admin, click here</a>
   </div>
 
+  <!-- ✅ Script Section -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js";
@@ -222,46 +189,60 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    window.loginUser = function loginUser() {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+    // ✅ Login Function
+    window.loginUser = async function loginUser() {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const errorMessage = document.getElementById("errorMessage");
+      errorMessage.textContent = "";
 
-      signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-          const user = userCredential.user;
+      if (!email || !password) {
+        errorMessage.textContent = "Please enter both email and password.";
+        return;
+      }
 
-          const usersCollection = collection(db, "users");
-          const q = query(usersCollection, where("uid", "==", user.uid));
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
 
-          getDocs(q)
-            .then((querySnapshot) => {
-              if (!querySnapshot.empty) {
-                const userDoc = querySnapshot.docs[0].data();
-                const role = userDoc.role;
+        // Fetch user document from Firestore
+        const q = query(collection(db, "users"), where("uid", "==", user.uid));
+        const snap = await getDocs(q);
 
-                if (role === "admin") {
-                  window.location.href = "admin-dashboard.html";
-                } else if (role === "teacher") {
-                  window.location.href = "teacher-dashboard.html";
-                } else if (role === "student") {
-                  window.location.href = "student-dashboard.html";
-                }
-              } else {
-                alert("User not found in the database!");
-              }
-            })
-            .catch((error) => {
-              console.error("Error fetching user data from Firestore: ", error);
-            });
-        })
-        .catch((error) => {
-          console.error("Login error:", error);
-          alert("Login failed: " + error.message);
-        });
+        if (snap.empty) {
+          errorMessage.textContent = "User not found in database.";
+          return;
+        }
+
+        const userDoc = snap.docs[0].data();
+        const role = userDoc.role;
+        const year = userDoc.year || ""; // ✅ keep compatibility with existing users (no year)
+
+        // ✅ Save for role-auth.js
+        localStorage.setItem("roleAuthUser", JSON.stringify({
+          uid: user.uid,
+          role: role,
+          year: year
+        }));
+
+        // ✅ Redirect based on role
+        if (role === "admin") {
+          window.location.href = "admin-dashboard.html";
+        } else if (role === "teacher") {
+          window.location.href = "teacher-dashboard.html";
+        } else if (role === "student") {
+          window.location.href = "student-dashboard.html";
+        } else {
+          errorMessage.textContent = "Unknown role assigned. Contact admin.";
+        }
+      } catch (error) {
+        console.error("Login error:", error);
+        errorMessage.textContent = "Login failed: " + error.message;
+      }
     };
   </script>
 
-  <!-- ✅ Register Service Worker (only here, not in every page) -->
+  <!-- ✅ Register Service Worker -->
   <script>
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker
@@ -273,4 +254,6 @@
 </body>
 </html>
 
-<script async data-explicit-opt-in="true" data-cookie-opt-in="true" data-deployment-id="dpl_2b9QX6tcYCcFHeVrs5xc23c9R3Rs" src="https://vercel.live/_next-live/feedback/feedback.js"></script>
+<script async data-explicit-opt-in="true" data-cookie-opt-in="true"
+data-deployment-id="dpl_2b9QX6tcYCcFHeVrs5xc23c9R3Rs"
+src="https://vercel.live/_next-live/feedback/feedback.js"></script>
