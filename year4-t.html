@@ -3,196 +3,216 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Year 4 Live Class Page for Orli International School">
-    <meta name="author" content="Orli International School">
-    <title>Orli International School</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background-color: #f9f9f9;
-            color: #333;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Year 1 Live Class Page for Orli International School">
+  <meta name="author" content="Orli International School">
+  <title>Orli International School | Year 1 Terms</title>
 
-        /* Header with logo and school name */
-        .header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 20px;
-            text-align: center;
-        }
+  <style>
+    /* ====== GENERAL PAGE STYLES ====== */
+    body {
+      font-family: "Poppins", sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #e3f2fd, #fce4ec);
+      color: #333;
+    }
 
-        .logo-container {
-            position: relative;
-            width: 100px;
-            height: 100px;
-            border: 5px solid #007bff;
-            border-radius: 50%;
-            animation: rotate 50s linear infinite;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+    /* ====== HEADER ====== */
+    .header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      margin-bottom: 20px;
+      animation: fadeInDown 1s ease-in-out;
+    }
 
-        .logo-container img {
-            width: 90%;
-            border-radius: 50%;
-            object-fit: cover;
-        }
+    .logo-container {
+      width: 120px;
+      height: 120px;
+      border: 6px solid #007bff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      animation: rotate 40s linear infinite;
+      background: white;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    }
 
-        /* School name with 3D effect */
-        .school-name {
-            font-size: 2.5em;
-            font-weight: bold;
-            color: #007bff;
-            text-transform: uppercase;
-            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
-            letter-spacing: 2px;
-            margin-top: 10px;
-            animation: text3D 1.5s ease-in-out infinite alternate;
-        }
+    .logo-container img {
+      width: 90%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
 
-        /* Keyframe animation for logo rotation */
-        @keyframes rotate {
-            0% {
-                transform: rotate(0deg);
-            }
-            100% {
-                transform: rotate(360deg);
-            }
-        }
+    .school-name {
+      font-size: 2.2em;
+      font-weight: 700;
+      color: #007bff;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      text-shadow: 1px 2px 6px rgba(0, 0, 0, 0.3);
+      margin-top: 10px;
+      animation: popIn 1s ease-in-out;
+    }
 
-        /* Keyframe animation for 3D text effect */
-        @keyframes text3D {
-            0% {
-                text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
-                transform: scale(1.1);
-            }
-            100% {
-                text-shadow: 2px 2px 20px rgba(0, 0, 0, 0.7);
-                transform: scale(1.2);
-            }
-        }
+    /* ====== ANIMATIONS ====== */
+    @keyframes rotate {
+      0% {
+        transform: rotate(0deg);
+      }
 
-        /* Media Queries for responsiveness */
-        @media (max-width: 768px) {
-            .logo-container {
-                width: 120px;
-                height: 120px;
-            }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
 
-            .school-name {
-                font-size: 1.4em;
-            }
-        }
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
 
-        @media (max-width: 480px) {
-            .school-name {
-                font-size: 1.0em;
-            }
-        }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
-        .welcome-message {
-            font-size: 2.2em;
-            color: #4CAF50;
-            margin-top: 15px;
-        }
+    @keyframes popIn {
+      from {
+        transform: scale(0.8);
+        opacity: 0;
+      }
 
-        .instructions {
-            font-size: 1.2em;
-            margin: 20px;
-        }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
 
-        .buttons-container {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            margin-top: 50px;
-            margin-bottom: 80px;
-            flex-wrap: wrap;
-        }
+    /* ====== CONTENT ====== */
+    .welcome-message {
+      font-size: 2em;
+      color: #28a745;
+      margin-top: 15px;
+      text-align: center;
+      font-weight: 600;
+      animation: fadeInUp 1.2s ease;
+    }
 
-        .button {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background-color: #00FFFF;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            font-size: 1.0em;
-            color: black;
-            transition: transform 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            text-align: center; /* Ensures horizontal text alignment */
-            line-height: 1.2; /* Fine-tuning vertical alignment */
-        }
-        .button2 {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            background-color: blue;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            font-size: 1.3em;
-            color: black;
-            transition: transform 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            text-align: center; /* Ensures horizontal text alignment */
-            line-height: 1.2; /* Fine-tuning vertical alignment */
-        }
+    .instructions {
+      font-size: 1.1em;
+      margin: 20px;
+      text-align: center;
+      color: #555;
+    }
 
-        .button:hover {
-            transform: scale(1.1);
-        }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
 
-        footer {
-            background-color: #4CAF50;
-            color: white;
-            text-align: center;
-            padding: 10px;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-        }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
-        footer p {
-            margin: 0;
-            font-size: 1.2em;
-        }
-    </style>
+    /* ====== BUTTONS ====== */
+    .buttons-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 25px;
+      margin: 30px 0 70px 0;
+    }
+
+    .button {
+      width: 120px;
+      height: 120px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #00e5ff, #1a73e8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      font-size: 1em;
+      color: white;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      text-align: center;
+    }
+
+    .button:hover {
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .button.live {
+      background: linear-gradient(135deg, #ff4081, #f50057);
+      width: 160px;
+      height: 160px;
+      font-size: 1.2em;
+    }
+
+    /* ====== FOOTER ====== */
+    footer {
+      background-color: #007bff;
+      color: white;
+      text-align: center;
+      padding: 10px;
+      width: 100%;
+      position: fixed;
+      bottom: 0;
+      font-size: 0.95em;
+      letter-spacing: 0.5px;
+    }
+
+    /* ====== RESPONSIVE ====== */
+    @media (max-width: 600px) {
+      .school-name {
+        font-size: 1.4em;
+      }
+
+      .button {
+        width: 100px;
+        height: 100px;
+        font-size: 0.9em;
+      }
+
+      .button.live {
+        width: 130px;
+        height: 130px;
+      }
+    }
+  </style>
 </head>
 
 <body>
-    <!-- Header with rotating logo and 3D school name -->
-    <div class="header">
-        <div class="logo-container">
-            <!-- Add your logo here -->
-            <img src="logo.png" alt="School Logo">
-        </div>
-        <div class="school-name">Orli International Academy</div>
+  <!-- Header -->
+  <div class="header">
+    <div class="logo-container">
+      <img src="logo.png" alt="School Logo">
     </div>
+    <div class="school-name">Orli International Academy</div>
+  </div>
 
-    <div class="welcome-message">
-        TERMS
-    </div>
+  <div class="welcome-message">Terms</div>
+  <div class="instructions">Select your current term or join your live class below.</div>
 
-    <div class="instructions">
-        Click on the buttons below to select your current term.
-    </div>
-
-    <div class="buttons-container">
+  <div class="buttons-container">
         <a href="year4-first-term-teacher-dashboard.html" class="button" target="_blank">
             FIRST TERM
         </a>
@@ -202,15 +222,42 @@
         <a href="year4-third-term-teacher-dashboard.html" class="button" target="_blank">
             THIRD TERM
         </a>
-        <a href="https://meet.google.com/rih-gntn-tkf" class="button2" target="_blank">
-            LIVE CLASS
-        </a>
-    </div>
+        <a href="https://meet.google.com/hya-brnf-cet" class="button live" target="_blank">Live Class</a>
+  </div>
 
-    <footer>
-        <p>&copy; 2024 Orli International Academy. All Rights Reserved.</p>
-    </footer>
+  <footer>
+    <p>&copy; 2024 Orli International Academy. All Rights Reserved.</p>
+  </footer>
+
+  <!-- 🔐 Firebase Auth Protection -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBXqFTnZqi1Uzo_4k1s-cZrm__eSrUQuV8",
+      authDomain: "home-1e252.firebaseapp.com",
+      projectId: "home-1e252",
+      storageBucket: "home-1e252.appspot.com",
+      messagingSenderId: "702969034430",
+      appId: "1:702969034430:web:47ff6e815f2017fc8f10ef"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // ✅ Allow only logged-in users
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        // Redirect to login page if not authenticated
+        window.location.href = "index.html";
+      }
+    });
+  </script>
+
+  <script async data-explicit-opt-in="true" data-cookie-opt-in="true"
+    src="https://vercel.live/_next-live/feedback/feedback.js"></script>
 </body>
 
 </html>
-<script async data-explicit-opt-in="true" data-cookie-opt-in="true" src="https://vercel.live/_next-live/feedback/feedback.js"></script>
+
