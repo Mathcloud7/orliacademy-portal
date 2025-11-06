@@ -195,22 +195,7 @@
   </script>
 
   <!-- ✅ Register Service Worker -->
-  <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker
-        .register("/service-worker.js")
-        .then(() => console.log("✅ Service Worker registered"))
-        .catch(err => console.error("Service Worker registration failed:", err));
-    }
-  </script>
-<script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker
-    .register("/service-worker.js")
-    .then(() => console.log("✅ Service Worker registered"))
-    .catch(err => console.error("Service Worker registration failed:", err));
-}
-</script>
+
   <script async data-explicit-opt-in="true" data-cookie-opt-in="true" data-deployment-id="dpl_2b9QX6tcYCcFHeVrs5xc23c9R3Rs" src="https://vercel.live/_next-live/feedback/feedback.js"></script>
 </body>
 </html>
