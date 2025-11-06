@@ -84,7 +84,7 @@ class RoleAuth {
         `year${y}-third-term-theory-view.html`,
         `year${y}-s.html`,
         `y${y}-cbt-student.html`,
-        `student-dashboard.html`,
+        `student-dashboard.html` // ✅ explicitly allowed
       ];
 
       // Teacher access
@@ -107,7 +107,7 @@ class RoleAuth {
         `year${y}-t.html`,
         `y${y}-cbt-teacher.html`,
         `y${y}-cbt-result.html`,
-        `teacher-dashboard.html`,
+        `teacher-dashboard.html` // ✅ explicitly allowed
       ];
     });
 
@@ -158,10 +158,21 @@ class RoleAuth {
   checkAccess(role, year, page) {
     if (role === "admin" || this.publicPages.includes(page)) return;
 
+    // ✅ Always allow dashboards for logged-in users
+    if ((role === "student" && page === "student-dashboard.html") ||
+        (role === "teacher" && page === "teacher-dashboard.html")) {
+      return;
+    }
+
     const key = `${role}-year${year}`;
     const allowed = this.accessMap[key] || [];
 
-    if (!allowed.includes(page)) {
+    // ✅ Also allow generic matching patterns
+    const allowedByPattern =
+      (role === "student" && page.startsWith("student")) ||
+      (role === "teacher" && page.startsWith("teacher"));
+
+    if (!allowed.includes(page) && !allowedByPattern) {
       this.showAccessDeniedModal(role);
     }
   }
