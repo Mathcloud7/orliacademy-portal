@@ -1,8 +1,8 @@
 // service-worker.js
-// Combines: (1) your caching/offline logic AND (2) auto-injection of /role-auth.js
+// Combines: (1) caching/offline logic AND (2) auto-injection of /role-auth.js
 // Place this file in your Firebase hosting root (/public/service-worker.js)
 
-const CACHE_NAME = 'site-static-v2';
+const CACHE_NAME = 'site-static-v3';
 const OFFLINE_PAGE = '/offline.html';
 
 // Restricted filenames (avoid caching them)
@@ -43,6 +43,7 @@ const RESTRICTED_FILENAMES = [
   "year5-third-term-lesson-view.html"
 ];
 
+// Public assets to cache safely
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -53,7 +54,7 @@ const STATIC_ASSETS = [
   '/js/main.js'
 ];
 
-// Helper functions
+// Helper function to get filename from URL
 function getFilename(url) {
   try {
     const u = new URL(url);
@@ -65,6 +66,7 @@ function getFilename(url) {
   }
 }
 
+// --- INSTALL EVENT (safe caching) ---
 self.addEventListener('install', (e) => {
   e.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
@@ -72,35 +74,49 @@ self.addEventListener('install', (e) => {
       const fname = getFilename(u);
       return !RESTRICTED_FILENAMES.includes(fname);
     });
-    await cache.addAll(toCache);
+
+    for (const url of toCache) {
+      try {
+        const response = await fetch(url);
+        if (response.ok) await cache.put(url, response);
+      } catch (err) {
+        console.warn('⚠️ SW: Skipping missing asset', url);
+      }
+    }
+
     self.skipWaiting();
   })());
 });
 
+// --- ACTIVATE EVENT (clean old caches) ---
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(keys.map(k => k !== CACHE_NAME ? caches.delete(k) : null));
+    await Promise.all(keys.map(k => (k !== CACHE_NAME ? caches.delete(k) : null)));
     self.clients.claim();
   })());
 });
 
+// --- FETCH EVENT (main logic) ---
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
 
   const filename = getFilename(req.url);
 
-  // Handle HTML pages (inject role-auth.js)
+  // Handle HTML pages (inject role-auth.js automatically)
   if (req.destination === 'document') {
     event.respondWith(
       (async () => {
         try {
           const response = await fetch(req);
           let text = await response.text();
+
+          // Inject /role-auth.js if not already present
           if (!/\/role-auth\.js/i.test(text)) {
             text = text.replace(/<\/body>/i, `<script type="module" src="/role-auth.js"></script></body>`);
           }
+
           return new Response(text, {
             headers: response.headers,
             status: response.status,
@@ -108,7 +124,6 @@ self.addEventListener('fetch', (event) => {
           });
         } catch (err) {
           console.error("SW injection fetch error:", err);
-          // offline fallback
           const cache = await caches.open(CACHE_NAME);
           const fallback = await cache.match(OFFLINE_PAGE);
           return fallback || new Response('<h1>Offline</h1>', { headers: { 'Content-Type': 'text/html' } });
@@ -118,7 +133,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Restricted pages: network-first (no caching)
+  // Restricted pages: network-first, no caching
   if (RESTRICTED_FILENAMES.includes(filename) || /year\d|^y\d/i.test(filename)) {
     event.respondWith(
       fetch(req).catch(async () => {
@@ -132,7 +147,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Other assets: cache-first
+  // All other assets: cache-first strategy
   event.respondWith(
     caches.match(req).then(cached => {
       if (cached) return cached;
