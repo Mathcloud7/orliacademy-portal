@@ -1,6 +1,6 @@
 // role-auth.js
-// Enforces role + class-based access automatically
-// This script is injected automatically by your service worker
+// Enforces role + class-based access, but makes year1-s ... year6-s public
+// This file is injected automatically by your service worker.
 
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyBXqFTnZqi1Uzo_4k1s-cZrm__eSrUQuV8",
@@ -52,17 +52,27 @@ const studentPages = new Set([
   "year5-third-term-lesson-view.html"
 ]);
 
+// Make these specific student pages PUBLIC (no auth required)
+const explicitlyPublicPages = new Set([
+  "year1-s.html",
+  "year2-s.html",
+  "year3-s.html",
+  "year4-s.html",
+  "year5-s.html",
+  "year6-s.html"
+]);
+
 // ---------- HELPERS ----------
 function normalizeClassString(s) {
   if (!s) return '';
   return String(s)
     .toLowerCase()
-    .replace(/\s+/g, '')       // remove spaces
-    .replace(/primary/, 'year') // convert "primary" -> "year"
-    .replace(/^p(\d)/, 'year$1') // convert "p5" -> "year5"
-    .replace(/^class(\d)/, 'year$1') // convert "class5" -> "year5"
-    .replace(/^basic(\d)/, 'year$1') // convert "basic5" -> "year5"
-    .replace(/[^a-z0-9]/g, '');     // remove any other characters
+    .replace(/\s+/g, '')        // remove spaces
+    .replace(/primary/, 'year') // "primary5" -> "year5"
+    .replace(/^p(\d)/, 'year$1')// "p5" -> "year5"
+    .replace(/^class(\d)/, 'year$1')
+    .replace(/^basic(\d)/, 'year$1')
+    .replace(/[^a-z0-9]/g, ''); // remove anything else
 }
 
 function getRequiredClassFromPath(pathname) {
@@ -72,8 +82,9 @@ function getRequiredClassFromPath(pathname) {
 
 function getFilenameFromPath(pathname) {
   const segs = pathname.split('/');
-  let last = segs.pop() || segs.pop();
-  return (last || 'index.html').toLowerCase();
+  let last = segs.pop() || segs.pop(); // handle trailing slash
+  if (!last) last = 'index.html';
+  return last.toLowerCase();
 }
 
 function redirectToLogin() {
@@ -92,24 +103,33 @@ document.addEventListener('DOMContentLoaded', async () => {
   const pathname = window.location.pathname;
   const filename = getFilenameFromPath(pathname);
 
+  // If page is explicitly public, allow immediately
+  if (explicitlyPublicPages.has(filename)) {
+    return; // public: no auth required
+  }
+
+  // Determine if page is restricted (teacher/student/class-specific)
   const requiredClass = getRequiredClassFromPath(filename);
   const isTeacherPage = teacherPages.has(filename) || /-t|teacher|cbt-teacher|lesson-teacher|result/i.test(filename);
   const isStudentPage = studentPages.has(filename) || /-s|student|lesson-view|theory-view|cbt-student/i.test(filename);
-  const isRestricted = isTeacherPage || isStudentPage || requiredClass;
+  const isRestricted = isTeacherPage || isStudentPage || Boolean(requiredClass);
 
-  if (!isRestricted) return; // public page
+  if (!isRestricted) {
+    // Not a restricted page — public
+    return;
+  }
 
   // Try localStorage first
   let user = null;
   try {
     user = JSON.parse(localStorage.getItem('roleAuthUser'));
-  } catch (e) {}
+  } catch (e) { /* ignore parse errors */ }
 
   let userRole = user?.role?.toLowerCase() || null;
   let userClass = normalizeClassString(user?.year || user?.userClass || user?.class);
 
-  if (!userRole || !userClass) {
-    // Fallback to Firebase Auth
+  // If missing info, fallback to Firebase
+  if (!userRole || (requiredClass && !userClass)) {
     try {
       const [
         { initializeApp },
@@ -132,7 +152,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
       });
 
-      if (!currentUser) return redirectToLogin();
+      if (!currentUser) {
+        // Not authenticated
+        redirectToLogin();
+        return;
+      }
 
       const q = query(collection(db, 'users'), where('uid', '==', currentUser.uid));
       const snap = await getDocs(q);
@@ -142,42 +166,61 @@ document.addEventListener('DOMContentLoaded', async () => {
         userRole = (data.role || '').toLowerCase();
         userClass = normalizeClassString(data.year || data.userClass || data.class);
 
-        localStorage.setItem('roleAuthUser', JSON.stringify({
-          uid: currentUser.uid,
-          role: userRole,
-          year: data.year || data.userClass || data.class
-        }));
+        // Update localStorage for faster checks next time
+        try {
+          localStorage.setItem('roleAuthUser', JSON.stringify({
+            uid: currentUser.uid,
+            role: userRole,
+            year: data.year || data.userClass || data.class
+          }));
+        } catch (e) { /* ignore storage errors */ }
       } else {
-        return redirectToLogin();
+        redirectToLogin();
+        return;
       }
     } catch (err) {
       console.error('role-auth: Firebase fetch failed', err);
-      return redirectToLogin();
+      redirectToLogin();
+      return;
     }
   }
 
-  if (!userRole) return redirectToLogin();
-
-  if (userRole === 'admin') return; // full access
-
-  const requiredClassNorm = normalizeClassString(requiredClass);
-
-  // --- Teacher Pages ---
-  if (isTeacherPage) {
-    if (userRole !== 'teacher') return redirectToDashboardForRole(userRole);
-    if (requiredClassNorm && userClass && userClass !== requiredClassNorm)
-      return redirectToDashboardForRole(userRole);
+  if (!userRole) {
+    redirectToLogin();
     return;
   }
 
-  // --- Student Pages ---
+  // Admin has full access
+  if (userRole === 'admin') return;
+
+  const requiredClassNorm = normalizeClassString(requiredClass || '');
+
+  // Teacher pages enforcement
+  if (isTeacherPage) {
+    if (userRole !== 'teacher') {
+      redirectToDashboardForRole(userRole);
+      return;
+    }
+    if (requiredClassNorm && userClass && userClass !== requiredClassNorm) {
+      redirectToDashboardForRole(userRole);
+      return;
+    }
+    return; // allowed
+  }
+
+  // Student pages enforcement
   if (isStudentPage) {
-    if (userRole !== 'student') return redirectToDashboardForRole(userRole);
-    if (requiredClassNorm && userClass && userClass !== requiredClassNorm)
-      return redirectToDashboardForRole(userRole);
-    return;
+    if (userRole !== 'student') {
+      redirectToDashboardForRole(userRole);
+      return;
+    }
+    if (requiredClassNorm && userClass && userClass !== requiredClassNorm) {
+      redirectToDashboardForRole(userRole);
+      return;
+    }
+    return; // allowed
   }
 
   // Default deny
-  return redirectToLogin();
+  redirectToLogin();
 });
