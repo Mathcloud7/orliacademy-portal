@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -271,20 +272,36 @@
   </footer>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
-    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-database.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+  import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAzqLWaTKYLNWCyF8o3ZdaKsfWxjmJF5ZE",
-  authDomain: "year2f-38da9.firebaseapp.com",
-  projectId: "year2f-38da9",
-  storageBucket: "year2f-38da9.firebasestorage.app",
-  messagingSenderId: "509048214050",
-  appId: "1:509048214050:web:151935acbcb489ae29307b"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyAzqLWaTKYLNWCyF8o3ZdaKsfWxjmJF5ZE",
+    authDomain: "year2f-38da9.firebaseapp.com",
+    projectId: "year2f-38da9",
+    storageBucket: "year2f-38da9.appspot.com",
+    messagingSenderId: "509048214050",
+    appId: "1:509048214050:web:151935acbcb489ae29307b"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  window.onload = () => {
+    const resultsRef = ref(db, 'results');
+    get(resultsRef)
+      .then(snapshot => {
+        if (snapshot.exists()) {
+          console.log("✅ Results loaded successfully:", snapshot.val());
+        } else {
+          alert("No results found in the database.");
+        }
+      })
+      .catch(error => {
+        console.error("❌ Firebase connection error:", error);
+        alert("Error retrieving results. Check Firebase rules or configuration.");
+      });
+  };
 
     window.onload = displayResultsOverview;
     window.viewDetailedResult = viewDetailedResult;
