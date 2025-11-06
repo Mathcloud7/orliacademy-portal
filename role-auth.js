@@ -74,6 +74,9 @@ class RoleAuth {
         `year${y}-second-term-assessment.html`,
         `year${y}-second-term-lesson-view.html`,
         `year${y}-second-term-theory-view.html`,
+        `year${y}-first-term-student-dashboard.html`,
+        `year${y}-second-term-student-dashboard.html`,
+        `year${y}-third-term-student-dashboard.html`,
         `year${y}-third-term-assessment-student.html`,
         `year${y}-third-term-assessment.html`,
         `year${y}-third-term-lesson-view.html`,
@@ -95,7 +98,9 @@ class RoleAuth {
         `year${y}-second-term-results.html`,
         `year${y}-second-term-theory.html`,
         `year${y}-third-term-cbt.html`,
-        `year${y}-first-term-teacher-dashboard.html
+        `year${y}-first-term-teacher-dashboard.html`,
+        `year${y}-second-term-teacher-dashboard.html`,
+        `year${y}-third-term-teacher-dashboard.html`,
         `year${y}-third-term-lesson-teacher.html`,
         `year${y}-third-term-lesson-upload.html`,
         `year${y}-third-term-results.html`,
@@ -277,4 +282,5 @@ class RoleAuth {
 
 // Initialize
 new RoleAuth();
+
 
