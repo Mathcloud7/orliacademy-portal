@@ -1,381 +1,651 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Orli International Academy - Theory Upload</title>
-<script type="module">
-    // Import Firebase SDK
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-    import { getDatabase, ref, push, set, remove, onValue, get } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Teacher Assessment Manager</title>
 
-    // Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyAzqLWaTKYLNWCyF8o3ZdaKsfWxjmJF5ZE",
-  authDomain: "year2f-38da9.firebaseapp.com",
-  projectId: "year2f-38da9",
-  storageBucket: "year2f-38da9.firebasestorage.app",
-  messagingSenderId: "509048214050",
-  appId: "1:509048214050:web:151935acbcb489ae29307b"
-};
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
-
-    // Fetch and display uploaded files based on filters
-    function fetchFiles() {
-        const selectedSubject = document.getElementById('subjectFilter').value;
-        const selectedType = document.getElementById('typeFilter').value;
-
-        onValue(ref(database, 'files'), (snapshot) => {
-            const fileList = document.getElementById('fileList');
-            fileList.innerHTML = ''; // Clear previous content
-            const files = snapshot.val();
-            if (files) {
-                for (const id in files) {
-                    const file = files[id];
-
-                    // Apply filters
-                    if ((selectedSubject === 'All' || file.subject === selectedSubject) &&
-                        (selectedType === 'All' || file.type === selectedType)) {
-
-                        const fileDiv = document.createElement('div');
-                        fileDiv.classList.add('file');
-
-                        fileDiv.innerHTML = `
-                            <p><strong>Subject:</strong> ${file.subject}</p>
-                            <p><strong>Type:</strong> ${file.type}</p>
-                            <p><a href="${file.link}" target="_blank" class="view-file">View File</a></p>
-                            <p><strong>Status:</strong> ${file.published ? 'Published' : 'Unpublished'}</p>
-                            <button onclick="editFile('${id}')">Edit</button>
-                            <button onclick="deleteFile('${id}')">Delete</button>
-                            <button onclick="togglePublish('${id}', ${file.published})">${file.published ? 'Unpublish' : 'Publish'}</button>
-                        `;
-                        fileList.appendChild(fileDiv);
-                    }
-                }
-            } else {
-                fileList.innerHTML = '<p>No files uploaded yet.</p>';
-            }
-        });
-    }
-
-    // Trigger file fetch when filters change
-    document.getElementById('subjectFilter').addEventListener('change', fetchFiles);
-    document.getElementById('typeFilter').addEventListener('change', fetchFiles);
-
-    // Handle form submission
-    document.getElementById('uploadForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-
-        const subject = document.getElementById('subject').value;
-        const type = document.getElementById('type').value;
-        const link = document.getElementById('link').value;
-
-        // Validate input fields
-        if (!subject || !type || !link) {
-            alert("Please make sure all fields are filled out.");
-            return;
-        }
-
-        // Create a new reference for the file
-        const newFileRef = push(ref(database, 'files'));
-        set(newFileRef, {
-            subject: subject,
-            type: type,
-            link: link,
-            published: false
-        }).then(() => {
-            alert('File uploaded successfully');
-            document.getElementById('uploadForm').reset();
-        }).catch((error) => {
-            alert('Error uploading file: ' + error.message);
-        });
-    });
-
-    // Edit file function
-    window.editFile = function(id) {
-        const subject = prompt('Enter new subject:');
-        const type = prompt('Enter new type:');
-        const link = prompt('Enter new link:');
-
-        // Ensure user input is not null or empty
-        if (subject && type && link) {
-            const fileRef = ref(database, 'files/' + id);
-            get(fileRef).then((snapshot) => {
-                const file = snapshot.val();
-                set(fileRef, {
-                    subject: subject,
-                    type: type,
-                    link: link,
-                    published: file.published // Preserve publish status
-                }).then(() => {
-                    alert('File updated successfully');
-                }).catch((error) => {
-                    alert('Error updating file: ' + error.message);
-                });
-            });
-        } else {
-            alert('All fields must be filled out.');
-        }
-    };
-
-    // Delete file function
-    window.deleteFile = function(id) {
-        if (confirm('Are you sure you want to delete this file?')) {
-            const fileRef = ref(database, 'files/' + id);
-            remove(fileRef).then(() => {
-                alert('File deleted successfully');
-            }).catch((error) => {
-                alert('Error deleting file: ' + error.message);
-            });
-        }
-    };
-
-    // Toggle publish status function
-    window.togglePublish = function(id, currentStatus) {
-        const fileRef = ref(database, 'files/' + id);
-
-        // Fetch file data once using get()
-        get(fileRef).then((snapshot) => {
-            const file = snapshot.val();
-
-            if (file) {
-                set(fileRef, {
-                    ...file, // Preserve other fields
-                    published: !currentStatus
-                }).then(() => {
-                    alert(`File ${currentStatus ? 'unpublished' : 'published'} successfully`);
-                }).catch((error) => {
-                    alert('Error toggling publish status: ' + error.message);
-                });
-            } else {
-                alert('File not found.');
-            }
-        }).catch((error) => {
-            alert('Error fetching file data: ' + error.message);
-        });
-    };
-
-    // Initial file fetch when page loads
-    window.onload = fetchFiles;
-</script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f9;
-            color: #333;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 20px auto;
-            padding: 20px;
-            background: #fff;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .logo {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-
-        .logo img {
-            max-width: 120px;
-        }
-
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        label {
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        input, select, button {
-            padding: 10px;
-            font-size: 16px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        button {
-            background-color: #4caf50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #45a049;
-        }
-
-        #fileList {
-            margin-top: 20px;
-        }
-
-        .file {
-            padding: 10px;
-            margin-bottom: 10px;
-            background: #f9f9f9;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        .file p {
-            margin: 5px 0;
-        }
-
-        .file button {
-            margin-right: 5px;
-        }
-
-        .view-file {
-            color: #007bff;
-            text-decoration: none;
-        }
-
-        .view-file:hover {
-            text-decoration: underline;
-        }
-.filters {
-    display: flex; /* Flexbox layout for the container */
-    justify-content: space-between; /* Space items on both sides */
-    margin-bottom: 20px;
+<style>
+:root {
+  --accent: #0ea5e9;
+  --accent-dark: #0369a1;
+  --muted: #64748b;
+  --card: #ffffff;
+  --bg: #f8fafc;
+  --radius: 12px;
+  --shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
 }
 
-.filter-left, .filter-right {
-    display: flex;
-    flex-direction: column; /* Stack the label and select vertically */
-    padding: 10px;
+body {
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  margin: 0;
+  padding: 24px;
+  background: var(--bg);
+  color: #0f172a;
+  line-height: 1.5;
+}
+
+header {
+  background: linear-gradient(90deg, var(--accent), #2563eb);
+  color: #fff;
+  padding: 20px 24px;
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+header small {
+  opacity: 0.9;
+  font-size: 14px;
+}
+
+.wrap {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: var(--shadow);
+}
+
+h2, h3 {
+  margin-top: 0;
+  font-weight: 600;
+  color: #0f172a;
 }
 
 label {
-    margin-bottom: 5px;
+  display: block;
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
 }
 
-        .filters select {
-            padding: 10px;
-            font-size: 16px;
-        }
-    /* Footer styling */
-    footer {
-      bottom: 0;
-      width: 100%;
-      background-color: #007bff;
-      color: white;
-      text-align: center;
-      padding: 12px 0;
-      margin-top: 20px;
-    }
+input, select, textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  font-size: 14px;
+  font-family: inherit;
+  color: #0f172a;
+}
 
-    </style>
+#editor {
+  height: 150px;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  margin-top: 6px;
+}
+
+.btn {
+  padding: 9px 14px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 14px;
+}
+
+.btn:hover { opacity: 0.9; }
+.btn.primary { background: var(--accent); color: #fff; }
+.btn.ghost {
+  background: transparent;
+  color: var(--accent-dark);
+  border: 1px solid #bae6fd;
+}
+
+.row { display: flex; gap: 10px; align-items: flex-end; }
+.row .col { flex: 1; }
+
+.assessment {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #f9fafb;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 10px;
+}
+
+.assessment .meta { flex: 1; }
+.assessment h3 { margin: 0; font-size: 16px; color: #0f172a; }
+
+.pill {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: var(--accent-dark);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.submissions {
+  margin-top: 8px;
+  background: #f1f5f9;
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.submissions div {
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.submissions div:hover { background: #e0f2fe; }
+
+#subModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+  padding: 20px;
+}
+
+#subModalContent {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow);
+}
+
+#subModalTitle {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+#subMeta { color: var(--muted); font-size: 13px; margin-top: 4px; }
+#feedbackInput {
+  width: 100%;
+  margin-top: 6px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  font-family: inherit;
+}
+
+#totalContainer {
+  font-weight: 600;
+  margin-top: 12px;
+  color: #0f172a;
+}
+
+footer {
+  text-align: center;
+  color: var(--muted);
+  margin-top: 24px;
+  font-size: 13px;
+}
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo">
-            <img src="logo.png" alt="Orli International Academy Logo">
-        </div>
-        <h1>Year 2 First Term - Theory Upload</h1>
-        <form id="uploadForm">
-            <div class="form-group">
-                <label for="class">Class:</label>
-                <input type="text" id="class" value="Year 2 First Term" disabled>
-            </div>
-            <div class="form-group">
-                <label for="subject">Subject:</label>
-                <select id="subject">
-<option value="Science">Science</option>
-<option value="Home Economics">Home Economics</option>
-<option value="Geography">Geography</option>
-<option value="Agricultural Science">Agricultural Science</option>
-<option value="Mathematics">Mathematics</option>
-<option value="Civic Education">Civic Education</option>
-<option value="English Studies">English Studies</option>
-<option value="History">History</option>
-<option value="Religious Studies (CRS/IRS)">Religious Studies (CRS/IRS)</option>
-<option value="Information and Communication Technology">Information and Communication Technology</option>
-<option value="Personal Social and Health Education (PSHE)">Personal Social and Health Education (PSHE)</option>
-<option value="General Knowledge">General Knowledge</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="type">Type:</label>
-                <select id="type">
-                    <option value="Examination">Examination</option>
-                    <option value="CA1">CA1</option>
-                    <option value="CA2">CA2</option>
-                    <option value="Project">Project</option>
-                    <option value="Assignment">Assignment</option>
-                    <option value="Holiday Assignment">Holiday Assignment</option> 
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="link">Upload Link:</label>
-                <input type="url" id="link" placeholder="Enter Google Docs link" required>
-            </div>
-            <button type="submit">Upload to your Students</button>
-        </form>
 
-<h2>Filters</h2>
-<div class="filters">
-    <div class="filter-left">
-        <label for="subjectFilter">Filter by Subject:</label>
-        <select id="subjectFilter">
-            <option value="All">All</option>
-<option value="Science">Science</option>
-<option value="Home Economics">Home Economics</option>
-<option value="Geography">Geography</option>
-<option value="Agricultural Science">Agricultural Science</option>
-<option value="Mathematics">Mathematics</option>
-<option value="Civic Education">Civic Education</option>
-<option value="English Studies">English Studies</option>
-<option value="History">History</option>
-<option value="Religious Studies (CRS/IRS)">Religious Studies (CRS/IRS)</option>
-<option value="Information and Communication Technology">Information and Communication Technology</option>
-<option value="Personal Social and Health Education (PSHE)">Personal Social and Health Education (PSHE)</option>
-<option value="General Knowledge">General Knowledge</option>
+<header>
+  <h1>Teacher Assessment Manager</h1>
+  <small>Realtime manage assessments & mark student submissions</small>
+</header>
+
+<div class="wrap">
+  <section class="card">
+    <h2>Create / Edit Assessment</h2>
+    <label>Class</label>
+    <select id="yearInput"><option>Year 2</option></select>
+
+    <div class="row">
+      <div class="col">
+        <label>Term</label>
+        <select id="termInput">
+          <option>First Term</option>
+          <option>Second Term</option>
+          <option>Third Term</option>
         </select>
-    </div>
-    <div class="filter-right">
-        <label for="typeFilter">Filter by Type:</label>
-        <select id="typeFilter">
-            <option value="All">All</option>
-                    <option value="Examination">Examination</option>
-                    <option value="CA1">CA1</option>
-                    <option value="CA2">CA2</option>
-                    <option value="Project">Project</option>
-                    <option value="Assignment">Assignment</option>
-                    <option value="Holiday Assignment">Holiday Assignment</option> 
+      </div>
+      <div class="col">
+        <label>Type</label>
+        <select id="typeInput">
+          <option>CA 1</option>
+          <option>CA 2</option>
+          <option>Examination</option>
         </select>
+      </div>
     </div>
+
+    <label>Subject</label>
+    <select id="subjectInput">
+      <option value="">Select Subject</option>
+      <option>Science</option>
+      <option>Home Economics</option>
+      <option>Geography</option>
+      <option>Agricultural Science</option>
+      <option>Mathematics</option>
+      <option>Civic Education</option>
+      <option>English Studies</option>
+      <option>History</option>
+      <option>Christian Religious Studies</option>
+      <option>Islam Religious Studies</option>
+      <option>Information and Communication Technology</option>
+      <option>Personal Social and Health Education</option>
+      <option>General Knowledge</option>
+    </select>
+
+    <label>Instructions (optional)</label>
+    <textarea id="instructionsInput" rows="2"></textarea>
+
+    <label>Question (rich)</label>
+    <div id="editor"></div>
+
+    <div class="row">
+      <div class="col">
+        <label>Grade / Marks</label>
+        <input id="gradeInput" placeholder="10" />
+      </div>
+      <div class="col">
+        <button id="addQBtn" class="btn primary">Add Question</button>
+      </div>
+    </div>
+
+    <div id="questionsList" style="margin-top:12px;"></div>
+
+    <div class="row" style="margin-top:12px;">
+      <button id="saveBtn" class="btn primary">Save Assessment</button>
+      <button id="resetBtn" class="btn ghost">Reset</button>
+    </div>
+  </section>
+
+  <aside>
+    <div class="card">
+      <h3>Saved Assessments (<span id="count">0</span>)</h3>
+      <div class="row">
+        <select id="filterYear"><option value="">Year 2</option><option>Year 2</option></select>
+        <select id="filterTerm"><option value="">All Terms</option><option>First Term</option><option>Second Term</option><option>Third Term</option></select>
+      </div>
+      <input id="searchInput" placeholder="Search subject or type..." style="margin-top:8px;" />
+      <div id="assessmentsList" style="margin-top:12px;"></div>
+    </div>
+  </aside>
 </div>
 
-
-        <h2>Uploaded Files</h2>
-        <div id="fileList"></div>
+<div id="subModal">
+  <div id="subModalContent">
+    <h2 id="subModalTitle"></h2>
+    <div id="subMeta"></div>
+    <div id="subQuestions" style="margin-top:10px;"></div>
+    <div id="totalContainer">Total: <span id="totalScore">0</span></div>
+    <h3 style="margin-top:14px;">Feedback</h3>
+    <textarea id="feedbackInput" rows="3" placeholder="Write feedback..."></textarea>
+    <div style="margin-top:10px;display:flex;gap:8px;">
+      <button id="updateScoreBtn" class="btn primary">Save Scores</button>
+      <button id="closeSubBtn" class="btn ghost">Close</button>
     </div>
-  <!-- Footer Section -->
-  <footer>
-    Orli International Academy &copy; 2024
-  </footer>
+    <div id="subStatus" style="margin-top:8px;color:#64748b;font-size:13px;"></div>
+  </div>
+</div>
+
+<footer>Teacher portal Realtime DB marking system</footer>
+
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+import { getDatabase, ref, push, set, onValue, update, remove, get, child } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+// Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyCmEbbRBE30WTQJzYWbWJRnGkzBiCut_uQ",
+    authDomain: "year2-eassy.firebaseapp.com",
+    projectId: "year2-eassy",
+    storageBucket: "year2-eassy.firebasestorage.app",
+    messagingSenderId: "973490416558",
+    appId: "1:973490416558:web:97b94daa573356ad46b63f"
+  };
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// Quill editor and elements
+const editor = new Quill('#editor', { theme: 'snow' });
+const yearInput = document.getElementById('yearInput');
+const termInput = document.getElementById('termInput');
+const typeInput = document.getElementById('typeInput');
+const subjectInput = document.getElementById('subjectInput');
+const instructionsInput = document.getElementById('instructionsInput');
+const gradeInput = document.getElementById('gradeInput');
+const addQBtn = document.getElementById('addQBtn');
+const questionsList = document.getElementById('questionsList');
+const saveBtn = document.getElementById('saveBtn');
+const resetBtn = document.getElementById('resetBtn');
+const assessmentsList = document.getElementById('assessmentsList');
+const countEl = document.getElementById('count');
+const filterYear = document.getElementById('filterYear');
+const filterTerm = document.getElementById('filterTerm');
+const searchInput = document.getElementById('searchInput');
+
+let questions = [], editingId = null;
+const rootRef = ref(db, '/assessments');
+
+// Render questions
+function renderQuestions() {
+  if (questions.length === 0) {
+    questionsList.innerHTML = '<div style="color:#64748b">No questions yet</div>';
+    return;
+  }
+  questionsList.innerHTML = '';
+  questions.forEach((q, i) => {
+    const el = document.createElement('div');
+    el.style.border = '1px solid #eef6fb';
+    el.style.padding = '6px';
+    el.style.borderRadius = '6px';
+    el.style.marginTop = '6px';
+    el.innerHTML = `
+      <div><strong>Q${i + 1}</strong> - Grade: ${q.grade || ''}</div>
+      <div>${q.html || ''}</div>
+      <button data-idx="${i}" class="btn ghost" style="margin-top:4px;">Remove</button>`;
+    questionsList.appendChild(el);
+  });
+  questionsList.querySelectorAll('button').forEach(btn => {
+    btn.onclick = () => {
+      const idx = Number(btn.dataset.idx);
+      questions.splice(idx, 1);
+      renderQuestions();
+    };
+  });
+}
+
+function resetForm() {
+  yearInput.value = 'Year 7';
+  termInput.value = 'Term 1';
+  typeInput.value = 'Essay';
+  subjectInput.value = '';
+  instructionsInput.value = '';
+  editor.setContents([{ insert: '\n' }]);
+  gradeInput.value = '';
+  questions = [];
+  editingId = null;
+  renderQuestions();
+}
+
+addQBtn.onclick = () => {
+  const html = editor.root.innerHTML.trim();
+  const grade = gradeInput.value.trim();
+  if (!html || html === '<p><br></p>') return alert('Add question content.');
+  if (!grade) return alert('Enter grade.');
+  questions.push({ html, grade });
+  renderQuestions();
+  editor.setContents([{ insert: '\n' }]);
+  gradeInput.value = '';
+};
+
+saveBtn.onclick = async () => {
+  const subject = subjectInput.value.trim();
+  if (!subject) return alert('Enter subject');
+  if (questions.length === 0) return alert('Add questions');
+  const payload = {
+    year: yearInput.value,
+    term: termInput.value,
+    type: typeInput.value,
+    subject,
+    instructions: instructionsInput.value,
+    questions,
+    published: false,
+    timestamp: Date.now()
+  };
+  try {
+    if (editingId) {
+      await update(ref(db, `/assessments/${editingId}`), payload);
+    } else {
+      const nref = push(rootRef);
+      await set(nref, payload);
+    }
+    resetForm();
+  } catch (e) {
+    alert('Failed to save');
+    console.error(e);
+  }
+};
+
+// Listen to database
+onValue(rootRef, (snap) => {
+  const val = snap.val() || {};
+  const arr = Object.keys(val).map(k => ({ id: k, ...val[k] })).sort((a, b) => b.timestamp - a.timestamp);
+  renderAssessments(arr);
+});
+
+// Render assessments
+function renderAssessments(all) {
+  const fy = filterYear.value, ft = filterTerm.value, q = searchInput.value.toLowerCase();
+  const filtered = all.filter(a => {
+    if (fy && a.year !== fy) return false;
+    if (ft && a.term !== ft) return false;
+    if (q) {
+      const hay = (a.subject + ' ' + (a.type || '')).toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  countEl.textContent = filtered.length;
+  assessmentsList.innerHTML = '';
+  if (filtered.length === 0) {
+    assessmentsList.innerHTML = '<div style="color:#64748b;padding:6px;">No assessments</div>';
+    return;
+  }
+
+  filtered.forEach(a => {
+    const subject = a.subject || 'Untitled';
+    const year = a.year || '';
+    const term = a.term || '';
+    const type = a.type || 'N/A';
+    const published = a.published ? 'Published' : 'Unpublished';
+
+    const el = document.createElement('div');
+    el.className = 'assessment';
+    el.innerHTML = `
+      <div class="meta">
+        <h3>${subject}</h3>
+        <div class="pill">${year} - ${term}</div>
+        <div style="margin-top:4px;font-size:13px;color:#64748b;">
+          Type: ${type} - ${published}
+        </div>
+        <div class="submissions" id="subs-${a.id}">Loading submissions...</div>
+      </div>
+      <div class="actions">
+        <button data-id="${a.id}" data-action="edit" class="btn">Edit</button>
+        <button data-id="${a.id}" data-action="publish" class="btn ghost">
+          ${a.published ? 'Unpublish' : 'Publish'}
+        </button>
+        <button data-id="${a.id}" data-action="delete" class="btn ghost">Delete</button>
+      </div>`;
+    assessmentsList.appendChild(el);
+    attachSubmissionListener(a.id);
+  });
+
+  assessmentsList.querySelectorAll('button').forEach(btn => {
+    const id = btn.dataset.id, action = btn.dataset.action;
+    btn.onclick = () => {
+      if (action === 'edit') loadEdit(id);
+      else if (action === 'publish') togglePublish(id);
+      else if (action === 'delete') deleteAssessment(id);
+    };
+  });
+}
+
+// Submissions
+const submissionListeners = {};
+
+function attachSubmissionListener(aid) {
+  if (submissionListeners[aid]) return;
+  const subRef = ref(db, `/assessments/${aid}/submissions`);
+  submissionListeners[aid] = subRef;
+  onValue(subRef, (snap) => {
+    const val = snap.val() || {};
+    const entries = Object.keys(val).map(k => ({ id: k, ...val[k] }));
+    const node = document.getElementById(`subs-${aid}`);
+    if (!node) return;
+
+    if (entries.length === 0) {
+      node.innerHTML = '<i style="color:#64748b">No submissions</i>';
+    } else {
+      node.innerHTML = entries.map(s => `
+        <div data-ass="${aid}" data-stu="${s.id}">
+          ${s.studentName || '(Unnamed)'} - ${s.status || 'Pending'}
+          ${s.totalScore ? ` - Total: ${s.totalScore}` : ''}
+        </div>`).join('');
+    }
+    node.querySelectorAll('div').forEach(div => {
+      div.onclick = () => openSubmissionModal(aid, div.dataset.stu);
+    });
+  });
+}
+
+// --- Submission Modal ---
+const subModal = document.getElementById('subModal');
+const subModalTitle = document.getElementById('subModalTitle');
+const subMeta = document.getElementById('subMeta');
+const subQuestions = document.getElementById('subQuestions');
+const feedbackInput = document.getElementById('feedbackInput');
+const updateScoreBtn = document.getElementById('updateScoreBtn');
+const closeSubBtn = document.getElementById('closeSubBtn');
+const subStatus = document.getElementById('subStatus');
+const totalScoreEl = document.getElementById('totalScore');
+
+let currentSub = { aid: '', sid: '', assessment: null };
+
+async function openSubmissionModal(aid, sid) {
+  currentSub = { aid, sid };
+  const asnap = await get(ref(db, `/assessments/${aid}`));
+  if (!asnap.exists()) return alert('Assessment not found');
+  currentSub.assessment = asnap.val();
+
+  const ssnap = await get(ref(db, `/assessments/${aid}/submissions/${sid}`));
+  if (!ssnap.exists()) return alert('Submission not found');
+  const sub = ssnap.val();
+
+  subModalTitle.textContent = sub.studentName || '(Unnamed Student)';
+  subMeta.textContent = [currentSub.assessment.year, currentSub.assessment.term, currentSub.assessment.type]
+    .filter(Boolean).join(' - ');
+
+  const qs = currentSub.assessment.questions || [];
+  const answers = sub.answers || [];
+  const scores = sub.scorePerQuestion || [];
+  let html = "";
+
+  qs.forEach((q, i) => {
+    const ans = answers[i] || "<i style='color:#94a3b8'>(No answer)</i>";
+    html += `
+      <div style="margin-top:8px;border:1px solid #e2e8f0;border-radius:8px;padding:10px;background:#f9fafb;">
+        <div><strong>Q${i + 1}</strong> (${q.grade || 0} marks)</div>
+        <div style="margin-top:4px;">${q.html || ''}</div>
+        <div style="margin-top:6px;color:#475569;"><strong>Student answer:</strong></div>
+        <div style="margin-top:4px;padding:6px;border-radius:6px;background:#fff;border:1px solid #e2e8f0;">${ans}</div>
+        <div style="margin-top:8px;">
+          <label style="font-size:13px;color:#334155;">Score:</label>
+          <input type="number" class="qscore" data-index="${i}" value="${scores[i] || ''}" 
+                 min="0" max="${q.grade || 0}" step="0.5"
+                 style="width:80px;padding:6px;border-radius:6px;border:1px solid #cbd5e1;"> / ${q.grade || 0}
+        </div>
+      </div>`;
+  });
+  subQuestions.innerHTML = html;
+  feedbackInput.value = sub.feedback || '';
+  const inputs = subQuestions.querySelectorAll('.qscore');
+
+  function calcTotal() {
+    let total = 0;
+    inputs.forEach(inp => total += Number(inp.value || 0));
+    totalScoreEl.textContent = total.toFixed(1);
+  }
+
+  inputs.forEach(inp => inp.addEventListener('input', calcTotal));
+  calcTotal();
+
+  subStatus.textContent = `Submitted: ${new Date(sub.timestamp || 0).toLocaleString()}`;
+  subModal.style.display = 'flex';
+}
+
+updateScoreBtn.onclick = async () => {
+  const qInputs = subQuestions.querySelectorAll('.qscore');
+  const scores = Array.from(qInputs).map(inp => Number(inp.value || 0));
+  const total = scores.reduce((a, b) => a + b, 0);
+  const feedback = feedbackInput.value.trim();
+  const path = `/assessments/${currentSub.aid}/submissions/${currentSub.sid}`;
+  await update(ref(db, path), {
+    scorePerQuestion: scores,
+    totalScore: total,
+    feedback,
+    status: 'Marked'
+  });
+  subStatus.textContent = 'Scores saved';
+  totalScoreEl.textContent = total.toFixed(1);
+};
+
+closeSubBtn.onclick = () => subModal.style.display = 'none';
+subModal.onclick = e => { if (e.target === subModal) subModal.style.display = 'none'; };
+
+async function loadEdit(id) {
+  const snap = await get(child(rootRef, id));
+  if (!snap.exists()) return alert('Not found');
+  const data = snap.val();
+  yearInput.value = data.year;
+  termInput.value = data.term;
+  typeInput.value = data.type;
+  subjectInput.value = data.subject;
+  instructionsInput.value = data.instructions;
+  questions = data.questions || [];
+  editingId = id;
+  renderQuestions();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function togglePublish(id) {
+  const snap = await get(ref(db, `/assessments/${id}`));
+  if (!snap.exists()) return;
+  await update(ref(db, `/assessments/${id}`), { published: !snap.val().published });
+}
+
+async function deleteAssessment(id) {
+  if (confirm('Delete assessment & submissions?')) await remove(ref(db, `/assessments/${id}`));
+}
+
+// Filter inputs
+[filterYear, filterTerm, searchInput].forEach(el =>
+  el.addEventListener('input', () =>
+    get(rootRef).then(snap => {
+      const val = snap.val() || {};
+      renderAssessments(Object.keys(val).map(k => ({ id: k, ...val[k] })).sort((a, b) => b.timestamp - a.timestamp));
+    })
+  )
+);
+</script>
+
 </body>
 </html>
