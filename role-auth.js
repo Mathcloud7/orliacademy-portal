@@ -1,7 +1,7 @@
 /*!
-  role-auth.js — FIXED VERSION (2025)
-  STRICT year-role access guard (Firebase Compat)
-  Works for ALL pages: year1 … year6
+  role-auth.js — CLEAN FIXED VERSION (2025)
+  Strict role + year access enforcement
+  Firebase 9 compat (no modules required)
 */
 
 (function () {
@@ -18,7 +18,7 @@
   };
   /* ==================================================== */
 
-  // Public pages (no auth)
+  /* PUBLIC PAGES (no authentication required) */
   const PUBLIC_PAGES = [
     "index.html",
     "login.html",
@@ -26,44 +26,20 @@
     "about.html"
   ];
 
-  /* =======================================================
-     FIXED YEAR DETECTION
-     Matches ANY: year5 … year1 … y5 … y1 … year5-first-term
-  ======================================================= */
+  /* YEAR DETECTION (matches year1–year6, y1–y6) */
   const YEAR_REGEX = /(year|y)([1-6])/i;
 
-  /* =======================================================
-     FIXED ROLE DETECTION
-     100% accurate, no collisions
-     Teacher pages MUST contain:
-       - "-t"       (suffix)
-       - "teacher"  (full word)
-       - "lesson-teacher"
-       - "lesson-upload"
-       - "cbt-teacher"
-     
-     Student pages MUST contain:
-       - "-s"
-       - "student"
-       - "lesson-view"
-       - "theory-view"
-       - "cbt-student"
-  ======================================================= */
-
+  /* ROLE DETECTION */
   function detectPageRole(filenameLower) {
-    // Teacher pages
     const teacherKeys = [
-      "-t.", "teacher", "lesson-teacher", "lesson-upload",
-      "cbt-teacher"
+      "-t.", "teacher", "lesson-teacher", "lesson-upload", "cbt-teacher"
     ];
     for (const k of teacherKeys) {
       if (filenameLower.includes(k)) return "teacher";
     }
 
-    // Student pages
     const studentKeys = [
-      "-s.", "student", "lesson-view", "theory-view",
-      "cbt-student"
+      "-s.", "student", "lesson-view", "theory-view", "cbt-student"
     ];
     for (const k of studentKeys) {
       if (filenameLower.includes(k)) return "student";
@@ -77,7 +53,7 @@
     return m ? Number(m[2]) : null;
   }
 
-  /* ================= HELPER: load firebase compat ================= */
+  /* ================= Firebase loader ================= */
   function loadScript(src) {
     return new Promise((resolve, reject) => {
       const s = document.createElement("script");
@@ -106,13 +82,13 @@
     return firebase;
   }
 
-  /* ================= Get user role/year from Firebase or LS ================= */
+  /* ================= User data (Firebase or LocalStorage) ================= */
   async function getUserFromFirebase(firebase) {
     return new Promise((resolve) => {
       firebase.auth().onAuthStateChanged(async (fbUser) => {
         if (!fbUser) return resolve(null);
 
-        // 1. Try JWT custom claims
+        // Try JWT claims
         try {
           const token = await fbUser.getIdTokenResult(true);
           if (token.claims.role) {
@@ -122,9 +98,9 @@
               year: token.claims.year ? Number(token.claims.year) : null
             });
           }
-        } catch { }
+        } catch {}
 
-        // 2. Firestore fallback
+        // Firestore fallback
         try {
           const db = firebase.firestore();
           const snap = await db.collection("users")
@@ -142,7 +118,7 @@
               });
             }
           }
-        } catch { }
+        } catch {}
 
         resolve({ uid: fbUser.uid, role: null, year: null });
       });
@@ -153,8 +129,10 @@
     try {
       const raw = localStorage.getItem("roleAuthUser");
       if (!raw) return null;
+
       const u = JSON.parse(raw);
       if (!u.role) return null;
+
       return {
         uid: u.uid || null,
         role: u.role.toLowerCase(),
@@ -172,16 +150,13 @@
     location.replace(url.toString());
   }
 
-  /* ================= PERMISSION CHECK ================= */
+  /* ================= Access rules ================= */
   function isAllowed(user, pageRole, pageYear) {
     if (!user || !user.role) return false;
-
     if (user.role === "admin") return true;
-
     if (pageRole === "public") return true;
 
     if (!pageYear) return false;
-
     if (user.role !== pageRole) return false;
 
     return user.year === pageYear;
@@ -191,6 +166,7 @@
   (async function main() {
     const filename = location.pathname.split("/").pop().toLowerCase();
 
+    // Public page? → Allow
     if (PUBLIC_PAGES.includes(filename)) return;
 
     const pageRole = detectPageRole(filename);
@@ -203,7 +179,7 @@
       firebase = await ensureFirebaseCompat();
       firebase = initFirebase(firebase);
       user = await getUserFromFirebase(firebase);
-    } catch { }
+    } catch {}
 
     if (!user) {
       const local = readLocalUser();
@@ -211,11 +187,13 @@
     }
 
     if (!isAllowed(user, pageRole, pageYear)) {
-      return redirect(user && user.role ? "unauthorized" : "not_authenticated");
+      return redirect(
+        user && user.role ? "unauthorized" : "not_authenticated"
+      );
     }
 
-    // expose for debugging
     window.__ROLE_AUTH = { user, pageRole, pageYear, filename };
     console.info("role-auth OK:", window.__ROLE_AUTH);
   })();
+
 })();
