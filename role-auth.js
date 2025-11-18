@@ -1,131 +1,166 @@
 ```javascript
-// ================================================
-// FINAL ROLE-AUTH.JS (COMPLETE & FULLY WORKING)
-// ================================================
+// COMPLETE role-auth.js — FINAL VERSION
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js";
-import {
-  getAuth,
-  onAuthStateChanged,
-  signOut,
-} from "https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js";
-import {
-  getFirestore,
-  doc,
-  getDoc,
-} from "https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js";
+(function () {
+  "use strict";
 
-// ================================================
-// FIREBASE CONFIG (UNCHANGED)
-// ================================================
-const firebaseConfig = {
-  apiKey: "AIzaSyBXqFTnZqi1Uzo_4k1s-cZrm__eSrUQuV8",
-  authDomain: "home-1e252.firebaseapp.com",
-  projectId: "home-1e252",
-  storageBucket: "home-1e252.firebasestorage.app",
-  messagingSenderId: "702969034430",
-  appId: "1:702969034430:web:47ff6e815f2017fc8f10ef"
-};
+  /*
+   ===============================================================
+    ROLE-AUTH.JS — FINAL, COMPLETE, FULLY COMPATIBLE
+   ===============================================================
+   RULES ENFORCED:
+   ---------------------------------------
+   ⭐ Admin → Access ALL pages
+   ⭐ Teachers → Only pages of their own class (year)
+   ⭐ Students → Only pages of their own class (year)
+   ⭐ No class can open another class pages
+   ⭐ No student can open any teacher page
+   ⭐ No teacher can open any student page
+   ⭐ Automatically detects page role + page year from filename
+   ⭐ Uses localStorage value from login page:
+        localStorage.setItem("roleAuthUser", {
+           uid, role, year
+        })
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth();
-const db = getFirestore();
+   ---------------------------------------
+   PAGE ROLE & YEAR DETECTION LOGIC
+   ---------------------------------------
+   e.g. "year5-first-term-lesson-teacher.html"
+        → pageRole = "teacher"
+        → pageYear = 5
 
-// ================================================
-// PAGE ROUTE ANALYSIS
-// ================================================
-const currentPage = window.location.pathname.split("/").pop().toLowerCase();
+   e.g. "y3-cbt-student.html"
+        → pageRole = "student"
+        → pageYear = 3
 
-// Helper: extract year (1–6) from filename
-function extractYear(page) {
-  const match = page.match(/year([1-6])/);
-  const altMatch = page.match(/y([1-6])-/);
-  if (match) return parseInt(match[1]);
-  if (altMatch) return parseInt(altMatch[1]);
-  return null;
-}
+   ---------------------------------------
+   AUTO-PROTECTS ALL CLASS PAGES YEAR 1–6
+   ---------------------------------------
+  */
 
-const pageYear = extractYear(currentPage);
-const isTeacherPage = currentPage.includes("teacher");
-const isStudentPage = currentPage.includes("student");
-const isDashboardPage = currentPage.includes("dashboard");
+  const YEAR_REGEX = /(year|y)([1-6])/i;
 
-// ================================================
-// AUTH GUARD
-// ================================================
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    return (window.location.href = "login.html");
+  // Keywords to classify page role
+  const TEACHER_KEYS = ["teacher", "-t", "teacher-dashboard", "cbt-teacher", "lesson-teacher", "lesson-upload"];
+  const STUDENT_KEYS = ["student", "-s", "cbt-student", "lesson-view", "theory-view"];
+  const ADMIN_KEYS   = ["admin", "admin-dashboard"];
+
+  /* ------------------------------------------------------
+     1. Get current filename
+  --------------------------------------------------------- */
+  function getFilename() {
+    try {
+      const name = location.pathname.split("/").pop();
+      return name || "index.html";
+    } catch {
+      return "index.html";
+    }
   }
 
-  const userRef = doc(db, "users", user.uid);
-  const userSnap = await getDoc(userRef);
+  /* ------------------------------------------------------
+     2. Infer page role + page year
+  --------------------------------------------------------- */
+  function inferPageInfo(filename) {
+    const lower = filename.toLowerCase();
+    let pageRole = "public";
 
-  if (!userSnap.exists()) {
-    alert("Account record missing.");
-    return signOut(auth);
+    // Teacher detection
+    for (const key of TEACHER_KEYS) {
+      if (lower.includes(key)) pageRole = "teacher";
+    }
+
+    // Student detection
+    for (const key of STUDENT_KEYS) {
+      if (lower.includes(key)) pageRole = "student";
+    }
+
+    // Admin detection
+    for (const key of ADMIN_KEYS) {
+      if (lower.includes(key)) pageRole = "admin";
+    }
+
+    // Year detection
+    let pageYear = null;
+    const match = lower.match(YEAR_REGEX);
+    if (match && match[2]) pageYear = Number(match[2]);
+
+    return { pageRole, pageYear };
   }
 
-  const userData = userSnap.data();
-  const role = userData.role; // admin | teacher | student
-  const year = userData.year ? parseInt(userData.year) : null;
-
-  // ================================================
-  // ADMIN → FULL ACCESS
-  // ================================================
-  if (role === "admin") return;
-
-  // ================================================
-  // YEAR CHECK REQUIRED FOR TEACHERS & STUDENTS
-  // ================================================
-  if (!pageYear) return;
-  if (!year) return;
-
-  // ================================================
-  // ROLE RULES
-  // ================================================
-
-  // BLOCK TEACHER from student pages
-  if (role === "teacher") {
-    if (isStudentPage) {
-      alert("Teachers cannot access student pages.");
-      return (window.location.href = "login.html");
+  /* ------------------------------------------------------
+     3. Read stored login session from localStorage
+  --------------------------------------------------------- */
+  function readStoredUser() {
+    try {
+      const raw = localStorage.getItem("roleAuthUser");
+      if (!raw) return null;
+      const user = JSON.parse(raw);
+      if (!user.role) return null;
+      return {
+        role: String(user.role).toLowerCase(),
+        year: user.year ? Number(user.year) : null,
+      };
+    } catch {
+      return null;
     }
-
-    if (pageYear !== year) {
-      alert("You cannot access another class's pages.");
-      return (window.location.href = "login.html");
-    }
-
-    return;
   }
 
-  // BLOCK STUDENT from teacher pages
-  if (role === "student") {
-    if (isTeacherPage) {
-      alert("Students cannot access teacher pages.");
-      return (window.location.href = "login.html");
-    }
-
-    if (pageYear !== year) {
-      alert("You cannot access another class's pages.");
-      return (window.location.href = "login.html");
-    }
-
-    return;
+  /* ------------------------------------------------------
+     4. Redirection helper
+  --------------------------------------------------------- */
+  function redirect(reason) {
+    const url = new URL("login.html", location.origin);
+    url.searchParams.set("reason", reason);
+    url.searchParams.set("redirect", location.pathname);
+    location.replace(url.toString());
   }
 
-  // Unknown role
-  alert("Invalid role. Contact admin.");
-  signOut(auth);
-});
+  /* ------------------------------------------------------
+     5. Permission engine
+  --------------------------------------------------------- */
+  function isAllowed(user, page) {
+    // Admin allowed everywhere
+    if (user.role === "admin") return true;
 
-// ================================================
-// OPTIONAL: LOGOUT HANDLER
-// ================================================
-const logoutBtn = document.getElementById("logoutBtn");
-if (logoutBtn) {
-  logoutBtn.addEventListener("click", () => signOut(auth));
-}
-```}]}
+    // Public pages allowed
+    if (page.pageRole === "public") return true;
 
+    // Page requires year
+    if (!page.pageYear) return false;
+
+    // Students
+    if (user.role === "student") {
+      return page.pageRole === "student" && user.year === page.pageYear;
+    }
+
+    // Teachers
+    if (user.role === "teacher") {
+      return page.pageRole === "teacher" && user.year === page.pageYear;
+    }
+
+    return false;
+  }
+
+  /* ------------------------------------------------------
+     6. MAIN EXECUTION
+  --------------------------------------------------------- */
+  (function enforceRoleAccess() {
+    const filename = getFilename();
+    const page = inferPageInfo(filename);
+    const user = readStoredUser();
+
+    // Not logged in
+    if (!user) {
+      if (page.pageRole !== "public") redirect("not_logged_in");
+      return;
+    }
+
+    // Unauthorized
+    if (!isAllowed(user, page)) {
+      redirect("unauthorized");
+      return;
+    }
+  })();
+
+})();
+```
