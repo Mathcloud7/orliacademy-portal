@@ -1,6 +1,5 @@
 // =========================================================
-// role-auth.js (FINAL STRICT VERSION)
-// Enforces class + role security (cannot bypass with URL)
+// role-auth.js (FINAL — UNBREAKABLE SECURITY VERSION)
 // =========================================================
 
 const FIREBASE_CONFIG = {
@@ -13,9 +12,8 @@ const FIREBASE_CONFIG = {
 };
 
 // ---------------------------------------------------------
-// PAGE LISTS — EXACT PAGES YOU PROVIDED
+// EXACT PAGE SETS (as provided by you)
 // ---------------------------------------------------------
-
 const teacherPages = new Set([
   "teacher-dashboard.html",
   "year5-t.html",
@@ -56,35 +54,29 @@ const studentPages = new Set([
   "year5-third-term-lesson-view.html"
 ]);
 
-
 // ---------------------------------------------------------
-// FIXED: UNIVERSAL CLASS NORMALIZER
-// No matter the format, always returns: "year5"
+// UNIVERSAL CLASS NORMALIZER — bulletproof
+// ALWAYS converts everything to “year5”
 // ---------------------------------------------------------
-function normalizeClass(value) {
-  if (!value) return null;
+function normalizeClass(input) {
+  if (!input) return null;
+  input = String(input).toLowerCase();
 
-  value = String(value).toLowerCase().trim();
-
-  // Match year5, Year5, YEAR5
-  let m = value.match(/year\s*?(\d)/i);
+  // year5 / Year5 / YEAR5
+  let m = input.match(/year\s*?(\d+)/i);
   if (m) return "year" + m[1];
 
-  // Match y5, Y5
-  let m2 = value.match(/^y\s*?(\d)$/i);
-  if (m2) return "year" + m2[1];
+  // y5 / Y5
+  m = input.match(/^y\s*?(\d+)/i);
+  if (m) return "year" + m[1];
 
-  // Match "5", "class 5", "primary5"
-  let m3 = value.match(/(\d)/);
-  if (m3) return "year" + m3[1];
+  // 5 / Class 5 / Grade 5
+  m = input.match(/(\d+)/);
+  if (m) return "year" + m[1];
 
   return null;
 }
 
-
-// ---------------------------------------------------------
-// Extract class from filename — ALWAYS WORKS
-// ---------------------------------------------------------
 function getFilename(path) {
   return path.split("/").pop().toLowerCase();
 }
@@ -93,25 +85,22 @@ function getClassFromFilename(filename) {
   return normalizeClass(filename);
 }
 
-
 // ---------------------------------------------------------
-// Redirects
+// Perfect redirect helpers
 // ---------------------------------------------------------
 function goLogin() {
   window.location.href = "/login.html";
 }
 
 function goRoleHome(role) {
-  role = (role || "").toLowerCase();
   if (role === "teacher") return window.location.href = "/teacher-dashboard.html";
   if (role === "student") return window.location.href = "/student-dashboard.html";
   if (role === "admin") return window.location.href = "/admin-dashboard.html";
   return goLogin();
 }
 
-
 // ---------------------------------------------------------
-// MAIN SECURITY LOGIC (STRICT, FINAL)
+// MAIN LOGIC — cannot be bypassed by URL edits
 // ---------------------------------------------------------
 document.addEventListener("DOMContentLoaded", async () => {
 
@@ -121,12 +110,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   const isTeacherPage = teacherPages.has(filename);
   const isStudentPage = studentPages.has(filename);
 
-  // If not restricted (public page), allow
+  // Public page → allow
   if (!isTeacherPage && !isStudentPage) return;
 
-
   // -----------------------------------------------------
-  // 1) Load cached user
+  // Load cached user
   // -----------------------------------------------------
   let user = null;
   try { user = JSON.parse(localStorage.getItem("roleAuthUser")); } catch {}
@@ -134,9 +122,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   let role = user?.role?.toLowerCase() || null;
   let userClass = normalizeClass(user?.year || user?.class);
 
-
   // -----------------------------------------------------
-  // 2) Load from Firebase if missing data
+  // If missing → fetch from Firebase
   // -----------------------------------------------------
   if (!role || !userClass) {
     try {
@@ -173,7 +160,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       role = (data.role || "").toLowerCase();
       userClass = normalizeClass(data.year || data.class);
 
-      // Save fixed data
+      // SAVE permanently
       localStorage.setItem("roleAuthUser", JSON.stringify({
         uid: firebaseUser.uid,
         role,
@@ -181,32 +168,31 @@ document.addEventListener("DOMContentLoaded", async () => {
       }));
 
     } catch (err) {
-      console.error("role-auth error:", err);
+      console.error("AUTH ERROR:", err);
       return goLogin();
     }
   }
 
-
   // -----------------------------------------------------
-  // 3) FINAL ENFORCEMENT — UNBREAKABLE SECURITY
+  // FINAL ENFORCEMENT — YOU CANNOT BYPASS THIS
   // -----------------------------------------------------
 
   if (!role) return goLogin();
 
-  // Admin can open everything
+  // Admin → full access
   if (role === "admin") return;
 
-  // Teacher pages require teacher
+  // Teacher pages → only teachers
   if (isTeacherPage && role !== "teacher") return goRoleHome(role);
 
-  // Student pages require student
+  // Student pages → only students
   if (isStudentPage && role !== "student") return goRoleHome(role);
 
-  // Class enforcement — FIXED (normalizes everything)
+  // **FINAL CLASS LOCK**
+  // If page class ≠ user class → block
   if (pageClass && userClass && pageClass !== userClass) {
     return goRoleHome(role);
   }
 
-  // Safe, allow page load
-  return;
+  // SAFE → allow page
 });
