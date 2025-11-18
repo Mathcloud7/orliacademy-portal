@@ -1,81 +1,83 @@
-// SERVICE WORKER – FINAL VERIFIED VERSION (2025)
+// ORLI ACADEMY – SERVICE WORKER (ERROR-PROOF VERSION)
 
 // Cache version
-const CACHE_NAME = "orli-static-v1";
+const CACHE_NAME = "orli-v1";
 
-// Static assets only – HTML is NOT cached
+// These files MUST exist — use ONLY the files that are real
 const STATIC_FILES = [
+  "/",               // your homepage root always exists
   "/index.html",
   "/offline.html",
-  "/login.html",
-  "/style.css",
-  "/main.js"
+  "/login.html"
 ];
 
-// ---------------------- INSTALL ----------------------
+// ---------------- INSTALL ----------------
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_FILES))
+    caches.open(CACHE_NAME).then(async (cache) => {
+      for (const file of STATIC_FILES) {
+        try {
+          await cache.add(file);
+        } catch (err) {
+          // skip missing files instead of breaking
+          console.warn("SW: Skip missing file:", file);
+        }
+      }
+    })
   );
   self.skipWaiting();
 });
 
-// ---------------------- ACTIVATE ----------------------
+// ---------------- ACTIVATE ----------------
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((names) =>
+    caches.keys().then((keys) =>
       Promise.all(
-        names
-          .filter((n) => n !== CACHE_NAME)
-          .map((n) => caches.delete(n))
+        keys
+          .filter((k) => k !== CACHE_NAME)
+          .map((k) => caches.delete(k))
       )
     )
   );
   self.clients.claim();
 });
 
-// ---------------------- FETCH ----------------------
+// ---------------- FETCH ----------------
 self.addEventListener("fetch", (event) => {
   const req = event.request;
 
-  // ❌ Do NOT intercept chrome-extension://
+  // IGNORE chrome extension URLs
   if (req.url.startsWith("chrome-extension://")) return;
 
-  // ❌ Do NOT cache role-auth or Firebase
+  // IGNORE Firebase + role-auth
   if (
-    req.url.includes("role-auth.js") ||
     req.url.includes("firebase") ||
-    req.url.includes("auth") ||
-    req.url.includes("firestore")
+    req.url.includes("role-auth.js")
   ) {
-    return; // let network handle normally
+    return;
   }
 
-  // Only GET may be cached
+  // Only GET allowed
   if (req.method !== "GET") return;
 
-  // Static cache-first
   event.respondWith(
     caches.match(req).then((cached) => {
       if (cached) return cached;
 
       return fetch(req)
-        .then((networkResp) => {
-          // Only cache clean static responses
+        .then((response) => {
           if (
-            networkResp &&
-            networkResp.status === 200 &&
-            networkResp.type === "basic" &&
-            req.url.startsWith("https")
+            response &&
+            response.status === 200 &&
+            response.type === "basic"
           ) {
             caches.open(CACHE_NAME).then((cache) => {
-              cache.put(req, networkResp.clone()).catch(() => {});
+              cache.put(req, response.clone()).catch(() => {});
             });
           }
-          return networkResp;
+          return response;
         })
         .catch(() => {
-          // Offline fallback ONLY for documents
           if (req.destination === "document") {
             return caches.match("/offline.html");
           }
