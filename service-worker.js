@@ -1,116 +1,151 @@
-/* service-worker.js
-   Place at site root so it can control the whole site.
-   It injects: <script type="module" src="/role-auth.module.js" defer></script>
-*/
+/* ============================================================
+   FIXED service-worker.js (2025)
+   Injects: <script type="module" src="/role-auth.module.js" defer></script>
+   Provides:
+     - strict injection
+     - safe cache behavior
+     - offline fallback
+     - protected page handling
+============================================================ */
 
-const CACHE_VERSION = 'v1.0.0';
+const CACHE_VERSION = 'v2.0.0';
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const OFFLINE_HTML = '/offline.html';
 const MODULE_SCRIPT_PATH = '/role-auth.module.js';
 
+/* ============================================================
+   INSTALL
+============================================================ */
 self.addEventListener('install', (ev) => {
   ev.waitUntil((async () => {
     const cache = await caches.open(STATIC_CACHE);
-    // cache offline fallback; if it doesn't exist on server, ignore error
-    await cache.addAll([OFFLINE_HTML]).catch(() => {});
+    await cache.add(OFFLINE_HTML).catch(() => {});
     self.skipWaiting();
   })());
 });
 
+/* ============================================================
+   ACTIVATE — remove old caches
+============================================================ */
 self.addEventListener('activate', (ev) => {
   ev.waitUntil((async () => {
-    // remove old caches (keep current)
     const keys = await caches.keys();
-    await Promise.all(keys.filter(k => k !== STATIC_CACHE).map(k => caches.delete(k)));
-    await self.clients.claim();
+    await Promise.all(
+      keys.filter(k => k !== STATIC_CACHE).map(k => caches.delete(k))
+    );
+    self.clients.claim();
   })());
 });
 
-// helper to inject module script tag into HTML string
-function injectModuleIntoHtml(htmlText) {
-  const injectTag = `<script type="module" src="${MODULE_SCRIPT_PATH}" defer></script>`;
-  if (htmlText.includes(MODULE_SCRIPT_PATH) || htmlText.includes('window.__ROLE_AUTH')) return htmlText;
-  if (htmlText.includes('</head>')) return htmlText.replace('</head>', injectTag + '\n</head>');
-  if (htmlText.includes('</body>')) return htmlText.replace('</body>', injectTag + '\n</body>');
-  return injectTag + '\n' + htmlText;
+/* ============================================================
+   Inject <script type="module"> into HTML
+============================================================ */
+function injectModule(html) {
+  const tag = `<script type="module" src="${MODULE_SCRIPT_PATH}" defer></script>`;
+
+  // Avoid duplicate injection
+  if (html.includes(MODULE_SCRIPT_PATH)) return html;
+
+  // Prefer head insertion
+  if (html.includes("</head>"))
+    return html.replace("</head>", tag + "\n</head>");
+
+  // Otherwise inject before body close
+  if (html.includes("</body>"))
+    return html.replace("</body>", tag + "\n</body>");
+
+  // Fallback (minimal)
+  return tag + "\n" + html;
 }
 
+/* ============================================================
+   MAIN FETCH HANDLER
+============================================================ */
 self.addEventListener('fetch', (ev) => {
   const req = ev.request;
-  // only handle same-origin navigations for injection
   const url = new URL(req.url);
 
-  // asset (cache-first) logic for static resources
-  if (req.destination && ['script', 'style', 'image', 'font'].includes(req.destination) ||
-      /\.(?:js|css|png|jpg|jpeg|svg|webp|gif|woff2?|ttf|eot)$/.test(url.pathname)) {
+  /* ------------------------------------------------------------
+     1. Handle static assets (cache-first)
+  ------------------------------------------------------------ */
+  const isStaticAsset =
+    (req.destination && ['script', 'style', 'image', 'font'].includes(req.destination)) ||
+    /\.(?:js|css|png|jpg|jpeg|svg|webp|gif|woff2?|ttf|eot)$/.test(url.pathname);
+
+  if (isStaticAsset) {
     ev.respondWith((async () => {
       const cache = await caches.open(STATIC_CACHE);
       const cached = await cache.match(req);
       if (cached) return cached;
+
       try {
-        const fetched = await fetch(req);
-        if (fetched && fetched.status === 200) cache.put(req, fetched.clone());
-        return fetched;
-      } catch (e) {
-        return cached || fetch(req).catch(() => new Response(null, {status: 503}));
+        const net = await fetch(req);
+        if (net && net.status === 200) cache.put(req, net.clone());
+        return net;
+      } catch {
+        return cached || new Response(null, { status: 503 });
       }
     })());
     return;
   }
 
-  // HTML navigation fetch -> network-first then inject module
-  const accept = req.headers.get('accept') || '';
-  const isNavigation = accept.includes('text/html');
+  /* ------------------------------------------------------------
+     2. Handle HTML navigations (Network-first + injection)
+  ------------------------------------------------------------ */
+  const acceptsHtml = req.headers.get("accept")?.includes("text/html");
+  const isNav = req.mode === "navigate" || acceptsHtml;
 
-  if (isNavigation && url.origin === location.origin) {
+  if (isNav && url.origin === location.origin) {
     ev.respondWith((async () => {
       try {
         const networkResp = await fetch(req);
+
+        // If the network fails
         if (!networkResp || networkResp.status !== 200) {
-          const cacheResp = await caches.match(req);
-          if (cacheResp) return cacheResp;
-          const fallback = await caches.match(OFFLINE_HTML);
-          return fallback || networkResp;
+          const cached = await caches.match(req);
+          return cached || await caches.match(OFFLINE_HTML);
         }
 
         const text = await networkResp.text();
-        const injected = injectModuleIntoHtml(text);
-        const headers = new Headers(networkResp.headers);
-        // create response with injected body
+        const injected = injectModule(text);
+
         const newResp = new Response(injected, {
           status: networkResp.status,
           statusText: networkResp.statusText,
-          headers
+          headers: { "Content-Type": "text/html" }
         });
 
-        // Cache public HTML (non-protected pages) conservatively:
-        // heuristic: do not cache pages whose path contains 'teacher' or 'student' or 'cbt' or 'admin' or 'year'
-        const path = url.pathname.toLowerCase();
+        // Determine if this HTML is safe to cache
         const protectedKeywords = ['teacher', 'student', 'cbt', 'admin', 'year'];
-        const isProtected = protectedKeywords.some(k => path.includes(k));
+        const isProtected = protectedKeywords.some(k =>
+          url.pathname.toLowerCase().includes(k)
+        );
+
         if (!isProtected) {
           const cache = await caches.open(STATIC_CACHE);
           cache.put(req, newResp.clone()).catch(() => {});
         }
 
         return newResp;
+
       } catch (err) {
-        // offline fallback
+        // Offline fallback
         const cached = await caches.match(req);
         if (cached) return cached;
-        const fallback = await caches.match(OFFLINE_HTML);
-        return fallback || new Response('<h1>Offline</h1>', { headers: { 'Content-Type': 'text/html' } });
+        return await caches.match(OFFLINE_HTML);
       }
     })());
     return;
   }
 
-  // default: network with cache fallback
+  /* ------------------------------------------------------------
+     3. Default fetch (network-first)
+  ------------------------------------------------------------ */
   ev.respondWith((async () => {
     try {
       return await fetch(req);
-    } catch (e) {
-      return await caches.match(req) || new Response(null, {status: 503});
+    } catch {
+      return await caches.match(req) || new Response(null, { status: 503 });
     }
   })());
 });
