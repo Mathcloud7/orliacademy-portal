@@ -1,7 +1,6 @@
 // role-auth.js
 // Automatically injected by service-worker.js
 // Handles login enforcement + role authorization + class locking
-// Allows all year1–year6 student landing pages as public.
 
 // ------------------ FIREBASE CONFIG ------------------
 const FIREBASE_CONFIG = {
@@ -54,7 +53,7 @@ const studentPages = new Set([
   "year5-third-term-lesson-view.html"
 ]);
 
-// Fully public access pages (auto-approved)
+// Public student landing pages
 const explicitlyPublicPages = new Set([
   "year1-s.html",
   "year2-s.html",
@@ -64,11 +63,22 @@ const explicitlyPublicPages = new Set([
   "year6-s.html"
 ]);
 
+// ------------------ BYPASS FIX (IMPORTANT) ------------------
+// These pages LOOK like dashboards but are not real dashboards.
+// They must NOT trigger redirects.
+const bypassAuthPages = new Set([
+  "year5-first-term-student-dashboard.html",
+  "year5-second-term-student-dashboard.html",
+  "year5-third-term-student-dashboard.html",
+  "year5-first-term-teacher-dashboard.html",
+  "year5-second-term-teacher-dashboard.html",
+  "year5-third-term-teacher-dashboard.html"
+]);
+
 // ------------------ HELPERS ------------------
 function getFilename(path) {
-  const segs = path.split("/");
-  let file = segs.pop() || segs.pop();
-  return (file || "index.html").toLowerCase();
+  const parts = path.split("/");
+  return (parts.pop() || "index.html").toLowerCase();
 }
 
 function normalizeClass(str) {
@@ -105,50 +115,51 @@ function redirectRole(role) {
       window.location.href = "/student-dashboard.html";
       break;
     default:
-      window.location.href = "/login.html";
+      redirectLogin();
   }
 }
 
-// ------------------ MAIN ACCESS LOGIC ------------------
+// ------------------ MAIN LOGIC ------------------
 document.addEventListener("DOMContentLoaded", async () => {
+  const filename = getFilename(window.location.pathname);
 
-  const pathname = window.location.pathname;
-  const filename = getFilename(pathname);
-
-  // 1️⃣ Public pages: immediate access
-  if (explicitlyPublicPages.has(filename)) {
-    console.log("Public student page:", filename);
+  // 1️⃣ Bypass pages (fix for your issue)
+  if (bypassAuthPages.has(filename)) {
+    console.log("Bypassed auth for:", filename);
     return;
   }
 
-  // 2️⃣ Detect if the page requires protection
+  // 2️⃣ Public landing pages
+  if (explicitlyPublicPages.has(filename)) {
+    console.log("Public page:", filename);
+    return;
+  }
+
+  // 3️⃣ Determine type
   const impliedClass = detectClassFromPage(filename);
 
   const isTeacherPage =
     teacherPages.has(filename) ||
-    /(?:-t|teacher|cbt-teacher|lesson-teacher|result)(?:\.html)?$/i.test(filename);
+    /(?:-t|cbt-teacher|lesson-teacher|result)(?:\.html)?$/i.test(filename);
 
   const isStudentPage =
     studentPages.has(filename) ||
-    /(?:-s|student|lesson-view|theory-view|cbt-student)(?:\.html)?$/i.test(filename);
+    /(?:-s|lesson-view|theory-view|cbt-student)(?:\.html)?$/i.test(filename);
 
   const restricted = isTeacherPage || isStudentPage || Boolean(impliedClass);
 
-  if (!restricted) {
-    // Public asset
-    return;
-  }
+  if (!restricted) return;
 
-  // ------------------ Try LocalStorage First ------------------
+  // ------------------ LOCAL STORAGE FIRST ------------------
   let user = null;
   try {
     user = JSON.parse(localStorage.getItem("roleAuthUser"));
-  } catch (e) {}
+  } catch {}
 
   let role = user?.role?.toLowerCase() || null;
   let userClass = normalizeClass(user?.year || user?.userClass || user?.class);
 
-  // ------------------ Fallback: Firebase Auth + Firestore ------------------
+  // ------------------ FIREBASE FALLBACK ------------------
   if (!role || (impliedClass && !userClass)) {
     try {
       const [
@@ -184,7 +195,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       role = (data.role || "").toLowerCase();
       userClass = normalizeClass(data.year || data.userClass || data.class);
 
-      // Cache locally
       localStorage.setItem(
         "roleAuthUser",
         JSON.stringify({
@@ -199,31 +209,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // ------------------ Final Authorization Logic ------------------
+  // ------------------ FINAL AUTH CHECKS ------------------
   if (!role) return redirectLogin();
 
-  // Admin can open anything
   if (role === "admin") return;
 
-  const pageRequired = normalizeClass(impliedClass);
+  const pageRequiredClass = normalizeClass(impliedClass);
 
-  // Teacher logic
+  // Teacher pages
   if (isTeacherPage) {
     if (role !== "teacher") return redirectRole(role);
-
-    if (pageRequired && userClass && userClass !== pageRequired)
+    if (pageRequiredClass && userClass !== pageRequiredClass)
       return redirectRole(role);
-
     return;
   }
 
-  // Student logic
+  // Student pages
   if (isStudentPage) {
     if (role !== "student") return redirectRole(role);
-
-    if (pageRequired && userClass && userClass !== pageRequired)
+    if (pageRequiredClass && userClass !== pageRequiredClass)
       return redirectRole(role);
-
     return;
   }
 
