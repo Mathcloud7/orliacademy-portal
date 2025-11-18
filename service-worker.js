@@ -3,6 +3,7 @@
 //  • Offline caching
 //  • Prevent caching of restricted user pages
 //  • Auto-inject /role-auth.js into every HTML page
+//  • Ignore chrome-extension:// and non-HTTP requests
 // =========================================================
 
 const CACHE_NAME = "site-static-v4";
@@ -62,7 +63,7 @@ const STATIC_ASSETS = [
   "/js/main.js"
 ];
 
-// Extract filename cleanly
+// Extract filename
 function getFilename(url) {
   try {
     const u = new URL(url);
@@ -80,18 +81,14 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     (async () => {
       const cache = await caches.open(CACHE_NAME);
-
       for (const url of STATIC_ASSETS) {
         try {
           const resp = await fetch(url);
-          if (resp.ok) {
-            await cache.put(url, resp);
-          }
+          if (resp.ok) await cache.put(url, resp);
         } catch (err) {
-          console.warn("Skipping missing asset:", url);
+          console.warn("Skipping asset:", url);
         }
       }
-
       self.skipWaiting();
     })()
   );
@@ -105,8 +102,8 @@ self.addEventListener("activate", (event) => {
     (async () => {
       const keys = await caches.keys();
       await Promise.all(
-        keys.map((k) => {
-          if (k !== CACHE_NAME) return caches.delete(k);
+        keys.map((key) => {
+          if (key !== CACHE_NAME) return caches.delete(key);
         })
       );
       self.clients.claim();
@@ -119,38 +116,53 @@ self.addEventListener("activate", (event) => {
 // =========================================================
 self.addEventListener("fetch", (event) => {
   const req = event.request;
+
+  // ---------------------------------------------
+  // 0. Ignore NON-HTTP(S) requests (fixes extension crash)
+  // ---------------------------------------------
+  if (!req.url.startsWith("http://") && !req.url.startsWith("https://")) return;
+
+  // Ignore chrome-extension://
+  if (req.url.startsWith("chrome-extension://")) return;
+
   if (req.method !== "GET") return;
 
   const filename = getFilename(req.url);
 
   // ---------------------------------------------
-  // 1. HTML document? → inject role-auth.js
+  // 1. HTML documents → Inject role-auth.js
   // ---------------------------------------------
   if (req.destination === "document") {
     event.respondWith(
       (async () => {
         try {
-          const networkResponse = await fetch(req);
-          let text = await networkResponse.text();
+          const net = await fetch(req);
+          let html = await net.text();
 
-          if (!/src=["']\/role-auth\.js["']/.test(text)) {
-            text = text.replace(
+          // Insert script if missing
+          if (!/src=["']\/role-auth\.js["']/.test(html)) {
+            html = html.replace(
               /<\/body>/i,
               `<script type="module" src="/role-auth.js"></script></body>`
             );
           }
 
-          return new Response(text, {
-            status: networkResponse.status,
-            statusText: networkResponse.statusText,
-            headers: networkResponse.headers
+          return new Response(html, {
+            status: net.status,
+            statusText: net.statusText,
+            headers: net.headers
           });
+
         } catch (err) {
           console.error("Document fetch failed:", err);
 
           const cache = await caches.open(CACHE_NAME);
-          const fallback = await cache.match(OFFLINE_PAGE);
-          return fallback || new Response("<h1>Offline</h1>", { headers: { "Content-Type": "text/html" } });
+          return (
+            (await cache.match(OFFLINE_PAGE)) ||
+            new Response("<h1>Offline</h1>", {
+              headers: { "Content-Type": "text/html" }
+            })
+          );
         }
       })()
     );
@@ -158,7 +170,7 @@ self.addEventListener("fetch", (event) => {
   }
 
   // ---------------------------------------------
-  // 2. Restricted pages → network first (NO CACHE)
+  // 2. Restricted pages → network ONLY
   // ---------------------------------------------
   const isClassPage = /^year\d|^y\d/.test(filename);
 
@@ -178,7 +190,7 @@ self.addEventListener("fetch", (event) => {
   }
 
   // ---------------------------------------------
-  // 3. All other files → cache-first
+  // 3. Other assets → cache-first
   // ---------------------------------------------
   event.respondWith(
     caches.match(req).then((cached) => {
@@ -187,7 +199,11 @@ self.addEventListener("fetch", (event) => {
       return fetch(req)
         .then(async (networkRes) => {
           const cache = await caches.open(CACHE_NAME);
-          if (networkRes && networkRes.status === 200 && networkRes.type === "basic") {
+          if (
+            networkRes &&
+            networkRes.status === 200 &&
+            networkRes.type === "basic"
+          ) {
             cache.put(req, networkRes.clone());
           }
           return networkRes;
@@ -197,7 +213,9 @@ self.addEventListener("fetch", (event) => {
             const cache = await caches.open(CACHE_NAME);
             return (
               (await cache.match(OFFLINE_PAGE)) ||
-              new Response("<h1>Offline</h1>", { headers: { "Content-Type": "text/html" } })
+              new Response("<h1>Offline</h1>", {
+                headers: { "Content-Type": "text/html" }
+              })
             );
           }
           return new Response("", { status: 503 });
