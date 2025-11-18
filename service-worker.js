@@ -1,152 +1,198 @@
-// role-auth.js
-// FINAL — Role based access control ONLY
+// =========================================================
+// service-worker.js (FINAL, no DOM usage)
+// - Safe HTML injection of /role-auth.js (network responses only)
+// - Ignores non-http schemes (chrome-extension etc.)
+// - Network-first for restricted pages
+// - Cache-first for safe assets
+// =========================================================
 
-// ------------------ FIREBASE CONFIG ------------------
-const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyBXqFTnZqi1Uzo_4k1s-cZrm__eSrUQuV8",
-  authDomain: "home-1e252.firebaseapp.com",
-  projectId: "home-1e252",
-  storageBucket: "home-1e252.firebasestorage.app",
-  messagingSenderId: "702969034430",
-  appId: "1:702969034430:web:47ff6e815f2017fc8f10ef"
-};
+const CACHE_NAME = "site-static-v5";
+const OFFLINE_PAGE = "/offline.html";
 
-// ------------------ PAGE GROUPS ------------------
-
-// Teacher pages only
-const teacherPages = new Set([
+// Files that should never be cached (restricted dashboards / sensitive pages)
+const RESTRICTED_FILENAMES = new Set([
   "teacher-dashboard.html",
+  "year5-t.html",
   "year5-first-term-teacher-dashboard.html",
   "year5-second-term-teacher-dashboard.html",
   "year5-third-term-teacher-dashboard.html",
   "year5-first-term-assessment.html",
-  "year5-second-term-assessment.html",
-  "year5-third-term-assessment.html",
-  "year5-first-term-lesson-upload.html",
-  "year5-second-term-lesson-upload.html",
-  "year5-third-term-lesson-upload.html",
   "year5-first-term-lesson-teacher.html",
-  "year5-second-term-lesson-teacher.html",
-  "year5-third-term-lesson-teacher.html",
+  "year5-first-term-lesson-upload.html",
   "year5-first-term-lesson-view.html",
+  "year5-second-term-assessment.html",
+  "year5-second-term-lesson-teacher.html",
+  "year5-second-term-lesson-upload.html",
   "year5-second-term-lesson-view.html",
+  "year5-third-term-assessment.html",
+  "year5-third-term-lesson-teacher.html",
+  "year5-third-term-lesson-upload.html",
   "year5-third-term-lesson-view.html",
   "y5-cbt-teacher.html",
-  "y5-cbt-result.html"
-]);
-
-// Student pages only
-const studentPages = new Set([
+  "year5-first-term-theory.html",
+  "year5-second-term-theory.html",
+  "year5-third-term-theory.html",
+  "y5-cbt-result.html",
   "student-dashboard.html",
+  "year5-s.html",
   "year5-first-term-student-dashboard.html",
   "year5-second-term-student-dashboard.html",
   "year5-third-term-student-dashboard.html",
-  "year5-first-term-lesson-view.html",
-  "year5-second-term-lesson-view.html",
-  "year5-third-term-lesson-view.html",
   "y5-cbt-student.html",
   "year5-first-term-theory-view.html",
+  "year5-first-term-lesson-view.html",
   "year5-second-term-theory-view.html",
-  "year5-third-term-theory-view.html"
+  "year5-second-term-lesson-view.html",
+  "year5-third-term-theory-view.html",
+  "year5-third-term-lesson-view.html"
 ]);
 
-// Public pages (no login needed)
-const publicPages = new Set([
-  "index.html",
-  "login.html"
-]);
+// Safe assets to cache
+const STATIC_ASSETS = [
+  "/",
+  "/index.html",
+  "/login.html",
+  "/admin-dashboard.html",
+  "/offline.html",
+  "/css/main.css",
+  "/js/main.js",
+  "/role-auth.js"
+];
 
-function getFilename(path) {
-  const p = path.split("/");
-  return (p.pop() || "index.html").toLowerCase();
-}
-
-function redirectLogin() {
-  window.location.href = "/login.html";
-}
-
-function redirectRole(role) {
-  switch (role) {
-    case "teacher":
-      window.location.href = "/teacher-dashboard.html";
-      break;
-    case "student":
-      window.location.href = "/student-dashboard.html";
-      break;
-    case "admin":
-      window.location.href = "/admin-dashboard.html";
-      break;
-    default:
-      redirectLogin();
-  }
-}
-
-// ------------------ MAIN AUTH CONTROLLER ------------------
-document.addEventListener("DOMContentLoaded", async () => {
-  const filename = getFilename(window.location.pathname);
-
-  // Public → allow
-  if (publicPages.has(filename)) return;
-
-  // Try LocalStorage first
-  let user = null;
+// Get filename from URL (fallback to index.html)
+function getFilename(url) {
   try {
-    user = JSON.parse(localStorage.getItem("roleAuthUser"));
-  } catch {}
+    const u = new URL(url);
+    const segs = u.pathname.split("/");
+    return (segs.pop() || "index.html").toLowerCase();
+  } catch {
+    return "";
+  }
+}
 
-  let role = user?.role || null;
+// Install: pre-cache static assets
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    (async () => {
+      const cache = await caches.open(CACHE_NAME);
+      for (const url of STATIC_ASSETS) {
+        try {
+          // use no-store to ensure latest copy on first install, but still cache result
+          const res = await fetch(url, { cache: "no-store" });
+          if (res && res.ok) await cache.put(url, res.clone());
+        } catch (err) {
+          // ignore missing assets
+          console.warn("SW install: skip", url, err && err.message);
+        }
+      }
+      self.skipWaiting();
+    })()
+  );
+});
 
-  // If missing → Firebase lookup
-  if (!role) {
-    try {
-      const [
-        { initializeApp },
-        { getAuth, onAuthStateChanged },
-        { getFirestore, collection, query, where, getDocs }
-      ] = await Promise.all([
-        import("https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js"),
-        import("https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js"),
-        import("https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js")
-      ]);
+// Activate: clean up old caches
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    (async () => {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => (k !== CACHE_NAME ? caches.delete(k) : null)));
+      self.clients.claim();
+    })()
+  );
+});
 
-      const app = initializeApp(FIREBASE_CONFIG);
-      const auth = getAuth(app);
-      const db = getFirestore(app);
+// Fetch handler
+self.addEventListener("fetch", (event) => {
+  const req = event.request;
 
-      const currentUser = await new Promise(resolve => {
-        const unsub = onAuthStateChanged(auth, u => {
-          unsub();
-          resolve(u);
-        });
-      });
-
-      if (!currentUser) return redirectLogin();
-
-      const q = query(collection(db, "users"), where("uid", "==", currentUser.uid));
-      const snap = await getDocs(q);
-      if (snap.empty) return redirectLogin();
-
-      const data = snap.docs[0].data();
-      role = data.role;
-
-      localStorage.setItem("roleAuthUser", JSON.stringify({ uid: currentUser.uid, role }));
-    } catch {
-      return redirectLogin();
-    }
+  // Ignore non-http(s) requests early (fixes chrome-extension crash)
+  if (!/^https?:/.test(req.url)) {
+    return; // do not handle requests from extensions or other schemes
   }
 
-  // ADMIN → access all pages
-  if (role === "admin") return;
+  // Only handle GET requests
+  if (req.method !== "GET") return;
 
-  // Teacher page but user not teacher
-  if (teacherPages.has(filename) && role !== "teacher") {
-    return redirectRole(role);
+  const filename = getFilename(req.url);
+
+  // 1) HTML documents: try network, inject role-auth.js into HTML body if missing
+  if (req.destination === "document") {
+    event.respondWith(
+      (async () => {
+        try {
+          const netRes = await fetch(req);
+          // If not an HTML response, return network response directly
+          const contentType = netRes.headers.get("Content-Type") || "";
+          if (!contentType.includes("text/html")) return netRes;
+
+          let text = await netRes.text();
+
+          // Only inject if the page does not already include role-auth
+          if (!/src=["']\/role-auth\.js["']/.test(text)) {
+            text = text.replace(/<\/body>/i, `<script type="module" src="/role-auth.js"></script></body>`);
+          }
+
+          // Build response with the original headers except we must create new Headers
+          const headers = new Headers(netRes.headers);
+          // Ensure content-type is HTML
+          if (!headers.has("Content-Type")) headers.set("Content-Type", "text/html");
+
+          return new Response(text, {
+            status: netRes.status,
+            statusText: netRes.statusText,
+            headers
+          });
+        } catch (err) {
+          // Network failed — serve offline fallback if available
+          const cache = await caches.open(CACHE_NAME);
+          const fallback = await cache.match(OFFLINE_PAGE);
+          return fallback || new Response("<h1>Offline</h1>", { headers: { "Content-Type": "text/html" } });
+        }
+      })()
+    );
+    return;
   }
 
-  // Student page but user not student
-  if (studentPages.has(filename) && role !== "student") {
-    return redirectRole(role);
+  // 2) Restricted pages (network-first, do NOT cache)
+  // Use an explicit check for restricted filenames; don't rely on broad regex that misclassifies.
+  if (RESTRICTED_FILENAMES.has(filename)) {
+    event.respondWith(
+      fetch(req).catch(async () => {
+        const cache = await caches.open(CACHE_NAME);
+        const fallback = await cache.match(OFFLINE_PAGE);
+        return fallback || new Response("<h1>Offline — restricted</h1>", { headers: { "Content-Type": "text/html" } });
+      })
+    );
+    return;
   }
 
-  // All good → allow page
+  // 3) All other assets: cache-first strategy
+  event.respondWith(
+    caches.match(req).then(async (cached) => {
+      if (cached) return cached;
+
+      try {
+        const networkRes = await fetch(req);
+        // Only cache same-origin basic responses (avoid opaque/cross-origin caching)
+        if (networkRes && networkRes.ok && networkRes.type === "basic") {
+          const cache = await caches.open(CACHE_NAME);
+          try {
+            await cache.put(req, networkRes.clone());
+          } catch (e) {
+            // If caching fails for some requests (extension, opaque), ignore
+            console.warn("SW: cache.put failed for", req.url, e && e.message);
+          }
+        }
+        return networkRes;
+      } catch (err) {
+        // If network fails and navigation, serve offline page
+        if (req.mode === "navigate") {
+          const cache = await caches.open(CACHE_NAME);
+          const fallback = await cache.match(OFFLINE_PAGE);
+          return fallback || new Response("<h1>Offline</h1>", { headers: { "Content-Type": "text/html" } });
+        }
+        return new Response("", { status: 503, statusText: "Service Unavailable" });
+      }
+    })
+  );
 });
