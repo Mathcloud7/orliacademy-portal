@@ -19,12 +19,12 @@ import {
 // FIREBASE CONFIG (UNCHANGED)
 // ================================================
 const firebaseConfig = {
-  apiKey: "AIzaSyD9cZZ_JfIJifQE5f443PWUvWClIOGHtpU",
-  authDomain: "tender-e1059.firebaseapp.com",
-  projectId: "tender-e1059",
-  storageBucket: "tender-e1059.appspot.com",
-  messagingSenderId: "234319688030",
-  appId: "1:234319688030:web:f7763af4fee7b2f568ec43",
+  apiKey: "AIzaSyBXqFTnZqi1Uzo_4k1s-cZrm__eSrUQuV8",
+  authDomain: "home-1e252.firebaseapp.com",
+  projectId: "home-1e252",
+  storageBucket: "home-1e252.firebasestorage.app",
+  messagingSenderId: "702969034430",
+  appId: "1:702969034430:web:47ff6e815f2017fc8f10ef"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -128,3 +128,4 @@ if (logoutBtn) {
   logoutBtn.addEventListener("click", () => signOut(auth));
 }
 ```}]}
+
