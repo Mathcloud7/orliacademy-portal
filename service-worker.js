@@ -1,26 +1,25 @@
-// ORLI ACADEMY – SERVICE WORKER (ERROR-PROOF VERSION)
+// ORLI ACADEMY — FINAL STABLE SERVICE WORKER (NO ERRORS)
 
-// Cache version
-const CACHE_NAME = "orli-v1";
+// Cache name
+const CACHE_NAME = "orli-cache-v3";
 
-// These files MUST exist — use ONLY the files that are real
+// Only cache essential public files
 const STATIC_FILES = [
-  "/",               // your homepage root always exists
+  "/",               
   "/index.html",
   "/offline.html",
   "/login.html"
 ];
 
-// ---------------- INSTALL ----------------
+// --------------------- INSTALL ---------------------
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
       for (const file of STATIC_FILES) {
         try {
-          await cache.add(file);
-        } catch (err) {
-          // skip missing files instead of breaking
-          console.warn("SW: Skip missing file:", file);
+          await cache.add(new Request(file, { cache: "reload" }));
+        } catch (e) {
+          console.warn("SW: skipping missing file:", file);
         }
       }
     })
@@ -28,60 +27,79 @@ self.addEventListener("install", (event) => {
   self.skipWaiting();
 });
 
-// ---------------- ACTIVATE ----------------
+// --------------------- ACTIVATE ---------------------
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
         keys
-          .filter((k) => k !== CACHE_NAME)
-          .map((k) => caches.delete(k))
+          .filter((key) => key !== CACHE_NAME)
+          .map((key) => caches.delete(key))
       )
     )
   );
   self.clients.claim();
 });
 
-// ---------------- FETCH ----------------
+// ---------------------- FETCH -----------------------
+
 self.addEventListener("fetch", (event) => {
   const req = event.request;
 
-  // IGNORE chrome extension URLs
-  if (req.url.startsWith("chrome-extension://")) return;
-
-  // IGNORE Firebase + role-auth
-  if (
-    req.url.includes("firebase") ||
-    req.url.includes("role-auth.js")
-  ) {
-    return;
-  }
-
-  // Only GET allowed
+  // Ignore non-GET
   if (req.method !== "GET") return;
 
-  event.respondWith(
-    caches.match(req).then((cached) => {
-      if (cached) return cached;
+  const url = req.url;
 
-      return fetch(req)
-        .then((response) => {
-          if (
-            response &&
-            response.status === 200 &&
-            response.type === "basic"
-          ) {
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(req, response.clone()).catch(() => {});
-            });
-          }
-          return response;
-        })
-        .catch(() => {
-          if (req.destination === "document") {
-            return caches.match("/offline.html");
-          }
-        });
-    })
+  // DO NOT cache Firebase or dynamic scripts
+  if (
+    url.includes("firebase") ||
+    url.includes("firestore") ||
+    url.includes("googleapis") ||
+    url.includes("role-auth") ||
+    url.includes("auth") ||
+    url.includes("token")
+  ) {
+    return; // Go straight to network
+  }
+
+  // Never cache teacher/student protected pages
+  if (
+    url.includes("dashboard") ||
+    url.includes("-t.html") ||
+    url.includes("-s.html") ||
+    url.includes("lesson") ||
+    url.includes("theory") ||
+    url.includes("assessment") ||
+    url.includes("cbt")
+  ) {
+    return; // Always network
+  }
+
+  // Use fallback caching ONLY for public pages
+  event.respondWith(
+    fetch(req)
+      .then((response) => {
+        // Only cache successful basic responses
+        if (
+          response &&
+          response.status === 200 &&
+          response.type === "basic"
+        ) {
+          const resClone = response.clone(); // SAFE CLONE
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(req, resClone).catch(() => {});
+          });
+        }
+        return response;
+      })
+      .catch(() => {
+        // Offline fallback for public pages
+        if (req.destination === "document") {
+          return caches.match(req).then((cached) => {
+            return cached || caches.match("/offline.html");
+          });
+        }
+      })
   );
 });
