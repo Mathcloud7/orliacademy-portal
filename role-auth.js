@@ -1,11 +1,18 @@
-/* role-auth.js — Complete drop-in file with Firebase support
-   - Place at site root: /role-auth.js
-   - Purpose: Enforce role/year access rules client-side (UX guard)
-   - IMPORTANT: This is a client-side guard. Always enforce authorization server-side too.
+/* role-auth.module.js
+   ES Module (Firebase v9 modular). Place at site root: /role-auth.module.js
+   Pages will be injected with: <script type="module" src="/role-auth.module.js" defer></script>
+   IMPORTANT: this is a client-side guard (UX). Always enforce server-side.
 */
 
-/* ======================= CONFIG — replace values with your Firebase project if different ======================= */
-const DEFAULT_FIREBASE_CONFIG = {
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, getIdTokenResult } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js";
+import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js";
+
+/* ========================= CONFIG =========================
+   Replace with your Firebase config if you prefer.
+   If you already initialize Firebase elsewhere, this script will not re-init.
+*/
+const FIREBASE_CONFIG = {
   apiKey: "AIzaSyBXqFTnZqi1Uzo_4k1s-cZrm__eSrUQuV8",
   authDomain: "home-1e252.firebaseapp.com",
   projectId: "home-1e252",
@@ -13,131 +20,52 @@ const DEFAULT_FIREBASE_CONFIG = {
   messagingSenderId: "702969034430",
   appId: "1:702969034430:web:47ff6e815f2017fc8f10ef"
 };
-/* ============================================================================================================= */
+/* ======================================================== */
 
-/* Keywords/Regex configuration (tweak if your filenames differ slightly) */
+/* Rules & filename heuristics */
 const YEAR_REGEX = /\b(?:year|y)[\-_]?([1-6])\b/i;
-const TEACHER_KEYS = ["teacher", "t-", "-t", "teacher-dashboard", "lesson-teacher", "lesson-upload", "cbt-teacher", "y?-t"];
-const STUDENT_KEYS = ["student", "s-", "-s", "student-dashboard", "lesson-view", "theory-view", "cbt-student", "y?-s"];
+const TEACHER_KEYS = ["teacher", "teacher-dashboard", "lesson-teacher", "lesson-upload", "cbt-teacher", "-t", "y?-t"];
+const STUDENT_KEYS = ["student", "student-dashboard", "lesson-view", "theory-view", "cbt-student", "-s", "y?-s"];
 const ADMIN_KEYS   = ["admin", "admin-dashboard", "management"];
+const PUBLIC_PAGES = ["login.html", "index.html", "offline.html", "about.html"];
 
-/* ---------------------- Helper: dynamically load script ---------------------- */
-function loadScript(src, attrs = {}) {
-  return new Promise((resolve, reject) => {
-    // Avoid double-loading
-    const existing = Array.from(document.getElementsByTagName("script")).find(s => s.src && s.src.includes(src));
-    if (existing) {
-      existing.addEventListener("load", () => resolve());
-      existing.addEventListener("error", () => reject(new Error("failed to load " + src)));
-      if (existing.readyState === "complete" || existing.readyState === "loaded") resolve();
-      return;
-    }
-
-    const s = document.createElement("script");
-    s.src = src;
-    Object.keys(attrs).forEach(k => s.setAttribute(k, attrs[k]));
-    s.onload = () => resolve();
-    s.onerror = (e) => reject(e);
-    document.head.appendChild(s);
-  });
-}
-
-/* ---------------------- Ensure Firebase (compat) is available ---------------------- */
-async function ensureFirebase() {
-  // If firebase (namespace) already exists, assume initialized or set later
-  if (window.firebase && window.firebase.apps) return window.firebase;
-
-  // Load compat SDKs so we can use firebase.auth(), firebase.firestore() easily.
-  // Using a reasonably recent compat version (keeps same global api pattern).
-  const base = "https://www.gstatic.com/firebasejs/9.16.0/";
-  await loadScript(base + "firebase-app-compat.js");
-  await loadScript(base + "firebase-auth-compat.js");
-  await loadScript(base + "firebase-firestore-compat.js");
-  return window.firebase;
-}
-
-/* ---------------------- Initialize Firebase app if needed ---------------------- */
-function initFirebaseIfNeeded(config = DEFAULT_FIREBASE_CONFIG) {
+/* ------------------- utility: filename & page infer ------------------- */
+function getFilename() {
   try {
-    if (!window.firebase) return null;
-    if (!(window.firebase.apps && window.firebase.apps.length)) {
-      window.firebase.initializeApp(config);
-    }
-    return window.firebase;
-  } catch (e) {
-    console.error("Failed to initialize firebase:", e);
-    return null;
-  }
+    const name = location.pathname.split("/").pop();
+    return name || "index.html";
+  } catch { return "index.html"; }
+}
+function inferPageInfo(filename) {
+  const lower = filename.toLowerCase();
+  let pageRole = "public";
+  for (const k of TEACHER_KEYS) if (lower.includes(k)) pageRole = "teacher";
+  for (const k of STUDENT_KEYS) if (lower.includes(k)) pageRole = "student";
+  for (const k of ADMIN_KEYS)   if (lower.includes(k)) pageRole = "admin";
+
+  let pageYear = null;
+  const m = lower.match(YEAR_REGEX);
+  if (m && m[1]) pageYear = Number(m[1]);
+
+  return { pageRole, pageYear };
 }
 
-/* ---------------------- Read stored local token (development fallback) ---- */
+/* ------------------- localStorage fallback ------------------- */
 function readLocalStoredUser() {
   try {
     const raw = localStorage.getItem("roleAuthUser") || localStorage.getItem("user") || localStorage.getItem("currentUser");
     if (!raw) return null;
     const obj = JSON.parse(raw);
     if (!obj || !obj.role) return null;
-    return { role: String(obj.role).toLowerCase(), year: obj.year ? Number(obj.year) : null, uid: obj.uid || null };
-  } catch (e) {
-    return null;
-  }
+    return { uid: obj.uid || null, role: String(obj.role).toLowerCase(), year: obj.year ? Number(obj.year) : null };
+  } catch (e) { return null; }
 }
 
-/* ---------------------- Infer page role and year from filename/path --------- */
-function getFilename() {
-  try {
-    const p = location.pathname.split("/").pop();
-    return p || "index.html";
-  } catch (e) {
-    return "index.html";
-  }
-}
-function inferPageInfo(filename) {
-  const lower = filename.toLowerCase();
-  let pageRole = "public";
-  // check teacher
-  for (const k of TEACHER_KEYS) if (lower.includes(k)) pageRole = "teacher";
-  // check student (allow it to override teacher if ambiguous)
-  for (const k of STUDENT_KEYS) if (lower.includes(k)) pageRole = "student";
-  // admin
-  for (const k of ADMIN_KEYS) if (lower.includes(k)) pageRole = "admin";
-
-  // try year patterns like year5, y5, year-5, y_5
-  let pageYear = null;
-  const m = lower.match(YEAR_REGEX);
-  if (m && m[1]) pageYear = Number(m[1]);
-
-  // Extra heuristics: filenames like 'y5-cbt-teacher.html' or 'year5-first-term-lesson-teacher.html'
-  // already matched above by presence of 'y5' or 'year5' via YEAR_REGEX
-
-  return { pageRole, pageYear };
-}
-
-/* ---------------------- Authorization logic ------------------------------ */
-function isAllowed(user, pageInfo) {
-  if (!pageInfo) return true;
-  if (!user || !user.role) return false;
-  if (user.role === "admin") return true;
-  if (pageInfo.pageRole === "public") return true;
-  // If page lacks year we deny (fail-safe)
-  if (!pageInfo.pageYear) return false;
-
-  if (user.role === "teacher") {
-    return pageInfo.pageRole === "teacher" && user.year === pageInfo.pageYear;
-  }
-  if (user.role === "student") {
-    return pageInfo.pageRole === "student" && user.year === pageInfo.pageYear;
-  }
-  // otherwise deny
-  return false;
-}
-
-/* ---------------------- Redirect helper --------------------------------- */
+/* ------------------- redirect helper ------------------- */
 function redirectToLogin(reason) {
   try {
     const url = new URL("login.html", location.origin);
     if (reason) url.searchParams.set("reason", reason);
-    // include current page so login can redirect back
     url.searchParams.set("redirect", location.pathname + location.search + location.hash);
     location.replace(url.toString());
   } catch (e) {
@@ -145,124 +73,128 @@ function redirectToLogin(reason) {
   }
 }
 
-/* ---------------------- Primary flow: read Firebase, claims, Firestore ---- */
-async function getUserFromFirebase(firebase) {
-  if (!firebase || !firebase.auth) return null;
-  const auth = firebase.auth();
-  return new Promise((resolve) => {
-    const unsub = auth.onAuthStateChanged(async (fbUser) => {
-      try { unsub && unsub(); } catch (e) {}
-      if (!fbUser) return resolve(null);
-      // Try to read custom claims (role, year)
-      try {
-        const tokenRes = await fbUser.getIdTokenResult(true).catch(() => null);
-        if (tokenRes && tokenRes.claims) {
-          const claims = tokenRes.claims;
-          const role = (claims.role || claims.user_role || claims.userRole || claims.roleType || null);
-          const year = (claims.year || claims.user_year || claims.userYear || null);
-          if (role) return resolve({ uid: fbUser.uid, role: String(role).toLowerCase(), year: year ? Number(year) : null });
-        }
-      } catch (e) {
-        // ignore and try Firestore fallback
-      }
+/* ------------------- permission engine ------------------- */
+function isAllowed(user, page) {
+  if (!page) return true;
+  if (!user || !user.role) return false;
+  if (user.role === "admin") return true;
+  if (page.pageRole === "public") return true;
+  if (!page.pageYear) return false; // fail-safe: pages without year are denied (except public)
 
-      // Firestore fallback: look up users collection by uid
-      try {
-        if (firebase.firestore) {
-          const db = firebase.firestore();
-          const usersRef = db.collection("users").where("uid", "==", fbUser.uid).limit(1);
-          const snap = await usersRef.get();
-          if (!snap.empty) {
-            const data = snap.docs[0].data();
-            const role = data.role || data.userRole || data.roleType;
-            const year = data.year || data.user_year || data.userYear;
-            if (role) return resolve({ uid: fbUser.uid, role: String(role).toLowerCase(), year: year ? Number(year) : null });
-          }
-        }
-      } catch (e) {
-        // ignore
-      }
-
-      // last fallback: check profile fields on fbUser.providerData
-      try {
-        const pd = fbUser.providerData && fbUser.providerData[0] ? fbUser.providerData[0] : {};
-        if (pd && pd.role) return resolve({ uid: fbUser.uid, role: String(pd.role).toLowerCase(), year: pd.year ? Number(pd.year) : null });
-      } catch (e) {
-        // ignore
-      }
-
-      // nothing found
-      resolve({ uid: fbUser.uid, role: null, year: null });
-    }, (err) => {
-      console.error("Auth state change error:", err);
-      resolve(null);
-    });
-  });
+  if (user.role === "teacher") return page.pageRole === "teacher" && user.year === page.pageYear;
+  if (user.role === "student") return page.pageRole === "student" && user.year === page.pageYear;
+  return false;
 }
 
-/* ---------------------- Execute enforcement flow ------------------------- */
-(async function enforce() {
-  // Step 1: determine page info
+/* ------------------- firebase helpers ------------------- */
+function ensureFirebaseInitialized() {
+  try {
+    if (!getApps || typeof getApps !== "function") return null;
+    if (!getApps().length) {
+      initializeApp(FIREBASE_CONFIG);
+    }
+    return true;
+  } catch (e) {
+    console.warn("Firebase init skipped:", e);
+    return false;
+  }
+}
+
+async function getUserFromFirebase() {
+  try {
+    ensureFirebaseInitialized();
+    const auth = getAuth();
+    return await new Promise((resolve) => {
+      const unsub = onAuthStateChanged(auth, async (fbUser) => {
+        try { unsub(); } catch {}
+        if (!fbUser) return resolve(null);
+        // try id token claims
+        try {
+          const tokenResult = await getIdTokenResult(fbUser, /* forceRefresh= */ true).catch(() => null);
+          if (tokenResult && tokenResult.claims) {
+            const claims = tokenResult.claims;
+            const role = claims.role || claims.user_role || claims.userRole || null;
+            const year = claims.year || claims.user_year || claims.userYear || null;
+            if (role) return resolve({ uid: fbUser.uid, role: String(role).toLowerCase(), year: year ? Number(year) : null });
+          }
+        } catch (e) { /* ignore */ }
+
+        // Firestore fallback
+        try {
+          const db = getFirestore();
+          const usersRef = collection(db, "users");
+          const q = query(usersRef, where("uid", "==", fbUser.uid));
+          const snap = await getDocs(q);
+          if (!snap.empty) {
+            const data = snap.docs[0].data();
+            const role = data.role || data.userRole || data.roleType || null;
+            const year = data.year || data.user_year || data.userYear || null;
+            if (role) return resolve({ uid: fbUser.uid, role: String(role).toLowerCase(), year: year ? Number(year) : null });
+          }
+        } catch (e) { /* ignore */ }
+
+        // providerData fallback
+        try {
+          const pd = fbUser.providerData && fbUser.providerData[0] ? fbUser.providerData[0] : {};
+          if (pd && pd.role) return resolve({ uid: fbUser.uid, role: String(pd.role).toLowerCase(), year: pd.year ? Number(pd.year) : null });
+        } catch (e) { /* ignore */ }
+
+        // nothing else
+        resolve({ uid: fbUser.uid, role: null, year: null });
+      }, (err) => {
+        console.error("Auth state error:", err);
+        resolve(null);
+      });
+    });
+  } catch (e) {
+    console.warn("getUserFromFirebase failed:", e);
+    return null;
+  }
+}
+
+/* ------------------- main enforcement ------------------- */
+(async function runGuard() {
   const filename = getFilename();
   const pageInfo = inferPageInfo(filename);
 
-  // If page is clearly public (like login.html or public assets), we allow it early
-  // Consider login.html and offline.html to be public
-  const PUBLIC_PAGES = ["login.html", "index.html", "offline.html"];
+  // allow public pages
   if (PUBLIC_PAGES.includes(filename.toLowerCase())) return;
 
-  // Step 2: Try to obtain user via firebase
-  let firebase;
-  try {
-    firebase = await ensureFirebase();
-    initFirebaseIfNeeded(DEFAULT_FIREBASE_CONFIG);
-  } catch (e) {
-    console.warn("Could not load firebase dynamically; continuing with local fallback.", e);
-  }
-
+  // try to get user from firebase (if firebase available)
   let user = null;
-
-  if (window.firebase && window.firebase.auth) {
-    try {
-      user = await getUserFromFirebase(window.firebase);
-      // If user returned with no role but uid present, we will fall back to localStorage or deny later
-    } catch (e) {
-      console.error("Error reading firebase user:", e);
-    }
+  try {
+    // initialize if not already
+    ensureFirebaseInitialized();
+    user = await getUserFromFirebase();
+  } catch (e) {
+    console.warn("Firebase path failed, will use local fallback", e);
   }
 
-  // Step 3: fallback to locally stored user
+  // local fallback
   if (!user || !user.role) {
     const local = readLocalStoredUser();
-    if (local) {
-      user = Object.assign({}, (user || {}), local);
-    }
+    if (local) user = Object.assign({}, (user || {}), local);
   }
 
-  // Step 4: If still no user or no role, deny access for protected pages
+  // If still no role => deny for protected pages
   if (!user || !user.role) {
-    // If page is public allow; otherwise redirect
     if (pageInfo.pageRole === "public") return;
     return redirectToLogin("not_authenticated");
   }
 
-  // Normalize
+  // normalize
   user.role = String(user.role).toLowerCase();
   user.year = user.year ? Number(user.year) : null;
 
-  // Step 5: final permission check
-  if (!isAllowed(user, pageInfo)) {
-    return redirectToLogin("unauthorized");
-  }
+  if (!isAllowed(user, pageInfo)) return redirectToLogin("unauthorized");
 
-  // Step 6: allowed — expose debug helper (read-only)
+  // allowed: expose readonly debug info
   try {
     Object.defineProperty(window, "__ROLE_AUTH", {
       value: { user, pageInfo, filename, ts: new Date().toISOString() },
       writable: false,
       configurable: false
     });
-    // small console hint
-    console.info("Role auth: access allowed for", user.role, "year", user.year, "->", filename);
-  } catch (e) {}
+    console.info("RoleAuth: allowed →", user.role, "year", user.year, filename);
+  } catch (e) { /* ignore */ }
 })();
