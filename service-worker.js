@@ -1,111 +1,100 @@
-/* ============================================================
-   SERVICE WORKER — FINAL VERSION (2025)
-   - Auto-inject role-auth.js into every HTML page
-   - Safe caching
-   - Full offline support
-   - No duplicates
-============================================================ */
+// ORLI ACADEMY — FINAL ERROR-FREE SERVICE WORKER
 
-const CACHE_NAME = "orli-cache-v1";
-const ASSETS = [
-  "/offline.html"
+const CACHE_NAME = "orli-cache-v4";
+
+const STATIC_FILES = [
+  "/",
+  "/index.html",
+  "/offline.html",
+  "/login.html",
+  "/role-auth.js"
 ];
 
-/* ============================================================
-   INSTALL — pre-cache minimal safe files
-============================================================ */
+// ---------------- INSTALL ----------------
 self.addEventListener("install", (event) => {
-  self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS).catch(() => null);
+    caches.open(CACHE_NAME).then(async (cache) => {
+      for (const file of STATIC_FILES) {
+        try {
+          await cache.add(new Request(file, { cache: "reload" }));
+        } catch (err) {
+          console.warn("Skip caching:", file);
+        }
+      }
     })
   );
+  self.skipWaiting();
 });
 
-/* ============================================================
-   ACTIVATE — cleanup old caches
-============================================================ */
+// ---------------- ACTIVATE ----------------
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
-        keys
-          .filter((k) => k !== CACHE_NAME)
-          .map((k) => caches.delete(k))
+        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
       )
     )
   );
+
   self.clients.claim();
 });
 
-/* ============================================================
-   FETCH — inject role-auth.js + offline fallback + cache-first
-============================================================ */
+// ---------------- FETCH -------------------
 self.addEventListener("fetch", (event) => {
   const req = event.request;
 
-  // Only tamper with HTML pages
-  if (req.destination === "document") {
-    event.respondWith(handleHtmlRequest(req));
-    return;
+  // 1. Skip non-GET requests (fixes POST error)
+  if (req.method !== "GET") return;
+
+  const url = req.url;
+
+  // 2. Skip chrome-extension URLs (fixes chrome extension error)
+  if (url.startsWith("chrome-extension://")) return;
+
+  // 3. Skip Firebase, auth, tokens
+  if (
+    url.includes("firebase") ||
+    url.includes("googleapis") ||
+    url.includes("gstatic") ||
+    url.includes("auth") ||
+    url.includes("token")
+  ) {
+    return;  // do not cache
   }
 
-  // Non-HTML files — default cache-first strategy
+  // 4. Skip dynamic class pages (avoid caching student/teacher pages)
+  if (
+    url.includes("-s.html") ||
+    url.includes("-t.html") ||
+    url.includes("dashboard") ||
+    url.includes("lesson") ||
+    url.includes("theory") ||
+    url.includes("cbt") ||
+    url.includes("assessment")
+  ) {
+    return;   // always online, never cached
+  }
+
+  // ----- NORMAL GET REQUESTS -----
   event.respondWith(
-    caches.match(req).then((cached) => {
-      return (
-        cached ||
-        fetch(req)
-          .then((res) => {
-            const clone = res.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(req, clone));
-            return res;
-          })
-          .catch(() => caches.match("/offline.html"))
-      );
-    })
+    fetch(req)
+      .then((response) => {
+        // Only cache real normal responses
+        if (response && response.status === 200 && response.type === "basic") {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(req, clone).catch(() => {});
+          });
+        }
+        return response;
+      })
+      .catch(() => {
+        // Offline fallback only for HTML
+        if (req.destination === "document") {
+          return caches.match(req).then((cached) => {
+            return cached || caches.match("/offline.html");
+          });
+        }
+      })
   );
 });
-
-/* ============================================================
-   FUNCTION: Handle HTML pages & inject role-auth.js
-============================================================ */
-async function handleHtmlRequest(req) {
-  try {
-    const networkResponse = await fetch(req);
-    const contentType = networkResponse.headers.get("content-type") || "";
-
-    if (!contentType.includes("text/html")) {
-      return networkResponse;
-    }
-
-    let html = await networkResponse.clone().text();
-
-    // Inject role-auth.js if NOT already present
-    if (!html.includes("role-auth.js")) {
-      html = html.replace(
-        "</head>",
-        `  <script src="/role-auth.js"></script>\n</head>`
-      );
-    }
-
-    // Cache the patched HTML
-    const responseToCache = new Response(html, {
-      status: networkResponse.status,
-      statusText: networkResponse.statusText,
-      headers: networkResponse.headers
-    });
-
-    caches.open(CACHE_NAME).then((cache) => {
-      cache.put(req, responseToCache.clone());
-    });
-
-    return responseToCache;
-  } catch (err) {
-    console.warn("HTML fetch failed, using cache/offline:", err);
-
-    const cached = await caches.match(req);
-    return cached || caches.match("/offline.html");
-  }
-}
