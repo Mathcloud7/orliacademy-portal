@@ -1,6 +1,5 @@
 // role-auth.js
-// Automatically injected by service-worker.js
-// Handles login enforcement + role authorization + class locking
+// FINAL VERSION — role based ONLY (NO class restriction)
 
 // ------------------ FIREBASE CONFIG ------------------
 const FIREBASE_CONFIG = {
@@ -13,6 +12,8 @@ const FIREBASE_CONFIG = {
 };
 
 // ------------------ PAGE GROUPS ------------------
+
+// TEACHER-ONLY pages
 const teacherPages = new Set([
   "teacher-dashboard.html",
   "year5-t.html",
@@ -38,6 +39,7 @@ const teacherPages = new Set([
   "y5-cbt-result.html"
 ]);
 
+// STUDENT-ONLY pages
 const studentPages = new Set([
   "student-dashboard.html",
   "year5-s.html",
@@ -53,8 +55,10 @@ const studentPages = new Set([
   "year5-third-term-lesson-view.html"
 ]);
 
-// Public student landing pages
-const explicitlyPublicPages = new Set([
+// Public pages
+const publicPages = new Set([
+  "index.html",
+  "login.html",
   "year1-s.html",
   "year2-s.html",
   "year3-s.html",
@@ -63,40 +67,10 @@ const explicitlyPublicPages = new Set([
   "year6-s.html"
 ]);
 
-// ------------------ BYPASS FIX (IMPORTANT) ------------------
-// These pages LOOK like dashboards but are not real dashboards.
-// They must NOT trigger redirects.
-const bypassAuthPages = new Set([
-  "year5-first-term-student-dashboard.html",
-  "year5-second-term-student-dashboard.html",
-  "year5-third-term-student-dashboard.html",
-  "year5-first-term-teacher-dashboard.html",
-  "year5-second-term-teacher-dashboard.html",
-  "year5-third-term-teacher-dashboard.html"
-]);
-
 // ------------------ HELPERS ------------------
 function getFilename(path) {
-  const parts = path.split("/");
-  return (parts.pop() || "index.html").toLowerCase();
-}
-
-function normalizeClass(str) {
-  if (!str) return "";
-  return String(str)
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, "")
-    .replace(/primary/, "year")
-    .replace(/^p(\d)/, "year$1")
-    .replace(/^class(\d)/, "year$1")
-    .replace(/^basic(\d)/, "year$1")
-    .replace(/[^a-z0-9]/g, "");
-}
-
-function detectClassFromPage(filename) {
-  const m = filename.match(/(?:year|y|primary|class|basic)(\d)/i);
-  return m ? `year${m[1]}` : null;
+  const p = path.split("/");
+  return (p.pop() || "index.html").toLowerCase();
 }
 
 function redirectLogin() {
@@ -119,58 +93,30 @@ function redirectRole(role) {
   }
 }
 
-// ------------------ MAIN LOGIC ------------------
+// ------------------ MAIN AUTH LOGIC ------------------
 document.addEventListener("DOMContentLoaded", async () => {
   const filename = getFilename(window.location.pathname);
 
-  // 1️⃣ Bypass pages (fix for your issue)
-  if (bypassAuthPages.has(filename)) {
-    console.log("Bypassed auth for:", filename);
-    return;
-  }
+  // Public → allow
+  if (publicPages.has(filename)) return;
 
-  // 2️⃣ Public landing pages
-  if (explicitlyPublicPages.has(filename)) {
-    console.log("Public page:", filename);
-    return;
-  }
-
-  // 3️⃣ Determine type
-  const impliedClass = detectClassFromPage(filename);
-
-  const isTeacherPage =
-    teacherPages.has(filename) ||
-    /(?:-t|cbt-teacher|lesson-teacher|result)(?:\.html)?$/i.test(filename);
-
-  const isStudentPage =
-    studentPages.has(filename) ||
-    /(?:-s|lesson-view|theory-view|cbt-student)(?:\.html)?$/i.test(filename);
-
-  const restricted = isTeacherPage || isStudentPage || Boolean(impliedClass);
-
-  if (!restricted) return;
-
-  // ------------------ LOCAL STORAGE FIRST ------------------
+  // ------------------ Try LocalStorage First ------------------
   let user = null;
   try {
     user = JSON.parse(localStorage.getItem("roleAuthUser"));
   } catch {}
 
   let role = user?.role?.toLowerCase() || null;
-  let userClass = normalizeClass(user?.year || user?.userClass || user?.class);
 
-  // ------------------ FIREBASE FALLBACK ------------------
-  if (!role || (impliedClass && !userClass)) {
+  // If missing, fallback to Firebase
+  if (!role) {
     try {
-      const [
-        { initializeApp },
-        { getAuth, onAuthStateChanged },
-        { getFirestore, collection, query, where, getDocs }
-      ] = await Promise.all([
-        import("https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js"),
-        import("https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js"),
-        import("https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js")
-      ]);
+      const [{ initializeApp }, { getAuth, onAuthStateChanged }, { getFirestore, collection, query, where, getDocs }] =
+        await Promise.all([
+          import("https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js"),
+          import("https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js"),
+          import("https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js")
+        ]);
 
       const app = initializeApp(FIREBASE_CONFIG);
       const auth = getAuth(app);
@@ -191,46 +137,30 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (snap.empty) return redirectLogin();
 
       const data = snap.docs[0].data();
-
       role = (data.role || "").toLowerCase();
-      userClass = normalizeClass(data.year || data.userClass || data.class);
 
-      localStorage.setItem(
-        "roleAuthUser",
-        JSON.stringify({
-          uid: currentUser.uid,
-          role,
-          year: data.year || data.userClass || data.class
-        })
-      );
+      localStorage.setItem("roleAuthUser", JSON.stringify({ uid: currentUser.uid, role }));
     } catch (err) {
-      console.error("role-auth Firebase error:", err);
+      console.error("Auth error:", err);
       return redirectLogin();
     }
   }
 
-  // ------------------ FINAL AUTH CHECKS ------------------
-  if (!role) return redirectLogin();
+  // ------------------ FINAL ROLE CHECK ------------------
 
-  if (role === "admin") return;
+  if (role === "admin") return; // admin = access everything
 
-  const pageRequiredClass = normalizeClass(impliedClass);
-
-  // Teacher pages
-  if (isTeacherPage) {
+  // Teacher pages require teacher
+  if (teacherPages.has(filename)) {
     if (role !== "teacher") return redirectRole(role);
-    if (pageRequiredClass && userClass !== pageRequiredClass)
-      return redirectRole(role);
     return;
   }
 
-  // Student pages
-  if (isStudentPage) {
+  // Student pages require student
+  if (studentPages.has(filename)) {
     if (role !== "student") return redirectRole(role);
-    if (pageRequiredClass && userClass !== pageRequiredClass)
-      return redirectRole(role);
     return;
   }
 
-  return redirectLogin();
+  // If unknown: allow
 });
