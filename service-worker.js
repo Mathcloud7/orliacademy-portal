@@ -1,126 +1,116 @@
-// ================================================
-// SERVICE-WORKER.JS (COMPLETE & FINAL)
-// ================================================
+/* service-worker.js
+   Place at site root so it can control the whole site.
+   It injects: <script type="module" src="/role-auth.module.js" defer></script>
+*/
 
-const CACHE_NAME = 'orli-static-v1';
-const OFFLINE_URL = '/offline.html';
-const ROLE_AUTH_PATH = '/role-auth.js';
+const CACHE_VERSION = 'v1.0.0';
+const STATIC_CACHE = `static-${CACHE_VERSION}`;
+const OFFLINE_HTML = '/offline.html';
+const MODULE_SCRIPT_PATH = '/role-auth.module.js';
 
-// Files to pre-cache (offline shell)
-const PRECACHE_ASSETS = [
-  OFFLINE_URL,
-  ROLE_AUTH_PATH,
-  '/styles.css',
-  '/favicon.ico'
-];
-
-// Utility to determine if response is HTML
-function isHtmlResponse(headers) {
-  const ct = headers.get('content-type') || '';
-  return ct.includes('text/html');
-}
-
-// Quick heuristic: treat paths containing year[1-6], y[1-6], teacher, student as protected
-function isProtectedPath(pathname) {
-  return /year[1-6]|\by[1-6]\b|teacher|student/.test(pathname.toLowerCase());
-}
-
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_ASSETS).catch(() => {}))
-  );
-  self.skipWaiting();
+self.addEventListener('install', (ev) => {
+  ev.waitUntil((async () => {
+    const cache = await caches.open(STATIC_CACHE);
+    // cache offline fallback; if it doesn't exist on server, ignore error
+    await cache.addAll([OFFLINE_HTML]).catch(() => {});
+    self.skipWaiting();
+  })());
 });
 
-self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim());
+self.addEventListener('activate', (ev) => {
+  ev.waitUntil((async () => {
+    // remove old caches (keep current)
+    const keys = await caches.keys();
+    await Promise.all(keys.filter(k => k !== STATIC_CACHE).map(k => caches.delete(k)));
+    await self.clients.claim();
+  })());
 });
 
-// Inject role-auth script into HTML pages so you don't have to edit each page manually
-async function injectRoleAuthIntoHtml(text) {
-  const scriptTag = `\n<script src="${ROLE_AUTH_PATH}" async></script>\n`;
-  if (/<head[\s\S]*?>/i.test(text)) {
-    return text.replace(/<head(\b[^>]*)>/i, (m) => m + scriptTag);
-  }
-  if (/<body[\s\S]*?>/i.test(text)) {
-    return text.replace(/<body(\b[^>]*)>/i, (m) => m + scriptTag);
-  }
-  return scriptTag + text;
+// helper to inject module script tag into HTML string
+function injectModuleIntoHtml(htmlText) {
+  const injectTag = `<script type="module" src="${MODULE_SCRIPT_PATH}" defer></script>`;
+  if (htmlText.includes(MODULE_SCRIPT_PATH) || htmlText.includes('window.__ROLE_AUTH')) return htmlText;
+  if (htmlText.includes('</head>')) return htmlText.replace('</head>', injectTag + '\n</head>');
+  if (htmlText.includes('</body>')) return htmlText.replace('</body>', injectTag + '\n</body>');
+  return injectTag + '\n' + htmlText;
 }
 
-self.addEventListener('fetch', (event) => {
-  const req = event.request;
-
-  if (req.method !== 'GET') return;
-
+self.addEventListener('fetch', (ev) => {
+  const req = ev.request;
+  // only handle same-origin navigations for injection
   const url = new URL(req.url);
 
-  // Only handle same-origin requests
-  if (url.origin !== location.origin) return;
-
-  // Network-first for HTML pages (so role-auth injection can work)
-  if (req.headers.get('accept') && req.headers.get('accept').includes('text/html')) {
-    event.respondWith((async () => {
+  // asset (cache-first) logic for static resources
+  if (req.destination && ['script', 'style', 'image', 'font'].includes(req.destination) ||
+      /\.(?:js|css|png|jpg|jpeg|svg|webp|gif|woff2?|ttf|eot)$/.test(url.pathname)) {
+    ev.respondWith((async () => {
+      const cache = await caches.open(STATIC_CACHE);
+      const cached = await cache.match(req);
+      if (cached) return cached;
       try {
-        const networkResp = await fetch(req);
-        if (!networkResp || !networkResp.ok) throw new Error('Network fetch failed');
-
-        const cloned = networkResp.clone();
-        const text = await cloned.text();
-
-        // If role-auth already present, return original
-        if (text.includes(ROLE_AUTH_PATH)) {
-          // Cache non-protected pages
-          if (!isProtectedPath(url.pathname)) {
-            const cache = await caches.open(CACHE_NAME);
-            cache.put(req, networkResp.clone());
-          }
-          return networkResp;
-        }
-
-        // Inject and optionally cache
-        const injected = await injectRoleAuthIntoHtml(text);
-        const responseHeaders = new Headers(networkResp.headers);
-        responseHeaders.set('Content-Length', String(new Blob([injected]).size));
-
-        const response = new Response(injected, {
-          status: networkResp.status,
-          statusText: networkResp.statusText,
-          headers: responseHeaders
-        });
-
-        if (!isProtectedPath(url.pathname)) {
-          const cache = await caches.open(CACHE_NAME);
-          cache.put(req, response.clone()).catch(() => {});
-        }
-
-        return response;
-      } catch (err) {
-        // Offline fallback
-        const cache = await caches.open(CACHE_NAME);
-        const cached = await cache.match(req);
-        if (cached) return cached;
-        const offline = await cache.match(OFFLINE_URL);
-        return offline || new Response('<h1>Offline</h1>', { headers: { 'Content-Type': 'text/html' } });
+        const fetched = await fetch(req);
+        if (fetched && fetched.status === 200) cache.put(req, fetched.clone());
+        return fetched;
+      } catch (e) {
+        return cached || fetch(req).catch(() => new Response(null, {status: 503}));
       }
     })());
     return;
   }
 
-  // For other requests, try cache then network
-  event.respondWith((async () => {
-    const cache = await caches.open(CACHE_NAME);
-    const cached = await cache.match(req);
-    if (cached) return cached;
-    try {
-      const resp = await fetch(req);
-      // Cache static assets (images, css, js) for performance
-      if (resp && resp.ok && /\.(js|css|png|jpg|jpeg|svg|woff2?|ico)$/.test(url.pathname)) {
-        cache.put(req, resp.clone()).catch(() => {});
+  // HTML navigation fetch -> network-first then inject module
+  const accept = req.headers.get('accept') || '';
+  const isNavigation = accept.includes('text/html');
+
+  if (isNavigation && url.origin === location.origin) {
+    ev.respondWith((async () => {
+      try {
+        const networkResp = await fetch(req);
+        if (!networkResp || networkResp.status !== 200) {
+          const cacheResp = await caches.match(req);
+          if (cacheResp) return cacheResp;
+          const fallback = await caches.match(OFFLINE_HTML);
+          return fallback || networkResp;
+        }
+
+        const text = await networkResp.text();
+        const injected = injectModuleIntoHtml(text);
+        const headers = new Headers(networkResp.headers);
+        // create response with injected body
+        const newResp = new Response(injected, {
+          status: networkResp.status,
+          statusText: networkResp.statusText,
+          headers
+        });
+
+        // Cache public HTML (non-protected pages) conservatively:
+        // heuristic: do not cache pages whose path contains 'teacher' or 'student' or 'cbt' or 'admin' or 'year'
+        const path = url.pathname.toLowerCase();
+        const protectedKeywords = ['teacher', 'student', 'cbt', 'admin', 'year'];
+        const isProtected = protectedKeywords.some(k => path.includes(k));
+        if (!isProtected) {
+          const cache = await caches.open(STATIC_CACHE);
+          cache.put(req, newResp.clone()).catch(() => {});
+        }
+
+        return newResp;
+      } catch (err) {
+        // offline fallback
+        const cached = await caches.match(req);
+        if (cached) return cached;
+        const fallback = await caches.match(OFFLINE_HTML);
+        return fallback || new Response('<h1>Offline</h1>', { headers: { 'Content-Type': 'text/html' } });
       }
-      return resp;
+    })());
+    return;
+  }
+
+  // default: network with cache fallback
+  ev.respondWith((async () => {
+    try {
+      return await fetch(req);
     } catch (e) {
-      return new Response('Network error', { status: 408 });
+      return await caches.match(req) || new Response(null, {status: 503});
     }
   })());
 });
