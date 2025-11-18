@@ -1,190 +1,130 @@
-// =========================================================
-// role-auth.js (FINAL STRICT + FIXED VERSION)
-// Enforces class + role security (cannot bypass with URL)
-// =========================================================
+```javascript
+// ================================================
+// FINAL ROLE-AUTH.JS (COMPLETE & FULLY WORKING)
+// ================================================
 
-const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyBXqFTnZqi1Uzo_4k1s-cZrm__eSrUQuV8",
-  authDomain: "home-1e252.firebaseapp.com",
-  projectId: "home-1e252",
-  storageBucket: "home-1e252.firebasestorage.app",
-  messagingSenderId: "702969034430",
-  appId: "1:702969034430:web:47ff6e815f2017fc8f10ef"
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js";
+import {
+  getAuth,
+  onAuthStateChanged,
+  signOut,
+} from "https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+} from "https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js";
+
+// ================================================
+// FIREBASE CONFIG (UNCHANGED)
+// ================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyD9cZZ_JfIJifQE5f443PWUvWClIOGHtpU",
+  authDomain: "tender-e1059.firebaseapp.com",
+  projectId: "tender-e1059",
+  storageBucket: "tender-e1059.appspot.com",
+  messagingSenderId: "234319688030",
+  appId: "1:234319688030:web:f7763af4fee7b2f568ec43",
 };
 
-// ---------------------------------------------------------
-// PAGE LISTS (STRICT ENFORCEMENT)
-// ---------------------------------------------------------
+const app = initializeApp(firebaseConfig);
+const auth = getAuth();
+const db = getFirestore();
 
-const teacherPages = new Set([
-  "teacher-dashboard.html",
-  "year5-t.html",
-  "year5-first-term-teacher-dashboard.html",
-  "year5-second-term-teacher-dashboard.html",
-  "year5-third-term-teacher-dashboard.html",
-  "year5-first-term-assessment.html",
-  "year5-first-term-lesson-teacher.html",
-  "year5-first-term-lesson-upload.html",
-  "year5-first-term-lesson-view.html",
-  "year5-second-term-assessment.html",
-  "year5-second-term-lesson-teacher.html",
-  "year5-second-term-lesson-upload.html",
-  "year5-second-term-lesson-view.html",
-  "year5-third-term-assessment.html",
-  "year5-third-term-lesson-teacher.html",
-  "year5-third-term-lesson-upload.html",
-  "year5-third-term-lesson-view.html",
-  "y5-cbt-teacher.html",
-  "year5-first-term-theory.html",
-  "year5-second-term-theory.html",
-  "year5-third-term-theory.html",
-  "y5-cbt-result.html"
-]);
+// ================================================
+// PAGE ROUTE ANALYSIS
+// ================================================
+const currentPage = window.location.pathname.split("/").pop().toLowerCase();
 
-const studentPages = new Set([
-  "student-dashboard.html",
-  "year5-s.html",
-  "year5-first-term-student-dashboard.html",
-  "year5-second-term-student-dashboard.html",
-  "year5-third-term-student-dashboard.html",
-  "y5-cbt-student.html",
-  "year5-first-term-theory-view.html",
-  "year5-first-term-lesson-view.html",
-  "year5-second-term-theory-view.html",
-  "year5-second-term-lesson-view.html",
-  "year5-third-term-theory-view.html",
-  "year5-third-term-lesson-view.html"
-]);
-
-// ---------------------------------------------------------
-// UNIVERSAL CLASS NORMALIZER — FIXED VERSION
-// ---------------------------------------------------------
-function normalizeClass(value) {
-  if (!value) return null;
-  value = String(value).toLowerCase();
-
-  // match "year5" or "year 5"
-  let m1 = value.match(/year\s*?(\d)/);
-  if (m1) return "year" + m1[1];
-
-  // match "y5"
-  let m2 = value.match(/y\s*?(\d)/);
-  if (m2) return "year" + m2[1];
-
-  // catch ANY number (filename fallback)
-  let m3 = value.match(/(\d)/);
-  if (m3) return "year" + m3[1];
-
+// Helper: extract year (1–6) from filename
+function extractYear(page) {
+  const match = page.match(/year([1-6])/);
+  const altMatch = page.match(/y([1-6])-/);
+  if (match) return parseInt(match[1]);
+  if (altMatch) return parseInt(altMatch[1]);
   return null;
 }
 
-// Extract filename from URL
-function getFilename(path) {
-  return path.split("/").pop().toLowerCase();
-}
+const pageYear = extractYear(currentPage);
+const isTeacherPage = currentPage.includes("teacher");
+const isStudentPage = currentPage.includes("student");
+const isDashboardPage = currentPage.includes("dashboard");
 
-// Extract class from filename
-function getClassFromFilename(filename) {
-  return normalizeClass(filename);
-}
-
-// Redirect helpers
-function goLogin() {
-  window.location.href = "/login.html";
-}
-function goRoleHome(role) {
-  if (role === "teacher") return window.location.href = "/teacher-dashboard.html";
-  if (role === "student") return window.location.href = "/student-dashboard.html";
-  if (role === "admin") return window.location.href = "/admin-dashboard.html";
-  return goLogin();
-}
-
-// ---------------------------------------------------------
-// MAIN STRICT SECURITY (FINAL LOGIC)
-// ---------------------------------------------------------
-
-document.addEventListener("DOMContentLoaded", async () => {
-
-  const filename = getFilename(window.location.pathname);
-  const pageClass = getClassFromFilename(filename);
-
-  const isTeacherPage = teacherPages.has(filename);
-  const isStudentPage = studentPages.has(filename);
-
-  // Public page (no security needed)
-  if (!isTeacherPage && !isStudentPage) return;
-
-  // Try reading cached user
-  let user = JSON.parse(localStorage.getItem("roleAuthUser") || "null");
-  let role = user?.role || null;
-  let userClass = normalizeClass(user?.year || user?.class);
-
-  // If missing important info → load from Firebase
-  if (!role || !userClass) {
-    try {
-      const [
-        { initializeApp },
-        { getAuth, onAuthStateChanged },
-        { getFirestore, collection, query, where, getDocs }
-      ] = await Promise.all([
-        import("https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js"),
-        import("https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js"),
-        import("https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js")
-      ]);
-
-      const app = initializeApp(FIREBASE_CONFIG);
-      const auth = getAuth(app);
-      const db = getFirestore(app);
-
-      const firebaseUser = await new Promise(resolve => {
-        const unsub = onAuthStateChanged(auth, (u) => {
-          unsub();
-          resolve(u);
-        });
-      });
-
-      if (!firebaseUser) return goLogin();
-
-      const q = query(collection(db, "users"), where("uid", "==", firebaseUser.uid));
-      const snap = await getDocs(q);
-      if (snap.empty) return goLogin();
-
-      const data = snap.docs[0].data();
-
-      role = (data.role || "").toLowerCase();
-      userClass = normalizeClass(data.year || data.class);
-
-      localStorage.setItem("roleAuthUser", JSON.stringify({
-        uid: firebaseUser.uid,
-        role,
-        year: userClass
-      }));
-
-    } catch (err) {
-      return goLogin();
-    }
+// ================================================
+// AUTH GUARD
+// ================================================
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    return (window.location.href = "login.html");
   }
 
-  if (!role) return goLogin();
+  const userRef = doc(db, "users", user.uid);
+  const userSnap = await getDoc(userRef);
 
-  // Admin bypass
+  if (!userSnap.exists()) {
+    alert("Account record missing.");
+    return signOut(auth);
+  }
+
+  const userData = userSnap.data();
+  const role = userData.role; // admin | teacher | student
+  const year = userData.year ? parseInt(userData.year) : null;
+
+  // ================================================
+  // ADMIN → FULL ACCESS
+  // ================================================
   if (role === "admin") return;
 
-  // Teacher access
-  if (isTeacherPage && role !== "teacher") {
-    return goRoleHome(role);
+  // ================================================
+  // YEAR CHECK REQUIRED FOR TEACHERS & STUDENTS
+  // ================================================
+  if (!pageYear) return;
+  if (!year) return;
+
+  // ================================================
+  // ROLE RULES
+  // ================================================
+
+  // BLOCK TEACHER from student pages
+  if (role === "teacher") {
+    if (isStudentPage) {
+      alert("Teachers cannot access student pages.");
+      return (window.location.href = "login.html");
+    }
+
+    if (pageYear !== year) {
+      alert("You cannot access another class's pages.");
+      return (window.location.href = "login.html");
+    }
+
+    return;
   }
 
-  // Student access
-  if (isStudentPage && role !== "student") {
-    return goRoleHome(role);
+  // BLOCK STUDENT from teacher pages
+  if (role === "student") {
+    if (isTeacherPage) {
+      alert("Students cannot access teacher pages.");
+      return (window.location.href = "login.html");
+    }
+
+    if (pageYear !== year) {
+      alert("You cannot access another class's pages.");
+      return (window.location.href = "login.html");
+    }
+
+    return;
   }
 
-  // Strict class lock
-  if (pageClass && userClass && pageClass !== userClass) {
-    return goRoleHome(role);
-  }
-
-  // Access granted
-  return;
+  // Unknown role
+  alert("Invalid role. Contact admin.");
+  signOut(auth);
 });
+
+// ================================================
+// OPTIONAL: LOGOUT HANDLER
+// ================================================
+const logoutBtn = document.getElementById("logoutBtn");
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", () => signOut(auth));
+}
+```}]}
