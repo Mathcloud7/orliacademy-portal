@@ -1,5 +1,6 @@
 // =========================================================
-// role-auth.js (FINAL — UNBREAKABLE SECURITY VERSION)
+// role-auth.js (FINAL STRICT VERSION)
+// Enforces class + role security (cannot bypass with URL)
 // =========================================================
 
 const FIREBASE_CONFIG = {
@@ -12,8 +13,9 @@ const FIREBASE_CONFIG = {
 };
 
 // ---------------------------------------------------------
-// EXACT PAGE SETS (as provided by you)
+// PAGE LISTS YOU PROVIDED (STRICT ENFORCEMENT)
 // ---------------------------------------------------------
+
 const teacherPages = new Set([
   "teacher-dashboard.html",
   "year5-t.html",
@@ -55,39 +57,38 @@ const studentPages = new Set([
 ]);
 
 // ---------------------------------------------------------
-// UNIVERSAL CLASS NORMALIZER — bulletproof
-// ALWAYS converts everything to “year5”
+// UNIVERSAL CLASS NORMALIZER — WORKS WITH ANY FORMAT
 // ---------------------------------------------------------
-function normalizeClass(input) {
-  if (!input) return null;
-  input = String(input).toLowerCase();
+function normalizeClass(value) {
+  if (!value) return null;
+  value = String(value).toLowerCase();
 
-  // year5 / Year5 / YEAR5
-  let m = input.match(/year\s*?(\d+)/i);
+  // match year5, year 5
+  let m = value.match(/year\s*?(\d)/);
   if (m) return "year" + m[1];
 
-  // y5 / Y5
-  m = input.match(/^y\s*?(\d+)/i);
-  if (m) return "year" + m[1];
+  // match y5
+  let m2 = value.match(/y\s*?(\d)/);
+  if (m2) return "year" + m2[1];
 
-  // 5 / Class 5 / Grade 5
-  m = input.match(/(\d+)/);
-  if (m) return "year" + m[1];
+  // match any number 1-9 inside filename
+  let m3 = value.match(/(\d)/);
+  if (m3) return "year" + m3[1];
 
   return null;
 }
 
+// Extract filename
 function getFilename(path) {
   return path.split("/").pop().toLowerCase();
 }
 
+// Extract class from filename
 function getClassFromFilename(filename) {
   return normalizeClass(filename);
 }
 
-// ---------------------------------------------------------
-// Perfect redirect helpers
-// ---------------------------------------------------------
+// Redirects
 function goLogin() {
   window.location.href = "/login.html";
 }
@@ -100,8 +101,9 @@ function goRoleHome(role) {
 }
 
 // ---------------------------------------------------------
-// MAIN LOGIC — cannot be bypassed by URL edits
+// MAIN STRICT SECURITY
 // ---------------------------------------------------------
+
 document.addEventListener("DOMContentLoaded", async () => {
 
   const filename = getFilename(window.location.pathname);
@@ -110,21 +112,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   const isTeacherPage = teacherPages.has(filename);
   const isStudentPage = studentPages.has(filename);
 
-  // Public page → allow
-  if (!isTeacherPage && !isStudentPage) return;
+  if (!isTeacherPage && !isStudentPage) {
+    return; // public or non-secure page
+  }
 
-  // -----------------------------------------------------
-  // Load cached user
-  // -----------------------------------------------------
-  let user = null;
-  try { user = JSON.parse(localStorage.getItem("roleAuthUser")); } catch {}
-
-  let role = user?.role?.toLowerCase() || null;
+  // --- Load saved user ---
+  let user = JSON.parse(localStorage.getItem("roleAuthUser") || "null");
+  let role = user?.role || null;
   let userClass = normalizeClass(user?.year || user?.class);
 
-  // -----------------------------------------------------
-  // If missing → fetch from Firebase
-  // -----------------------------------------------------
+  // --- If missing info, load from Firebase ---
   if (!role || !userClass) {
     try {
       const [
@@ -152,7 +149,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const q = query(collection(db, "users"), where("uid", "==", firebaseUser.uid));
       const snap = await getDocs(q);
-
       if (snap.empty) return goLogin();
 
       const data = snap.docs[0].data();
@@ -160,7 +156,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       role = (data.role || "").toLowerCase();
       userClass = normalizeClass(data.year || data.class);
 
-      // SAVE permanently
       localStorage.setItem("roleAuthUser", JSON.stringify({
         uid: firebaseUser.uid,
         role,
@@ -168,31 +163,30 @@ document.addEventListener("DOMContentLoaded", async () => {
       }));
 
     } catch (err) {
-      console.error("AUTH ERROR:", err);
       return goLogin();
     }
   }
 
-  // -----------------------------------------------------
-  // FINAL ENFORCEMENT — YOU CANNOT BYPASS THIS
-  // -----------------------------------------------------
-
   if (!role) return goLogin();
 
-  // Admin → full access
+  // Admin can open everything
   if (role === "admin") return;
 
-  // Teacher pages → only teachers
-  if (isTeacherPage && role !== "teacher") return goRoleHome(role);
+  // Teacher restrictions
+  if (isTeacherPage && role !== "teacher") {
+    return goRoleHome(role);
+  }
 
-  // Student pages → only students
-  if (isStudentPage && role !== "student") return goRoleHome(role);
+  // Student restrictions
+  if (isStudentPage && role !== "student") {
+    return goRoleHome(role);
+  }
 
-  // **FINAL CLASS LOCK**
-  // If page class ≠ user class → block
+  // Class enforcement — cannot bypass with URL
   if (pageClass && userClass && pageClass !== userClass) {
     return goRoleHome(role);
   }
 
-  // SAFE → allow page
+  // Page allowed
+  return;
 });
