@@ -1,5 +1,5 @@
 // =========================================================
-// role-auth.js (FINAL STRICT VERSION)
+// role-auth.js (FINAL STRICT + FIXED VERSION)
 // Enforces class + role security (cannot bypass with URL)
 // =========================================================
 
@@ -13,7 +13,7 @@ const FIREBASE_CONFIG = {
 };
 
 // ---------------------------------------------------------
-// PAGE LISTS YOU PROVIDED (STRICT ENFORCEMENT)
+// PAGE LISTS (STRICT ENFORCEMENT)
 // ---------------------------------------------------------
 
 const teacherPages = new Set([
@@ -57,28 +57,28 @@ const studentPages = new Set([
 ]);
 
 // ---------------------------------------------------------
-// UNIVERSAL CLASS NORMALIZER — WORKS WITH ANY FORMAT
+// UNIVERSAL CLASS NORMALIZER — FIXED VERSION
 // ---------------------------------------------------------
 function normalizeClass(value) {
   if (!value) return null;
   value = String(value).toLowerCase();
 
-  // match year5, year 5
-  let m = value.match(/year\s*?(\d)/);
-  if (m) return "year" + m[1];
+  // match "year5" or "year 5"
+  let m1 = value.match(/year\s*?(\d)/);
+  if (m1) return "year" + m1[1];
 
-  // match y5
+  // match "y5"
   let m2 = value.match(/y\s*?(\d)/);
   if (m2) return "year" + m2[1];
 
-  // match any number 1-9 inside filename
+  // catch ANY number (filename fallback)
   let m3 = value.match(/(\d)/);
   if (m3) return "year" + m3[1];
 
   return null;
 }
 
-// Extract filename
+// Extract filename from URL
 function getFilename(path) {
   return path.split("/").pop().toLowerCase();
 }
@@ -88,11 +88,10 @@ function getClassFromFilename(filename) {
   return normalizeClass(filename);
 }
 
-// Redirects
+// Redirect helpers
 function goLogin() {
   window.location.href = "/login.html";
 }
-
 function goRoleHome(role) {
   if (role === "teacher") return window.location.href = "/teacher-dashboard.html";
   if (role === "student") return window.location.href = "/student-dashboard.html";
@@ -101,7 +100,7 @@ function goRoleHome(role) {
 }
 
 // ---------------------------------------------------------
-// MAIN STRICT SECURITY
+// MAIN STRICT SECURITY (FINAL LOGIC)
 // ---------------------------------------------------------
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -112,16 +111,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   const isTeacherPage = teacherPages.has(filename);
   const isStudentPage = studentPages.has(filename);
 
-  if (!isTeacherPage && !isStudentPage) {
-    return; // public or non-secure page
-  }
+  // Public page (no security needed)
+  if (!isTeacherPage && !isStudentPage) return;
 
-  // --- Load saved user ---
+  // Try reading cached user
   let user = JSON.parse(localStorage.getItem("roleAuthUser") || "null");
   let role = user?.role || null;
   let userClass = normalizeClass(user?.year || user?.class);
 
-  // --- If missing info, load from Firebase ---
+  // If missing important info → load from Firebase
   if (!role || !userClass) {
     try {
       const [
@@ -138,8 +136,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       const auth = getAuth(app);
       const db = getFirestore(app);
 
-      const firebaseUser = await new Promise((resolve) => {
-        const unsub = onAuthStateChanged(auth, u => {
+      const firebaseUser = await new Promise(resolve => {
+        const unsub = onAuthStateChanged(auth, (u) => {
           unsub();
           resolve(u);
         });
@@ -169,24 +167,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (!role) return goLogin();
 
-  // Admin can open everything
+  // Admin bypass
   if (role === "admin") return;
 
-  // Teacher restrictions
+  // Teacher access
   if (isTeacherPage && role !== "teacher") {
     return goRoleHome(role);
   }
 
-  // Student restrictions
+  // Student access
   if (isStudentPage && role !== "student") {
     return goRoleHome(role);
   }
 
-  // Class enforcement — cannot bypass with URL
+  // Strict class lock
   if (pageClass && userClass && pageClass !== userClass) {
     return goRoleHome(role);
   }
 
-  // Page allowed
+  // Access granted
   return;
 });
