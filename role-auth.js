@@ -1,6 +1,7 @@
 /*!
-  role-auth.js — FINAL FIXED VERSION (2025)
+  role-auth.js — FINAL FIXED VERSION (2025) — HARDENED
   Bulletproof role/year access using explicit page mapping
+  (Now rejects localStorage tampering for year-specific pages)
 */
 
 (function () {
@@ -125,54 +126,69 @@
     return firebase;
   }
 
+  /* ==========================================================
+     USER FETCH: prefer secure Firebase-based identity
+     — for year-specific pages we require a Firebase-validated user
+     — localStorage fallback allowed only for non-year dashboards (role-only)
+  ========================================================== */
+
   async function getUserFromFirebase(firebase) {
     return new Promise((resolve) => {
       firebase.auth().onAuthStateChanged(async (fbUser) => {
         if (!fbUser) return resolve(null);
 
+        // 1) try token claims (fast & authoritative)
         try {
           const token = await fbUser.getIdTokenResult(true);
-          if (token.claims.role) {
-            return resolve({
-              uid: fbUser.uid,
-              role: token.claims.role.toLowerCase(),
-              year: token.claims.year ? Number(token.claims.year) : null
-            });
+          const claims = token && token.claims ? token.claims : {};
+          const role = claims.role || claims.user_role || claims.userRole || null;
+          const year = claims.year || claims.user_year || claims.userYear || null;
+          if (role) {
+            return resolve({ uid: fbUser.uid, role: String(role).toLowerCase(), year: year ? Number(year) : null, source: 'claims' });
           }
-        } catch {}
+        } catch (e) {
+          // ignore and continue to Firestore fallback
+        }
 
+        // 2) Firestore fallback (reads trusted server data)
         try {
-          const db = firebase.firestore();
-          const snap = await db.collection("users")
-            .where("uid", "==", fbUser.uid)
-            .limit(1)
-            .get();
-
-          if (!snap.empty) {
-            const d = snap.docs[0].data();
-            return resolve({
-              uid: fbUser.uid,
-              role: d.role.toLowerCase(),
-              year: d.year ? Number(d.year) : null
-            });
+          if (firebase.firestore) {
+            const db = firebase.firestore();
+            const snap = await db.collection('users').where('uid', '==', fbUser.uid).limit(1).get();
+            if (!snap.empty) {
+              const d = snap.docs[0].data();
+              if (d && d.role) {
+                return resolve({ uid: fbUser.uid, role: String(d.role).toLowerCase(), year: d.year ? Number(d.year) : null, source: 'firestore' });
+              }
+            }
           }
-        } catch {}
+        } catch (e) {
+          // ignore
+        }
 
+        // 3) providerData / fallback (not trusted but last resort)
+        try {
+          const pd = fbUser.providerData && fbUser.providerData[0] ? fbUser.providerData[0] : {};
+          if (pd && pd.role) return resolve({ uid: fbUser.uid, role: String(pd.role).toLowerCase(), year: pd.year ? Number(pd.year) : null, source: 'providerData' });
+        } catch (e) { }
+
+        // nothing found, still authenticated but no role info
+        resolve({ uid: fbUser.uid, role: null, year: null, source: 'firebase_no_role' });
+      }, (err) => {
+        console.error('Auth state error:', err);
         resolve(null);
       });
     });
   }
 
-  function readLocalUser() {
+  // STRICT local read: used only for non-year dashboards (role-only)
+  function readLocalUserStrict() {
     try {
       const raw = localStorage.getItem("roleAuthUser");
       if (!raw) return null;
       const u = JSON.parse(raw);
-      return {
-        uid: u.uid || null,
-        role: u.role.toLowerCase(),
-        year: u.year ? Number(u.year) : null
-      };
+      if (!u || !u.role) return null;
+      return { uid: u.uid || null, role: String(u.role).toLowerCase(), year: u.year ? Number(u.year) : null, source: 'local' };
     } catch {
       return null;
     }
@@ -192,6 +208,7 @@
   (async function main() {
     const filename = location.pathname.split("/").pop();
 
+    // allow public pages
     if (PUBLIC_PAGES.includes(filename)) return;
 
     const pageAccess = PAGE_ACCESS[filename];
@@ -201,41 +218,50 @@
       return redirect("unknown_page");
     }
 
-    let firebase, user = null;
-
+    // Try to get a Firebase-validated user first
+    let firebase = null;
+    let user = null;
     try {
       firebase = await ensureFirebaseCompat();
       firebase = initFirebase(firebase);
-      user = await getUserFromFirebase(firebase);
-    } catch {}
+      user = await getUserFromFirebase(firebase); // may be null
+    } catch (e) {
+      // ignore errors and try local fallback below
+    }
 
+    // If no firebase user AND the page is non-year dashboard (role-only), allow local fallback
     if (!user) {
-      user = readLocalUser();
+      // If the page requires a YEAR (year-specific) we must NOT accept localStorage-only identities.
+      if (pageAccess.year !== null) {
+        // force authentication via login
+        return redirect("not_authenticated_strict");
+      }
+      // pageAccess.year === null -> dashboard pages. allow strict local fallback as convenience.
+      user = readLocalUserStrict();
     }
 
     if (!user) {
       return redirect("not_authenticated");
     }
 
+    // Admin bypass (admins allowed anywhere)
     if (user.role === "admin") {
-      return; // admin can access anything
+      window.__ROLE_AUTH = { user, allowed: true, pageAccess, filename };
+      return;
     }
 
+    // Role mismatch -> block
     if (pageAccess.role !== user.role) {
       return redirect("role_mismatch");
     }
 
+    // Year mismatch -> block
     if (pageAccess.year !== null && pageAccess.year !== user.year) {
       return redirect("year_mismatch");
     }
 
-    window.__ROLE_AUTH = {
-      user,
-      allowed: true,
-      pageAccess,
-      filename
-    };
-
+    // Passed all checks
+    window.__ROLE_AUTH = { user, allowed: true, pageAccess, filename };
     console.info("ROLE AUTH OK →", window.__ROLE_AUTH);
   })();
 
