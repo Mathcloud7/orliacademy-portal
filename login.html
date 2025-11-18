@@ -1,11 +1,12 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Orli International Academy</title>
+  <title>Orli International Academy — Login</title>
+
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
+
   <style>
     body {
       font-family: 'Roboto', sans-serif;
@@ -13,68 +14,70 @@
       padding: 0;
       background: linear-gradient(135deg, #16E2F5, #5A2F96);
       color: #fff;
-      height: 100vh;
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
       flex-direction: column;
+      text-align: center;
     }
 
     h1 {
-      font-size: 2.5em;
-      font-weight: 600;
-      color: #fff;
-      margin-bottom: 10px;
+      font-size: 2.4em;
+      margin-bottom: 5px;
     }
 
-    p {
+    .subtitle {
       font-size: 1.1em;
-      color: black;
-      margin-bottom: 10px;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 20px;
     }
 
     .login-container {
       background-color: #ffffff;
       color: #333;
       width: 100%;
-      max-width: 450px;
-      padding: 10px;
-      border-radius: 10px;
-      box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1), 0 4px 15px rgba(0, 0, 0, 0.2);
-      text-align: center;
-      animation: fadeInUp 1.5s ease-out;
+      max-width: 430px;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+      animation: fadeInUp 1.1s ease-out;
     }
 
     .login-container h2 {
-      font-size: 1.8em;
-      color: #16E2F5;
-      margin-bottom: 10px;
+      font-size: 1.7em;
+      margin-bottom: 15px;
+      color: #5A2F96;
+      font-weight: 600;
     }
 
-    .login-container input,
-    .login-container button {
-      width: 80%;
+    .login-container input {
+      width: 85%;
       padding: 12px;
       margin: 10px 0;
       border: 1px solid #ccc;
       border-radius: 8px;
-      font-size: 1.1em;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      font-size: 1.05em;
+      transition: .3s;
     }
 
-    .login-container input:focus,
-    .login-container button:focus {
+    .login-container input:focus {
       border-color: #16E2F5;
-      box-shadow: 0 0 8px rgba(22, 226, 245, 0.3);
-      outline: none;
+      box-shadow: 0 0 6px rgba(22, 226, 245, 0.3);
     }
 
     .login-container button {
+      width: 85%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
       background-color: #16E2F5;
       color: white;
+      font-size: 1.1em;
       font-weight: 600;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      margin-top: 10px;
+      transition: .3s;
     }
 
     .login-container button:hover {
@@ -82,129 +85,74 @@
     }
 
     .forgot-password-message {
-      font-size: 1em;
-      color: #555;
-      margin-top: 10px;
-      text-align: center;
+      margin-top: 15px;
+      color: #666;
+      font-size: .95em;
     }
 
     .forgot-password-message a {
       color: #16E2F5;
-      text-decoration: none;
-    }
-
-    .forgot-password-message a:hover {
-      text-decoration: underline;
-    }
-
-    .button-container {
-      margin-top: 20px;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-
-    .button-container a {
-      display: inline-block;
-      text-decoration: none;
-      background-color: #16E2F5;
-      color: white;
-      padding: 10px 20px;
-      font-size: 16px;
-      border-radius: 5px;
-      transition: background-color 0.3s;
-    }
-
-    .button-container a:hover {
-      background-color: #0056b3;
+      font-weight: 500;
     }
 
     .error-message {
-      color: red;
-      font-size: 0.9em;
       margin-top: 15px;
-      text-align: center;
+      color: red;
+      font-size: .95em;
+      min-height: 20px;
     }
 
     @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(50px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    @media (max-width: 768px) {
-      h1 {
-        font-size: 2em;
-      }
-
-      .login-container {
-        max-width: 380px;
-        padding: 20px;
-      }
-
-      .login-container h2 {
-        font-size: 1.5em;
-      }
-
-      .login-container input,
-      .login-container button {
-        padding: 10px;
-      }
-
-      .forgot-password-message {
-        font-size: 0.9em;
-      }
+    .admin-link {
+      margin-top: 25px;
+      background: #ffffff;
+      padding: 10px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: #5A2F96;
+      font-weight: bold;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+      transition: .3s;
+    }
+    .admin-link:hover {
+      background: #16E2F5;
+      color: #fff;
     }
 
-    @media (max-width: 480px) {
-      h1 {
-        font-size: 1.8em;
-      }
-
-      .login-container {
-        max-width: 90%;
-        padding: 15px;
-      }
-
-      .login-container h2 {
-        font-size: 1.4em;
-      }
-
-      .login-container input,
-      .login-container button {
-        padding: 8px;
-      }
-    }
   </style>
 </head>
+
 <body>
+
   <h1>Orli International Academy</h1>
-  <p>Welcome to the Academic Portal</p>
+  <p class="subtitle">Welcome to the Academic Portal</p>
 
   <div class="login-container">
     <h2>Welcome Learner</h2>
-    <form>
-      <input type="email" id="email" placeholder="Email" required />
-      <input type="password" id="password" placeholder="Password" required />
-      <button type="button" onclick="loginUser()">Login</button>
-    </form>
+
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+
+    <button onclick="loginUser()">Login</button>
+
     <div class="error-message" id="errorMessage"></div>
 
     <div class="forgot-password-message">
-      <p>If you have forgotten your login details, 
-        <a href="mailto:admin@orliacademy.com">contact the school administrator</a> for assistance. 
-        Use the password provided to you by the Orli Academy Admin Officer.</p>
+      Forgot your login details?  
+      <a href="mailto:admin@orliacademy.com">Contact the school administrator.</a>
     </div>
   </div>
 
-  <div class="button-container">
-    <a href="https://example.com">If you're a super admin, click here</a>
-  </div>
+  <a class="admin-link" href="/super-admin.html">
+    Super Admin Access
+  </a>
 
+
+  <!-- 🔥 LOGIN LOGIC -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js";
@@ -223,55 +171,73 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    window.loginUser = function loginUser() {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+    // 🔥 Auto-redirect if the user is already saved in localStorage
+    const savedUser = JSON.parse(localStorage.getItem("roleAuthUser") || "null");
+    if (savedUser?.role) {
+      const r = savedUser.role.toLowerCase();
+      if (r === "admin") location.href = "/admin-dashboard.html";
+      if (r === "teacher") location.href = "/teacher-dashboard.html";
+      if (r === "student") location.href = "/student-dashboard.html";
+    }
+
+    // 🔥 LOGIN FUNCTION
+    window.loginUser = function () {
+      const email = email.value;
+      const password = password.value;
+      const errorBox = document.getElementById("errorMessage");
+
+      errorBox.textContent = "";
 
       signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-          const user = userCredential.user;
+        .then(async (cred) => {
+          const user = cred.user;
 
-          const usersCollection = collection(db, "users");
-          const q = query(usersCollection, where("uid", "==", user.uid));
+          const q = query(collection(db, "users"), where("uid", "==", user.uid));
+          const snap = await getDocs(q);
 
-          getDocs(q)
-            .then((querySnapshot) => {
-              if (!querySnapshot.empty) {
-                const userDoc = querySnapshot.docs[0].data();
-                const role = userDoc.role;
+          if (snap.empty) {
+            errorBox.textContent = "Account exists but no role assigned!";
+            return;
+          }
 
-                if (role === "admin") {
-                  window.location.href = "admin-dashboard.html";
-                } else if (role === "teacher") {
-                  window.location.href = "teacher-dashboard.html";
-                } else if (role === "student") {
-                  window.location.href = "student-dashboard.html";
-                }
-              } else {
-                alert("User not found in the database!");
-              }
-            })
-            .catch((error) => {
-              console.error("Error fetching user data from Firestore: ", error);
-            });
+          const data = snap.docs[0].data();
+          const role = data.role?.toLowerCase() || "";
+
+          // Save to localStorage for role-auth.js
+          localStorage.setItem("roleAuthUser", JSON.stringify({
+            uid: user.uid,
+            role,
+            year: data.year || data.userClass || data.class
+          }));
+
+          if (role === "admin") location.href = "/admin-dashboard.html";
+          else if (role === "teacher") location.href = "/teacher-dashboard.html";
+          else if (role === "student") location.href = "/student-dashboard.html";
+          else errorBox.textContent = "Unknown role. Contact admin.";
         })
-        .catch((error) => {
-          console.error("Login error:", error);
-          alert("Login failed: " + error.message);
+        .catch((err) => {
+          if (err.code === "auth/user-not-found")
+            errorBox.textContent = "No account found for this email.";
+
+          else if (err.code === "auth/wrong-password")
+            errorBox.textContent = "Incorrect password.";
+
+          else
+            errorBox.textContent = err.message;
         });
     };
   </script>
 
-  <!-- ✅ Register Service Worker (only here, not in every page) -->
+
+  <!-- Register Service Worker (ONLY HERE, never inside other pages) -->
   <script>
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker
         .register("/service-worker.js")
-        .then(() => console.log("✅ Service Worker registered"))
-        .catch((err) => console.error("SW registration failed:", err));
+        .then(() => console.log("Service Worker Registered"))
+        .catch((err) => console.error("Service Worker Failed:", err));
     }
   </script>
+
 </body>
 </html>
-
-<script async data-explicit-opt-in="true" data-cookie-opt-in="true" data-deployment-id="dpl_2b9QX6tcYCcFHeVrs5xc23c9R3Rs" src="https://vercel.live/_next-live/feedback/feedback.js"></script>
