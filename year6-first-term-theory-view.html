@@ -1,202 +1,307 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Orli International Academy - Section B View</title>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Student Essay Assessments</title>
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAKaQRmWm-3KF8kmJgbf1ENR45__p36e84",
-  authDomain: "year6f-43761.firebaseapp.com",
-  databaseURL: "https://year6f-43761-default-rtdb.firebaseio.com",
-  projectId: "year6f-43761",
-  storageBucket: "year6f-43761.firebasestorage.app",
-  messagingSenderId: "95725834235",
-  appId: "1:95725834235:web:e7b03541093dbcca88855e"
-};
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
+<style>
+  :root{
+    --accent:#16a34a;
+    --muted:#64748b;
+    --bg:#f8fafc;
+    --card:#ffffff;
+    --radius:12px;
+    --shadow:0 6px 20px rgba(2,6,23,0.06);
+  }
+  body{
+    font-family:Inter,system-ui,sans-serif;
+    background:var(--bg);
+    margin:0; padding:24px;
+    color:#0f172a;
+  }
+  header{
+    background:linear-gradient(90deg,#16a34a,#22c55e);
+    color:white; padding:18px 24px; border-radius:16px; box-shadow:var(--shadow);
+    text-align:center;
+  }
+  header h1{margin:0;font-size:22px;}
+  header small{opacity:.9;}
 
-        let files = {};
+  .container{max-width:1100px;margin:20px auto;}
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+  select,input{
+    padding:10px 12px;border-radius:8px;border:1px solid #e2e8f0;
+  }
+  .list{display:flex;flex-direction:column;gap:12px;}
+  .card{
+    background:var(--card);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:16px;
+  }
+  .card h2{margin:0 0 6px 0;font-size:18px;}
+  .pill{display:inline-block;padding:6px 8px;border-radius:999px;background:#f0fdf4;color:#166534;font-size:13px;margin-top:6px;}
+  .btn{
+    background:var(--accent);color:white;padding:10px 14px;border:none;border-radius:10px;cursor:pointer;font-weight:600;
+  }
+  .btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(22,163,74,0.25);}
 
-        function renderFiles(filteredFiles) {
-            const fileList = document.getElementById('fileList');
-            fileList.innerHTML = '';
+  #modal{
+    position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,23,42,0.6);display:none;
+    justify-content:center;align-items:center;padding:20px;z-index:999;
+  }
+  #modalContent{
+    background:white;padding:20px;border-radius:14px;max-width:900px;width:100%;max-height:90vh;overflow:auto;
+  }
+  .question-box{
+    border:1px solid #e2e8f0;padding:10px;border-radius:10px;margin-top:10px;background:#f9fafb;
+  }
+  .answer-box{margin-top:10px;}
+  footer{text-align:center;color:var(--muted);margin-top:20px;font-size:13px;}
 
-            if (Object.keys(filteredFiles).length > 0) {
-                for (const id in filteredFiles) {
-                    const file = filteredFiles[id];
-
-                    // Display only published files
-                    if (file.published) {
-                        const fileDiv = document.createElement('div');
-                        fileDiv.classList.add('file');
-
-                        fileDiv.innerHTML = `
-                            <h3>${file.subject}</h3>
-                            <p><strong>Type:</strong> ${file.type}</p>
-                            <button onclick="viewFile('${file.subject}', '${file.type}', '${file.link}')">Click to View</button>
-                        `;
-                        fileList.appendChild(fileDiv);
-                    }
-                }
-            } else {
-                fileList.innerHTML = '<p>No published files available.</p>';
-            }
-        }
-
-        function applyFilters() {
-            const subjectFilter = document.getElementById('subjectFilter').value;
-            const typeFilter = document.getElementById('typeFilter').value;
-
-            const filteredFiles = Object.fromEntries(Object.entries(files).filter(([_, file]) => {
-                return file.published &&
-                       (subjectFilter === 'all' || file.subject === subjectFilter) &&
-                       (typeFilter === 'all' || file.type === typeFilter);
-            }));
-
-            renderFiles(filteredFiles);
-        }
-
-        window.applyFilters = applyFilters;
-
-        // Fetch files and update filters
-        onValue(ref(database, 'files'), (snapshot) => {
-            files = snapshot.val() || {};
-            populateFilters();
-            applyFilters();
-        });
-
-        function populateFilters() {
-            const subjectSet = new Set(['all']);
-            const typeSet = new Set(['all']);
-
-            for (const id in files) {
-                const file = files[id];
-                if (file.published) {
-                    subjectSet.add(file.subject);
-                    typeSet.add(file.type);
-                }
-            }
-
-            document.getElementById('subjectFilter').innerHTML = Array.from(subjectSet).map(subject => `<option value="${subject}">${subject}</option>`).join('');
-            document.getElementById('typeFilter').innerHTML = Array.from(typeSet).map(type => `<option value="${type}">${type}</option>`).join('');
-        }
-
-        window.viewFile = function(subject, type, link) {
-            const viewPageContent = `
-                <html lang='en'>
-                <head>
-                    <meta charset='UTF-8'>
-                    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-                    <title>${subject} - ${type}</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; background-color: #f4f4f9; color: #333; margin: 0; padding: 0; }
-                        .container { max-width: 800px; margin: 20px auto; padding: 20px; background: #fff; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); border-radius: 8px; }
-                        h1 { text-align: center; }
-                        .back-button { display: block; margin: 20px auto; padding: 10px 20px; font-size: 16px; color: white; background-color: #4caf50; border: none; border-radius: 4px; text-align: center; cursor: pointer; text-decoration: none; }
-                        .back-button:hover { background-color: #45a049; }
-                        iframe { width: 100%; height: 500px; border: none; margin-top: 20px; }
-                    </style>
-                </head>
-                <body>
-    <div class='container'>
-        <h1>${subject}</h1>
-        <p><strong>Type:</strong> ${type}</p>
-        <p><strong>Class:</strong> First Term - Section B</p>
-        <a href="year6-first-term-theory-view.html" class="back-button">Back to Published Files</a>
-        <iframe src='${link}'></iframe>
-    </div>
-</body>
-</html>`;
-
-            const newWindow = window.open('', '_blank');
-            newWindow.document.write(viewPageContent);
-            newWindow.document.close();
-        };
-    </script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f9;
-            color: #333;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 20px auto;
-            padding: 20px;
-            background: #fff;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .filters {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-
-        .filters select {
-            padding: 10px;
-            font-size: 16px;
-        }
-
-        #fileList {
-            margin-top: 20px;
-        }
-
-        .file {
-            padding: 10px;
-            margin-bottom: 10px;
-            background: #f9f9f9;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        .file h3 {
-            margin: 5px 0;
-        }
-
-        .file button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 10px;
-            font-size: 16px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .file button:hover {
-            background-color: #0056b3;
-        }
-    </style>
+  #nameOverlay{
+    position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+    background:rgba(15,23,42,0.8);z-index:2000;
+  }
+  #nameBox{
+    background:white;padding:30px;border-radius:16px;box-shadow:var(--shadow);
+    text-align:center;max-width:350px;width:100%;
+  }
+  #nameBox h2{margin-top:0;margin-bottom:12px;}
+  #studentNameInput{
+    width:100%;padding:10px;border-radius:8px;border:1px solid #e2e8f0;margin-bottom:10px;
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>First Term - Section B Published Files</h1>
-        <div class="filters">
-            <select id="subjectFilter" onchange="applyFilters()">
-                <option value="all">All Subjects</option>
-            </select>
-            <select id="typeFilter" onchange="applyFilters()">
-                <option value="all">All Types</option>
-            </select>
-        </div>
-        <div id="fileList"></div>
+<header>
+  <h1>Available Assessments</h1>
+  <small>Published by your teacher (Realtime sync)</small>
+</header>
+
+<div class="container">
+  <div class="filters">
+    <select id="filterYear"><option value="">Year 6</option><option>Year 6</option></select>
+    <select id="filterTerm">
+      <option value="">All Terms</option>
+      <option>First Term</option>
+      <option>Second Term</option>
+      <option>Third Term</option>
+    </select>
+    <input id="searchInput" placeholder="Search subject..." />
+  </div>
+  <div id="list" class="list"></div>
+</div>
+
+<!-- Assessment Modal -->
+<div id="modal">
+  <div id="modalContent">
+    <h2 id="modalTitle"></h2>
+    <div id="modalMeta" style="font-size:14px;color:var(--muted)"></div>
+    <div id="modalInstructions" style="margin-top:10px;color:#0f172a;"></div>
+    <div id="modalQuestions" style="margin-top:12px;"></div>
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button id="submitBtn" class="btn">Submit All</button>
+      <button id="closeBtn" class="btn ghost">Close</button>
     </div>
+    <div id="submitStatus" style="margin-top:10px;color:var(--muted);font-size:13px;"></div>
+  </div>
+</div>
+
+<!-- Name Prompt Overlay -->
+<div id="nameOverlay">
+  <div id="nameBox">
+    <h2>Enter Your Name</h2>
+    <input id="studentNameInput" type="text" placeholder="Full Name" />
+    <button id="continueBtn" class="btn" style="width:100%">Continue</button>
+  </div>
+</div>
+
+<footer></footer>
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+  import { getDatabase, ref, onValue, set, get, child } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCCNPPD6FVQVOvVTHKAsLXlrYJ7pV7Upjw",
+    authDomain: "year6-eassy.firebaseapp.com",
+    projectId: "year6-eassy",
+    storageBucket: "year6-eassy.firebasestorage.app",
+    messagingSenderId: "721055360984",
+    appId: "1:721055360984:web:a80a91db87d4536677f4ad"
+  };
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  const listEl = document.getElementById("list");
+  const filterYear = document.getElementById("filterYear");
+  const filterTerm = document.getElementById("filterTerm");
+  const searchInput = document.getElementById("searchInput");
+  const modal = document.getElementById("modal");
+  const modalTitle = document.getElementById("modalTitle");
+  const modalMeta = document.getElementById("modalMeta");
+  const modalInstructions = document.getElementById("modalInstructions");
+  const modalQuestions = document.getElementById("modalQuestions");
+  const submitBtn = document.getElementById("submitBtn");
+  const closeBtn = document.getElementById("closeBtn");
+  const submitStatus = document.getElementById("submitStatus");
+  const nameOverlay = document.getElementById("nameOverlay");
+  const studentNameInput = document.getElementById("studentNameInput");
+  const continueBtn = document.getElementById("continueBtn");
+
+  let studentName = "";
+  let currentAssessment = null;
+  let editors = [];
+
+  continueBtn.onclick = () => {
+    const val = studentNameInput.value.trim();
+    if (!val) return alert("Please enter your full name.");
+    studentName = val;
+    localStorage.setItem("studentName", val);
+    nameOverlay.style.display = "none";
+    loadAssessments();
+  };
+
+  const savedName = localStorage.getItem("studentName");
+  if (savedName) {
+    studentName = savedName;
+    studentNameInput.value = savedName;
+    nameOverlay.style.display = "none";
+    loadAssessments();
+  }
+
+  function loadAssessments() {
+    const rootRef = ref(db, "/assessments");
+    onValue(rootRef, (snap) => {
+      const val = snap.val() || {};
+      const arr = Object.keys(val)
+        .map((k) => ({ id: k, ...val[k] }))
+        .filter((a) => a.published);
+      arr.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      renderList(arr);
+    });
+  }
+
+  function renderList(all) {
+    const fy = filterYear.value;
+    const ft = filterTerm.value;
+    const q = searchInput.value.toLowerCase();
+
+    const filtered = all.filter((a) => {
+      if (fy && a.year !== fy) return false;
+      if (ft && a.term !== ft) return false;
+      if (q && !a.subject?.toLowerCase().includes(q)) return false;
+      return true;
+    });
+
+    listEl.innerHTML = "";
+    if (!filtered.length) {
+      listEl.innerHTML =
+        "<div class='card' style='color:var(--muted)'>No published assessments</div>";
+      return;
+    }
+
+    filtered.forEach((a) => {
+      const el = document.createElement("div");
+      el.className = "card";
+      el.innerHTML = `
+        <h2>${a.subject || ""}</h2>
+        <div class="pill">${a.year || ""} ${a.term || ""}</div>
+        <div style="color:var(--muted);font-size:13px;margin-top:6px;">
+          ${a.type || ""}
+        </div>
+        <div style="margin-top:8px;">${a.instructions || ""}</div>
+        <button class="btn" style="margin-top:10px;" data-id="${a.id}">Open</button>
+      `;
+      el.querySelector("button").onclick = () => openModal(a);
+      listEl.appendChild(el);
+    });
+  }
+
+  [filterYear, filterTerm, searchInput].forEach((el) =>
+    el.addEventListener("input", () => {
+      const rootRef = ref(db, "/assessments");
+      get(rootRef).then((snap) => {
+        const val = snap.val() || {};
+        const arr = Object.keys(val)
+          .map((k) => ({ id: k, ...val[k] }))
+          .filter((a) => a.published);
+        renderList(arr);
+      });
+    })
+  );
+
+  function openModal(a) {
+    currentAssessment = a;
+    modal.style.display = "flex";
+    modalTitle.textContent = a.subject || "";
+    modalMeta.textContent = [a.year, a.term, a.type].filter(Boolean).join(" ");
+    modalInstructions.innerHTML = a.instructions ? a.instructions : "";
+    modalQuestions.innerHTML = "";
+
+    editors = [];
+    const questions = a.questions || [];
+    if (questions.length === 0) {
+      modalQuestions.innerHTML =
+        "<div style='color:var(--muted)'>No questions available</div>";
+      submitBtn.disabled = true;
+      return;
+    }
+
+    questions.forEach((q, i) => {
+      const box = document.createElement("div");
+      box.className = "question-box";
+      box.innerHTML = `
+        <div><strong>Q${i + 1}.</strong> (${q.score || 0} marks)</div>
+        <div style="margin-top:6px;">${q.html || ""}</div>
+        <div id="answer-${i}" class="answer-box"></div>
+      `;
+      modalQuestions.appendChild(box);
+      const editor = new Quill(`#answer-${i}`, { theme: "snow" });
+      editors.push(editor);
+    });
+
+    submitStatus.textContent = "";
+    const subId = studentName.replace(/\s+/g, "_");
+    get(child(ref(db, `/assessments/${a.id}/submissions`), subId)).then((snap) => {
+      if (snap.exists()) {
+        submitStatus.textContent = "Already submitted.";
+        const ans = snap.val().answers || [];
+        ans.forEach((x, i) => {
+          if (editors[i]) editors[i].root.innerHTML = x || "";
+        });
+        submitBtn.disabled = true;
+      } else {
+        submitBtn.disabled = false;
+      }
+    });
+  }
+
+  submitBtn.onclick = async () => {
+    if (!studentName) return alert("Enter your name first!");
+    const answers = editors.map((e) => e.root.innerHTML.trim());
+    if (answers.some((a) => !a || a === "<p><br></p>"))
+      return alert("Please complete all answers before submitting.");
+
+    const path = `/assessments/${currentAssessment.id}/submissions/${studentName.replace(/\s+/g, "_")}`;
+    await set(ref(db, path), {
+      studentName,
+      answers,
+      status: "Submitted",
+      timestamp: Date.now(),
+    });
+    submitStatus.textContent = "✔ Submitted successfully!";
+    submitBtn.disabled = true;
+  };
+
+  closeBtn.onclick = () => (modal.style.display = "none");
+  modal.onclick = (e) => {
+    if (e.target === modal) modal.style.display = "none";
+  };
+</script>
+
 </body>
 </html>
